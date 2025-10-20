@@ -1,5 +1,8 @@
 package cl.alercelab.centrointegral.adapters
 
- class SlotRow{
-
-}
+data class SlotRow(
+ val hora: String,
+ val titulo: String?,
+ val lugar: String?,
+ val citaId: String?
+)
