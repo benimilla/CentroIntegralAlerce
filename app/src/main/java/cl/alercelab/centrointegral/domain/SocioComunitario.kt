@@ -1,5 +1,6 @@
 package cl.alercelab.centrointegral.domain
 
- class SocioComunitario{
-
-}
+data class SocioComunitario(
+ val id: String = "",
+ val nombre: String = ""
+)

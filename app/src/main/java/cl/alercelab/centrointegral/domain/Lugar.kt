@@ -1,5 +1,7 @@
 package cl.alercelab.centrointegral.domain
 
- class Lugar{
-
- }
+data class Lugar(
+ val id: String = "",
+ val nombre: String = "",
+ val cupo: Int? = null
+)

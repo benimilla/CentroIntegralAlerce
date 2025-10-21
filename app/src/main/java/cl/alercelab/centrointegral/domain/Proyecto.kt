@@ -1,5 +1,6 @@
 package cl.alercelab.centrointegral.domain
 
- class Proyecto{
-
-}
+data class Proyecto(
+ val id: String = "",
+ val nombre: String = ""
+)
