@@ -24,12 +24,14 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<Button>(R.id.btnLogout).setOnClickListener {
+        val logoutButton = view.findViewById<Button>(R.id.btnLogout)
+        logoutButton.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
 
             val opts = navOptions {
                 popUpTo(R.id.nav_graph) { inclusive = true }
             }
+
             findNavController().navigate(R.id.loginFragment, null, opts)
         }
     }

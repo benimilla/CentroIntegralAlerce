@@ -20,13 +20,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // --- Setup inicial ---
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val bottom = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        val navController = findNavController(R.id.nav_host_fragment)
         setSupportActionBar(toolbar)
 
-        val navController = findNavController(R.id.nav_host_fragment)
-        val bottom = findViewById<BottomNavigationView>(R.id.bottom_nav)
-
-        // Destinos principales del bottom nav
+        // --- Configuración del AppBar ---
         val appBarConfig = AppBarConfiguration(
             setOf(
                 R.id.calendarDayFragment,
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfig)
         bottom.setupWithNavController(navController)
 
-        // Ocultar bottom en pantallas de auth
+        // --- Ocultar bottom nav en pantallas de autenticación ---
         navController.addOnDestinationChangedListener { _, dest, _ ->
             bottom.visibility = when (dest.id) {
                 R.id.loginFragment, R.id.registerFragment, R.id.forgotFragment -> View.GONE
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Ocultar pestañas por rol (hazlo en corrutina porque currentUserProfile() es suspend)
+        // --- Control de visibilidad por rol ---
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid != null) {
             lifecycleScope.launch {
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                     bottom.menu.findItem(R.id.adminFragment)?.isVisible = false
                     bottom.menu.findItem(R.id.activitiesFragment)?.isVisible = false
 
-                    // Si el usuario está parado en una pestaña que ocultamos, muévelo al calendario
+                    // Si el usuario está en una pestaña oculta, redirigir al calendario
                     val current = navController.currentDestination?.id
                     if (current == R.id.adminFragment || current == R.id.activitiesFragment) {
                         navController.navigate(R.id.calendarDayFragment)
