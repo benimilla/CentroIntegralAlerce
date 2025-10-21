@@ -3,6 +3,61 @@
     android:orientation="vertical" android:padding="16dp"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/tvActividad"
+        android:text="Reagendar actividad"
+        android:textStyle="bold" android:textSize="20sp"
+        android:textColor="@color/primary_green"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
+    <TextView
+        android:text="Seleccione una cita:"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <Spinner
+        android:id="@+id/spCitas"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etLugar"
+        android:hint="Lugar"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvFecha"
+            android:text="Fecha"
+            android:padding="12dp"
+            android:background="@drawable/bg_chip_outline"
+            android:textColor="@color/primary_green"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <Space android:layout_width="8dp" android:layout_height="1dp"/>
+
+        <TextView
+            android:id="@+id/tvHora"
+            android:text="Hora"
+            android:padding="12dp"
+            android:background="@drawable/bg_chip_outline"
+            android:textColor="@color/primary_green"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnGuardar"
+        android:text="Guardar"
+        android:backgroundTint="@color/primary_green"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 
 </LinearLayout>

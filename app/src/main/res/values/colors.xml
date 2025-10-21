@@ -1,3 +1,16 @@
 <resources>
+    <color name="primary_green">#2E7D32</color>
+    <color name="primary_green_700">#1B5E20</color>
+    <color name="chip_stroke">#CCDDCC</color>
+    <color name="chip_text">#2E7D32</color>
+    <color name="chip_text_checked">#FFFFFF</color>
+    <color name="chip_bg">#FFFFFF</color>
+    <color name="chip_bg_checked">#2E7D32</color>
 
+    <color name="slot_border">#E0E0E0</color>
+    <color name="slot_hour">#424242</color>
+
+    <!-- 👇 Agregas estos dos y el error se va -->
+    <color name="ic_launcher_background">#2E7D32</color>
+    <color name="ic_launcher_foreground">#FFFFFF</color>
 </resources>

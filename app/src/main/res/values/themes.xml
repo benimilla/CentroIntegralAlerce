@@ -1,3 +1,26 @@
 <resources>
+    <style name="Theme.CIA" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
 
+        <!-- GREEN palette -->
+        <item name="colorPrimary">#2E7D32</item>
+        <item name="colorSecondary">#66BB6A</item>
+        <item name="colorTertiary">#A5D6A7</item>
+
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:navigationBarColor">?attr/colorSurface</item>
+
+        <!-- Larger touch targets for buttons -->
+        <item name="materialButtonStyle">@style/AppButton</item>
+    </style>
+
+    <style name="AppButton" parent="Widget.Material3.Button">
+        <item name="android:minHeight">56dp</item>
+        <item name="cornerRadius">20dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:insetBottom">12dp</item>
+        <item name="android:insetTop">12dp</item>
+    </style>
 </resources>

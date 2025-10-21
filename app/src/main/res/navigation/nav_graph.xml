@@ -1,6 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_graph">
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <!-- LOGIN -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="cl.alercelab.centrointegral.auth.LoginFragment"
+        android:label="Login">
+
+        <action
+            android:id="@+id/action_login_to_calendar"
+            app:destination="@id/calendarDayFragment"/>
+
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment"/>
+
+        <action
+            android:id="@+id/action_login_to_forgot"
+            app:destination="@id/forgotFragment"/>
+    </fragment>
+
+    <!-- AUTH -->
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="cl.alercelab.centrointegral.auth.RegisterFragment"/>
+    <fragment
+        android:id="@+id/forgotFragment"
+        android:name="cl.alercelab.centrointegral.auth.ForgotPasswordFragment"/>
+
+    <!-- TOP LEVEL -->
+    <fragment
+        android:id="@+id/calendarDayFragment"
+        android:name="cl.alercelab.centrointegral.calendar.CalendarFragment"
+        android:label="Calendario"/>
+
+    <fragment
+        android:id="@+id/activitiesFragment"
+        android:name="cl.alercelab.centrointegral.activities.ActivitiesFragment"
+        android:label="Actividades">
+
+        <action
+            android:id="@+id/action_activities_to_activity_form"
+            app:destination="@id/activityFormFragment" />
+
+        <action
+            android:id="@+id/action_activities_to_reschedule"
+            app:destination="@id/activityRescheduleFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/adminFragment"
+        android:name="cl.alercelab.centrointegral.admin.AdminFragment"
+        android:label="Administración"/>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="cl.alercelab.centrointegral.settings.SettingsFragment"
+        android:label="Configuración"/>
+
+    <!-- SUB PANTALLAS -->
+    <fragment
+        android:id="@+id/activityFormFragment"
+        android:name="cl.alercelab.centrointegral.activities.ActivityFormFragment"/>
+
+    <fragment
+        android:id="@+id/activityRescheduleFragment"
+        android:name="cl.alercelab.centrointegral.activities.ActivityRescheduleFragment"/>
 
 </navigation>

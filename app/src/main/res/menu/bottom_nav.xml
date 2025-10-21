@@ -1,5 +1,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-  
+    <item
+        android:id="@+id/calendarDayFragment"
+        android:title="@string/nav_calendar"
+        android:icon="@android:drawable/ic_menu_my_calendar" />
+
+    <item
+        android:id="@+id/activitiesFragment"
+        android:title="@string/nav_activities"
+        android:icon="@android:drawable/ic_menu_agenda" />
+
+    <item
+        android:id="@+id/adminFragment"
+        android:title="@string/nav_admin"
+        android:icon="@android:drawable/ic_menu_manage" />
+
+    <item
+        android:id="@+id/settingsFragment"
+        android:title="@string/nav_settings"
+        android:icon="@android:drawable/ic_menu_preferences" />
 
 </menu>

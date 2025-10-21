@@ -3,5 +3,48 @@
     android:orientation="vertical" android:padding="16dp"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
+    <!-- Header: título + crear -->
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
 
+        <TextView
+            android:text="Actividades"
+            android:textStyle="bold" android:textSize="20sp"
+            android:textColor="@color/primary_green"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btnNewActivity"
+            android:text="Nueva Actividad"
+            android:backgroundTint="@color/primary_green"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Buscar -->
+    <EditText
+        android:id="@+id/etSearch"
+        android:hint="Buscar por nombre"
+        android:imeOptions="actionSearch"
+        android:singleLine="true"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <!-- Lista -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvActivities"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:text="No hay actividades"
+        android:gravity="center"
+        android:visibility="gone"
+        android:textColor="#666"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:padding="16dp"/>
 </LinearLayout>

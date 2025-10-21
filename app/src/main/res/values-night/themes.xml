@@ -1,3 +1,17 @@
 <resources>
+    <style name="Theme.CIA" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
 
+        <!-- GREEN night variants -->
+        <item name="colorPrimary">#66BB6A</item>
+        <item name="colorSecondary">#81C784</item>
+        <item name="colorTertiary">#C8E6C9</item>
+
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:navigationBarColor">?attr/colorSurface</item>
+
+        <item name="materialButtonStyle">@style/AppButton</item>
+    </style>
 </resources>

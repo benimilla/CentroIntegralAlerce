@@ -4,5 +4,46 @@
     android:background="@android:color/white"
     android:layout_width="match_parent" android:layout_height="wrap_content">
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical">
 
+        <TextView
+            android:id="@+id/tvTitle"
+            android:textStyle="bold" android:textSize="16sp"
+            android:textColor="@color/primary_green"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <ImageButton
+            android:id="@+id/btnEdit"
+            android:src="@android:drawable/ic_menu_edit"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Editar"
+            android:tint="@color/primary_green"
+            android:layout_width="40dp" android:layout_height="40dp"/>
+
+        <ImageButton
+            android:id="@+id/btnReschedule"
+            android:src="@android:drawable/ic_menu_today"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Reagendar"
+            android:tint="@color/primary_green"
+            android:layout_width="40dp" android:layout_height="40dp"/>
+
+        <ImageButton
+            android:id="@+id/btnDelete"
+            android:src="@android:drawable/ic_menu_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Eliminar"
+            android:tint="@color/primary_green"
+            android:layout_width="40dp" android:layout_height="40dp"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:textColor="#666"
+        android:layout_marginTop="4dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>

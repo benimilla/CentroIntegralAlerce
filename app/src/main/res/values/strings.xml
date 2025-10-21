@@ -1,3 +1,12 @@
 <resources>
-
+    <string name="app_name">Centro Integral Alerce</string>
+    <string name="nav_calendar">Calendario</string>
+    <string name="nav_activities">Actividades</string>
+    <string name="nav_admin">Admin</string>
+    <string name="nav_settings">Configuración</string>
+    <string name="previous">Anterior</string>
+    <string name="next">Siguiente</string>
+    <string name="no_data">No hay actividades esta semana</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
 </resources>

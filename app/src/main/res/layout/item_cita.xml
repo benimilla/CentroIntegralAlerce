@@ -6,5 +6,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/tvLine"
+        android:layout_weight="1"
+        android:text="📌 10 Mar 10:00 — Sala 1 · 60 min"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
 
+    <ImageButton
+        android:id="@+id/btnEdit"
+        android:src="@android:drawable/ic_menu_edit"
+        android:contentDescription="Editar"
+        android:background="@android:color/transparent"
+        android:layout_width="40dp"
+        android:layout_height="40dp"/>
+
+    <ImageButton
+        android:id="@+id/btnDelete"
+        android:src="@android:drawable/ic_menu_delete"
+        android:contentDescription="Eliminar"
+        android:background="@android:color/transparent"
+        android:layout_width="40dp"
+        android:layout_height="40dp"/>
 </LinearLayout>
