@@ -1,5 +1,7 @@
 package cl.alercelab.centrointegral.domain
 
- class Oferente{
-
-}
+data class Oferente(
+ val id: String = "",
+ val nombre: String = "",
+ val docenteResponsable: String = ""
+)

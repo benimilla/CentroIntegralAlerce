@@ -1,5 +1,6 @@
 package cl.alercelab.centrointegral.domain
 
- class TipoActividad{
-
-}
+data class TipoActividad(
+ val nombre: String = "",
+ val descripcion: String = ""
+)
