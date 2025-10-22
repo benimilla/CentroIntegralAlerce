@@ -7,4 +7,3 @@ Incluye:
 - Pestaña Admin (aprobaciones)
 - Firebase Auth/Firestore/Storage/Messaging + WorkManager
 
-Coloca tu `app/google-services.json` (package_name: `cl.alercelab.centrointegral`) y listo.
