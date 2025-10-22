@@ -4,69 +4,120 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
 
-    <!-- LOGIN -->
+    <!-- 🔹 LOGIN -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="cl.alercelab.centrointegral.auth.LoginFragment"
-        android:label="Login">
+        android:label="Iniciar sesión">
 
+        <!-- Usuario normal -->
         <action
             android:id="@+id/action_login_to_calendar"
-            app:destination="@id/calendarDayFragment"/>
+            app:destination="@id/calendarDayFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true" />
 
+        <!-- Ir a registro -->
         <action
             android:id="@+id/action_login_to_register"
-            app:destination="@id/registerFragment"/>
+            app:destination="@id/registerFragment" />
 
+        <!-- Ir a recuperación -->
         <action
             android:id="@+id/action_login_to_forgot"
-            app:destination="@id/forgotFragment"/>
+            app:destination="@id/forgotFragment" />
+
+        <!-- 🔹 Admin -->
+        <action
+            android:id="@+id/action_login_to_admin"
+            app:destination="@id/adminMainFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true" />
     </fragment>
 
-    <!-- AUTH -->
+    <!-- 🔹 REGISTRO -->
     <fragment
         android:id="@+id/registerFragment"
-        android:name="cl.alercelab.centrointegral.auth.RegisterFragment"/>
+        android:name="cl.alercelab.centrointegral.auth.RegisterFragment"
+        android:label="Registro">
+        <action
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/registerFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- 🔹 RECUPERAR CONTRASEÑA -->
     <fragment
         android:id="@+id/forgotFragment"
-        android:name="cl.alercelab.centrointegral.auth.ForgotPasswordFragment"/>
+        android:name="cl.alercelab.centrointegral.auth.ForgotPasswordFragment"
+        android:label="Recuperar contraseña">
+        <action
+            android:id="@+id/action_forgot_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/forgotFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
-    <!-- TOP LEVEL -->
+    <!-- 🔹 CALENDARIO -->
     <fragment
         android:id="@+id/calendarDayFragment"
         android:name="cl.alercelab.centrointegral.calendar.CalendarFragment"
-        android:label="Calendario"/>
+        android:label="Calendario" />
 
+    <!-- 🔹 ACTIVIDADES -->
     <fragment
         android:id="@+id/activitiesFragment"
         android:name="cl.alercelab.centrointegral.activities.ActivitiesFragment"
         android:label="Actividades">
-
         <action
             android:id="@+id/action_activities_to_activity_form"
             app:destination="@id/activityFormFragment" />
-
         <action
             android:id="@+id/action_activities_to_reschedule"
             app:destination="@id/activityRescheduleFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/adminFragment"
-        android:name="cl.alercelab.centrointegral.admin.AdminFragment"
-        android:label="Administración"/>
 
+    <!-- 🔹 ADMINISTRADOR -->
+    <fragment
+        android:id="@+id/adminMainFragment"
+        android:name="cl.alercelab.centrointegral.admin.AdminMainFragment"
+        android:label="Panel de administración">
+        <action
+            android:id="@+id/action_adminMain_to_adminUsers"
+            app:destination="@id/adminUsersFragment" />
+        <action
+            android:id="@+id/action_adminMain_to_adminPending"
+            app:destination="@id/adminPendingFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminPendingFragment"
+        android:name="cl.alercelab.centrointegral.admin.AdminPendingFragment"
+        android:label="Usuarios pendientes" />
+
+    <fragment
+        android:id="@+id/adminUsersFragment"
+        android:name="cl.alercelab.centrointegral.admin.AdminUsersFragment"
+        android:label="Gestión de usuarios" />
+
+    <!-- 🔹 CONFIGURACIÓN -->
     <fragment
         android:id="@+id/settingsFragment"
         android:name="cl.alercelab.centrointegral.settings.SettingsFragment"
-        android:label="Configuración"/>
+        android:label="Configuración" />
 
-    <!-- SUB PANTALLAS -->
+    <!-- 🔹 FORMULARIOS -->
     <fragment
         android:id="@+id/activityFormFragment"
-        android:name="cl.alercelab.centrointegral.activities.ActivityFormFragment"/>
+        android:name="cl.alercelab.centrointegral.activities.ActivityFormFragment"
+        android:label="Nueva actividad" />
 
     <fragment
         android:id="@+id/activityRescheduleFragment"
-        android:name="cl.alercelab.centrointegral.activities.ActivityRescheduleFragment"/>
+        android:name="cl.alercelab.centrointegral.activities.ActivityRescheduleFragment"
+        android:label="Reagendar cita" />
 
 </navigation>

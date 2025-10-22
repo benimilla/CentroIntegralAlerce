@@ -6,13 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.data.Repos
 import kotlinx.coroutines.launch
 
-class RegisterFragment : Fragment() {
+class  RegisterFragment : Fragment() {
 
     private val roles = listOf(
         "Administrador" to "admin",
@@ -32,14 +33,17 @@ class RegisterFragment : Fragment() {
         val etPassword = v.findViewById<EditText>(R.id.etPassword)
         val spRole = v.findViewById<Spinner>(R.id.spRole)
         val tvError = v.findViewById<TextView>(R.id.tvError)
+        val btnRegister = v.findViewById<Button>(R.id.btnRegister)
 
+        // Configurar Spinner
         spRole.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
             roles.map { it.first }
         )
 
-        v.findViewById<Button>(R.id.btnRegister).setOnClickListener {
+        // Manejar registro
+        btnRegister.setOnClickListener {
             val nombre = etNombre.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val pass = etPassword.text.toString().trim()
@@ -48,41 +52,54 @@ class RegisterFragment : Fragment() {
             tvError.text = ""
 
             when {
-                nombre.isEmpty() ->
-                    tvError.text = "Debe ingresar un nombre"
-                nombre.length < 3 ->
-                    tvError.text = "El nombre es demasiado corto"
-                email.isEmpty() ->
-                    tvError.text = "Debe ingresar un correo"
-                !Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
-                    tvError.text = "El formato del correo no es válido"
-                pass.isEmpty() ->
-                    tvError.text = "Debe ingresar una contraseña"
-                pass.length < 6 ->
-                    tvError.text = "La contraseña debe tener al menos 6 caracteres"
-                else -> {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        try {
-                            Repos().register(nombre, email, pass, rol)
-                            Toast.makeText(
-                                requireContext(),
-                                "Registro enviado. Pendiente de autorización.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            requireActivity().onBackPressedDispatcher.onBackPressed()
-                        } catch (e: Exception) {
-                            tvError.text = when {
-                                e.message?.contains("already in use", ignoreCase = true) == true ->
-                                    "Este correo ya está registrado"
-                                else ->
-                                    e.message ?: "Ocurrió un error al registrar"
-                            }
-                        }
-                    }
-                }
+                nombre.isEmpty() -> tvError.text = "Debe ingresar un nombre"
+                nombre.length < 3 -> tvError.text = "El nombre es demasiado corto"
+                email.isEmpty() -> tvError.text = "Debe ingresar un correo"
+                !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> tvError.text = "El formato del correo no es válido"
+                pass.isEmpty() -> tvError.text = "Debe ingresar una contraseña"
+                pass.length < 6 -> tvError.text = "La contraseña debe tener al menos 6 caracteres"
+                else -> registrarUsuario(nombre, email, pass, rol, tvError)
             }
         }
 
+        // Manejar el botón “atrás” correctamente
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            parentFragmentManager.popBackStack()
+        }
+
         return v
+    }
+
+    private fun registrarUsuario(
+        nombre: String,
+        email: String,
+        pass: String,
+        rol: String,
+        tvError: TextView
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Llamada al repositorio
+                Repos().register(nombre, email, pass, rol)
+
+                Toast.makeText(
+                    requireContext(),
+                    "Registro enviado. Pendiente de autorización.",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                // Volver atrás al LoginFragment
+                parentFragmentManager.popBackStack()
+
+            } catch (e: Exception) {
+                tvError.text = when {
+                    e.message?.contains("already in use", ignoreCase = true) == true ->
+                        "Este correo ya está registrado"
+                    e.message?.contains("invalid", ignoreCase = true) == true ->
+                        "El correo o la contraseña no son válidos"
+                    else -> e.message ?: "Ocurrió un error al registrar"
+                }
+            }
+        }
     }
 }

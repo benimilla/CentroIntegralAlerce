@@ -70,7 +70,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="calendarDayFragment">
+                  <entry key="adminMainFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -81,7 +81,12 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_day_to_week">
+                            <entry key="action_adminMain_to_adminPending">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                            <entry key="action_adminMain_to_adminUsers">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -91,23 +96,26 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="calendarWeekFragment">
+                  <entry key="adminUsersFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="256" />
-                            <option name="y" value="724" />
+                            <option name="y" value="12" />
                           </Point>
                         </option>
-                        <option name="myPositions">
-                          <map>
-                            <entry key="action_week_to_day">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                          </map>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="calendarDayFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -135,12 +143,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_login_to_admin">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_login_to_calendar_day">
+                            <entry key="action_login_to_calendar">
                               <value>
                                 <LayoutPositions />
                               </value>

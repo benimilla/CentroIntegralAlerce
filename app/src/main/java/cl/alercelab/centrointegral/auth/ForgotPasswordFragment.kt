@@ -4,63 +4,50 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.data.Repos
+import cl.alercelab.centrointegral.databinding.FragmentForgotPasswordBinding
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class ForgotPasswordFragment : Fragment() {
 
+    private var _binding: FragmentForgotPasswordBinding? = null
+    private val binding get() = _binding!!
+    private val repos = Repos()
+
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val v = inflater.inflate(R.layout.fragment_forgot, container, false)
-        val et = v.findViewById<EditText>(R.id.etEmail)
+        _binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        v.findViewById<Button>(R.id.btnSend).setOnClickListener {
-            val email = et.text.toString().trim()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-            if (email.isEmpty()) {
-                Toast.makeText(requireContext(), "Ingrese un correo", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(requireContext(), "Formato de correo inválido", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            viewLifecycleOwner.lifecycleScope.launch {
-                val success = try {
-                    Repos().resetPassword(email).await() // espera la respuesta real de Firebase
-                    true
-                } catch (e: Exception) {
-                    false
+        binding.btnResetPassword.setOnClickListener {
+            val email = binding.etEmail.text.toString()
+            if (email.isNotEmpty()) {
+                lifecycleScope.launch {
+                    val ok = repos.resetPassword(email)
+                    if (ok) {
+                        Toast.makeText(requireContext(), "Correo de recuperación enviado", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Error al enviar el correo", Toast.LENGTH_SHORT).show()
+                    }
                 }
-
-                if (success) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Correo enviado si la cuenta existe",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "Error al enviar correo",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            } else {
+                Toast.makeText(requireContext(), "Ingrese su correo", Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
-        return v
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -10,7 +10,11 @@
     <color name="slot_border">#E0E0E0</color>
     <color name="slot_hour">#424242</color>
 
-    <!-- 👇 Agregas estos dos y el error se va -->
+    <!-- Íconos del launcher -->
     <color name="ic_launcher_background">#2E7D32</color>
     <color name="ic_launcher_foreground">#FFFFFF</color>
+
+    <!-- ✅ Colores faltantes para fragment_login.xml -->
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
 </resources>

@@ -32,6 +32,7 @@
     <TextView
         android:id="@+id/tvError"
         android:textColor="#D32F2F"
+        android:text=""
         android:layout_marginTop="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
@@ -43,17 +44,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"/>
 
-    <Button
-        android:id="@+id/btnGoRegister"
-        android:text="Crear cuenta"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvForgotPassword"
+        android:text="¿Olvidaste tu contraseña?"
+        android:textColor="@color/teal_700"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="16dp"/>
 
-    <Button
-        android:id="@+id/btnForgot"
-        android:text="Olvidé mi contraseña"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvRegister"
+        android:text="Crear cuenta nueva"
+        android:textColor="@color/teal_700"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"/>
 

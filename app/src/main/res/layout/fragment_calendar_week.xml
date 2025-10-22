@@ -1,97 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="12dp"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="12dp">
 
-    <!-- Header navegación semana -->
     <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageButton
-            android:id="@+id/btnPrev"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:contentDescription="@string/previous"
-            android:src="@android:drawable/ic_media_previous"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
-
-        <TextView
-            android:id="@+id/tvWeekRange"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:text="1 Ene – 7 Ene" />
-
-        <ImageButton
-            android:id="@+id/btnNext"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:contentDescription="@string/next"
-            android:src="@android:drawable/ic_media_next"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
-    </LinearLayout>
-
-    <!-- Encabezado de días L..D -->
-    <LinearLayout
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
+        android:id="@+id/containerWeek"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="7">
+        android:orientation="vertical"
+        android:divider="?android:attr/dividerVertical"
+        android:showDividers="middle"
+        android:padding="8dp" />
 
-        <TextView android:id="@+id/day0" style="@style/DayHeader"/>
-        <TextView android:id="@+id/day1" style="@style/DayHeader"/>
-        <TextView android:id="@+id/day2" style="@style/DayHeader"/>
-        <TextView android:id="@+id/day3" style="@style/DayHeader"/>
-        <TextView android:id="@+id/day4" style="@style/DayHeader"/>
-        <TextView android:id="@+id/day5" style="@style/DayHeader"/>
-        <TextView android:id="@+id/day6" style="@style/DayHeader"/>
-    </LinearLayout>
-
-    <!-- Filtro por tipo (chips verdes) -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:overScrollMode="never"
-        android:scrollbars="none">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupTipos"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:singleSelection="true"
-            app:selectionRequired="false"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="8dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp" />
-    </HorizontalScrollView>
-
-    <!-- Grilla semanal -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvWeek"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingTop="8dp"
-        android:clipToPadding="false" />
-
-    <TextView
-        android:id="@+id/tvEmpty"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="@string/no_data"
-        android:visibility="gone"/>
-</LinearLayout>
+</ScrollView>
