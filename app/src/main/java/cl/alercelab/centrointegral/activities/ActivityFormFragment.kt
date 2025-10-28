@@ -1,160 +1,161 @@
 package cl.alercelab.centrointegral.activities
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.data.Repos
-import cl.alercelab.centrointegral.databinding.FragmentActivityFormBinding
-import cl.alercelab.centrointegral.domain.Actividad
-import cl.alercelab.centrointegral.domain.Cita
+import cl.alercelab.centrointegral.domain.*
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 class ActivityFormFragment : Fragment() {
 
-    private var _binding: FragmentActivityFormBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var etNombre: EditText
+    private lateinit var spTipo: Spinner
+    private lateinit var spPeriodicidad: Spinner
+    private lateinit var etCupo: EditText
+    private lateinit var spOferente: Spinner
+    private lateinit var spSocioComunitario: Spinner
+    private lateinit var etBeneficiarios: EditText
+    private lateinit var etDiasAvisoPrevio: EditText
+    private lateinit var spLugar: Spinner
+    private lateinit var etDuracion: EditText
+    private lateinit var btnAgregarCita: Button
+    private lateinit var btnGuardar: Button
+
     private val repos = Repos()
-    private val citas = mutableListOf<Cita>()
-    private val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+    private var listaCitas: MutableList<Cita> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentActivityFormBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        return inflater.inflate(R.layout.fragment_activity_form, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 🔹 Configurar selectores
-        val tipos = listOf("Taller", "Reunión", "Asesoría", "Capacitación", "Otro")
-        val periodicidades = listOf("Puntual", "Periódica")
-        val lugares = listOf("Centro Integral Alerce", "Sede Comunitaria", "Escuela", "Otro")
+        etNombre = view.findViewById(R.id.etNombre)
+        spTipo = view.findViewById(R.id.spTipo)
+        spPeriodicidad = view.findViewById(R.id.spPeriodicidad)
+        etCupo = view.findViewById(R.id.etCupo)
+        spOferente = view.findViewById(R.id.spOferente)
+        spSocioComunitario = view.findViewById(R.id.spSocioComunitario)
+        etBeneficiarios = view.findViewById(R.id.etBeneficiarios)
+        etDiasAvisoPrevio = view.findViewById(R.id.etDiasAvisoPrevio)
+        spLugar = view.findViewById(R.id.spLugar)
+        etDuracion = view.findViewById(R.id.etDuracion)
+        btnAgregarCita = view.findViewById(R.id.btnAgregarCita)
+        btnGuardar = view.findViewById(R.id.btnGuardar)
 
-        binding.spTipo.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, tipos)
-        binding.spPeriodicidad.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, periodicidades)
-        binding.spLugar.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, lugares)
+        // 🔹 Llenar spinner de periodicidad
+        val periodicidades = listOf("Única", "Semanal", "Mensual")
+        spPeriodicidad.adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_dropdown_item,
+            periodicidades
+        )
 
-        binding.btnAgregarCita.setOnClickListener { mostrarDialogoCita() }
-        binding.btnGuardar.setOnClickListener { guardarActividad() }
-    }
+        // 🔹 Cargar datos Firestore
+        lifecycleScope.launch {
+            try {
+                val lugares = repos.obtenerLugares()
+                val tipos = repos.obtenerTiposActividad()
+                val oferentes = repos.obtenerOferentes()
+                val socios = repos.obtenerSociosComunitarios()
 
-    private fun mostrarDialogoCita() {
-        val cal = Calendar.getInstance()
+                // Tipos
+                spTipo.adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_dropdown_item,
+                    tipos.map { it.nombre }
+                )
 
-        // Paso 1: Fecha del día
-        DatePickerDialog(requireContext(), { _, y, m, d ->
-            cal.set(Calendar.YEAR, y)
-            cal.set(Calendar.MONTH, m)
-            cal.set(Calendar.DAY_OF_MONTH, d)
+                // Oferentes
+                spOferente.adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_dropdown_item,
+                    oferentes.map { it.nombre }
+                )
 
-            // Paso 2: Hora de inicio
-            TimePickerDialog(requireContext(), { _, hIni, minIni ->
-                val inicioCal = Calendar.getInstance().apply {
-                    set(y, m, d, hIni, minIni)
-                }
+                // Lugares
+                spLugar.adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_dropdown_item,
+                    lugares.map { it.nombre }
+                )
 
-                // Paso 3: Hora de fin
-                TimePickerDialog(requireContext(), { _, hFin, minFin ->
-                    val finCal = Calendar.getInstance().apply {
-                        set(y, m, d, hFin, minFin)
-                    }
+                // Socios comunitarios (opcional)
+                val sociosOpciones = mutableListOf("Sin socio comunitario")
+                sociosOpciones.addAll(socios.map { it.nombre })
+                spSocioComunitario.adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_dropdown_item,
+                    sociosOpciones
+                )
 
-                    if (finCal.timeInMillis <= inicioCal.timeInMillis) {
-                        Toast.makeText(requireContext(), "La hora de fin debe ser posterior a la de inicio", Toast.LENGTH_SHORT).show()
-                        return@TimePickerDialog
-                    }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error cargando opciones: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
 
-                    val lugar = binding.spLugar.selectedItem.toString()
+        // 🔹 Acción del botón agregar cita (placeholder)
+        btnAgregarCita.setOnClickListener {
+            Toast.makeText(requireContext(), "Función de agregar cita próximamente", Toast.LENGTH_SHORT).show()
+        }
 
-                    val cita = Cita(
-                        fechaInicioMillis = inicioCal.timeInMillis,
-                        fechaFinMillis = finCal.timeInMillis,
-                        lugar = lugar
-                    )
-
-                    citas.add(cita)
-                    Toast.makeText(
-                        requireContext(),
-                        "Cita agregada: ${dateFormat.format(inicioCal.time)} - ${dateFormat.format(finCal.time)}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                }, hIni + 1, minIni, true).show() // default fin = 1h después
-            },
-                cal.get(Calendar.HOUR_OF_DAY),
-                cal.get(Calendar.MINUTE),
-                true
-            ).show()
-        },
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH),
-            cal.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        btnGuardar.setOnClickListener {
+            guardarActividad()
+        }
     }
 
     private fun guardarActividad() {
-        val nombre = binding.etNombre.text.toString().trim()
-        val tipo = binding.spTipo.selectedItem.toString()
-        val periodicidad = binding.spPeriodicidad.selectedItem.toString()
-        val cupo = binding.etCupo.text.toString().toIntOrNull() ?: 0
-        val oferente = binding.etOferente.text.toString().trim()
-        val socio = binding.etSocioComunitario.text.toString().trim()
-        val beneficiarios = binding.etBeneficiarios.text.toString()
-            .split(",").map { it.trim() }.filter { it.isNotBlank() }
-        val diasAviso = binding.etDiasAvisoPrevio.text.toString().toIntOrNull() ?: 0
+        val nombre = etNombre.text.toString().trim()
+        val tipo = spTipo.selectedItem?.toString() ?: ""
+        val periodicidad = spPeriodicidad.selectedItem?.toString() ?: ""
+        val cupo = etCupo.text.toString().toIntOrNull()
+        val oferente = spOferente.selectedItem?.toString()
+        val lugar = spLugar.selectedItem?.toString() ?: ""
+        val beneficiariosTexto = etBeneficiarios.text.toString()
+        val beneficiarios = beneficiariosTexto.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        val diasAviso = etDiasAvisoPrevio.text.toString().toIntOrNull() ?: 0
 
-        if (nombre.isEmpty() || citas.isEmpty()) {
-            Toast.makeText(requireContext(), "Debe ingresar todos los datos y al menos una cita", Toast.LENGTH_SHORT).show()
+        val socioSeleccionado = spSocioComunitario.selectedItem?.toString() ?: ""
+        val socioComunitario = if (socioSeleccionado == "Sin socio comunitario") null else socioSeleccionado
+
+        if (nombre.isEmpty() || tipo.isEmpty() || oferente.isNullOrEmpty() || lugar.isEmpty()) {
+            Toast.makeText(requireContext(), "Completa todos los campos obligatorios", Toast.LENGTH_SHORT).show()
             return
         }
-
-        if (periodicidad.equals("Puntual", true) && citas.size > 1) {
-            Toast.makeText(requireContext(), "Las actividades puntuales solo deben tener una cita", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val fechaInicio = citas.minOf { it.fechaInicioMillis }
-        val fechaFin = citas.maxOf { it.fechaFinMillis }
 
         val actividad = Actividad(
+            id = "",
             nombre = nombre,
             tipo = tipo,
             periodicidad = periodicidad,
             cupo = cupo,
             oferente = oferente,
-            socioComunitario = socio,
+            socioComunitario = socioComunitario,
             beneficiarios = beneficiarios,
             diasAvisoPrevio = diasAviso,
-            fechaInicio = fechaInicio,
-            fechaFin = fechaFin,
-            estado = "vigente"
+            lugar = lugar,
+            estado = "activa"
         )
 
         lifecycleScope.launch {
             try {
-                repos.crearActividadConCitas(actividad, citas)
-                Toast.makeText(requireContext(), "Actividad creada correctamente", Toast.LENGTH_LONG).show()
-                requireActivity().onBackPressedDispatcher.onBackPressed()
+                repos.crearActividadConCitas(actividad, listaCitas)
+                Toast.makeText(requireContext(), "Actividad creada con éxito", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error al crear: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

@@ -1,28 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- 🔹 Botón para agregar actividad -->
     <Button
         android:id="@+id/btnAddActividad"
         android:text="Agregar Actividad"
+        android:backgroundTint="@color/primary_green"
+        android:textColor="@android:color/white"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="12dp" />
 
+    <!-- 🔹 Título -->
     <TextView
-        android:text="Lista de actividades"
+        android:id="@+id/tvTituloLista"
+        android:text="Lista de Actividades"
         android:textStyle="bold"
         android:textSize="18sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp" />
 
+    <!-- 🔹 Lista de actividades -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvActividades"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
+
+    <!-- 🔹 Texto de vacío -->
+    <TextView
+        android:id="@+id/tvNoActividades"
+        android:text="No hay actividades disponibles"
+        android:visibility="gone"
+        android:gravity="center"
+        android:textColor="@android:color/darker_gray"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>

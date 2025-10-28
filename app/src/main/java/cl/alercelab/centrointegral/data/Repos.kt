@@ -140,6 +140,15 @@ class Repos {
         return snap.documents.mapNotNull { it.toObject(Actividad::class.java)?.apply { id = it.id } }
     }
 
+    suspend fun listUserActividades(uid: String): List<Actividad> {
+        val snap = db.collection("actividades")
+            .whereEqualTo("creadorUid", uid)
+            .get().await()
+        return snap.documents.mapNotNull {
+            it.toObject(Actividad::class.java)?.apply { id = it.id }
+        }
+    }
+
     suspend fun citasEnRango(inicio: Long, fin: Long): List<Cita> {
         val snap = db.collection("citas")
             .whereGreaterThanOrEqualTo("fechaInicioMillis", inicio)
@@ -161,30 +170,11 @@ class Repos {
 
     suspend fun updateCitaTiempoYLugar(
         citaId: String,
-        nuevoInicio: Long,
-        nuevoFin: Long,
+        nuevaFechaInicio: Long,
+        nuevaFechaFin: Long,
         nuevoLugar: String
     ) {
-        db.collection("citas").document(citaId)
-            .update(
-                mapOf(
-                    "fechaInicioMillis" to nuevoInicio,
-                    "fechaFinMillis" to nuevoFin,
-                    "lugar" to nuevoLugar
-                )
-            ).await()
-    }
-
-    // -----------------------------------------------------------
-    // 🔹 LISTA DE ACTIVIDADES DEL USUARIO
-    // -----------------------------------------------------------
-
-    suspend fun listUserActividades(uid: String): List<Actividad> {
-        val snap = db.collection("actividades")
-            .whereArrayContains("beneficiarios", uid)
-            .get()
-            .await()
-        return snap.documents.mapNotNull { it.toObject(Actividad::class.java)?.apply { id = it.id } }
+        reagendarCita(citaId, nuevaFechaInicio, nuevaFechaFin, nuevoLugar)
     }
 
     // -----------------------------------------------------------
@@ -264,17 +254,17 @@ class Repos {
     }
 
     // -----------------------------------------------------------
-    // 🔹 CRUD SOCIOS COMUNITARIOS
+    // 🔹 SOCIOS COMUNITARIOS
     // -----------------------------------------------------------
-
-    suspend fun obtenerSociosComunitarios(): List<SocioComunitario> {
-        val snap = db.collection("sociosComunitarios").get().await()
-        return snap.documents.mapNotNull { it.toObject(SocioComunitario::class.java)?.apply { id = it.id } }
-    }
 
     suspend fun crearSocioComunitario(socio: SocioComunitario) {
         val doc = db.collection("sociosComunitarios").document()
         doc.set(socio.copy(id = doc.id)).await()
+    }
+
+    suspend fun obtenerSociosComunitarios(): List<SocioComunitario> {
+        val snap = db.collection("sociosComunitarios").get().await()
+        return snap.documents.mapNotNull { it.toObject(SocioComunitario::class.java)?.apply { id = it.id } }
     }
 
     suspend fun actualizarSocioComunitario(socio: SocioComunitario) {
@@ -294,10 +284,22 @@ class Repos {
             .whereGreaterThanOrEqualTo("fechaInicio", inicio)
             .whereLessThanOrEqualTo("fechaFin", fin)
             .get().await()
-
         return snap.documents.mapNotNull {
             it.toObject(Actividad::class.java)?.apply { id = it.id }
         }
+    }
+
+    // -----------------------------------------------------------
+    // 🔹 OPCIONES PARA FORMULARIO DE ACTIVIDAD (ADMIN)
+    // -----------------------------------------------------------
+
+    suspend fun obtenerOpcionesParaFormularioActividad():
+            Quadruple<List<Lugar>, List<TipoActividad>, List<Oferente>, List<SocioComunitario>> {
+        val lugares = obtenerLugares()
+        val tipos = obtenerTiposActividad()
+        val oferentes = obtenerOferentes()
+        val socios = obtenerSociosComunitarios()
+        return Quadruple(lugares, tipos, oferentes, socios)
     }
 
     // -----------------------------------------------------------
@@ -322,6 +324,14 @@ class Repos {
             Log.e("FCM_SEND", "Error: ${e.message}")
         }
     }
-
-
 }
+
+/**
+ * 🔸 Clase auxiliar para devolver 4 listas
+ */
+data class Quadruple<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
+)

@@ -1,49 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="12dp"
+    android:orientation="vertical"
+    android:padding="12dp"
     android:background="@android:color/white"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
+    android:elevation="1dp">
 
+    <!-- 🔹 Encabezado con nombre y acciones -->
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical">
 
+        <!-- Nombre de la actividad -->
         <TextView
             android:id="@+id/tvTitle"
-            android:textStyle="bold" android:textSize="16sp"
+            android:text="Nombre de la actividad"
+            android:textStyle="bold"
+            android:textSize="16sp"
             android:textColor="@color/primary_green"
-            android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
+        <!-- Botón Editar -->
         <ImageButton
             android:id="@+id/btnEdit"
             android:src="@android:drawable/ic_menu_edit"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Editar"
             android:tint="@color/primary_green"
-            android:layout_width="40dp" android:layout_height="40dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="4dp" />
 
+        <!-- Botón Reagendar -->
         <ImageButton
             android:id="@+id/btnReschedule"
             android:src="@android:drawable/ic_menu_today"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Reagendar"
             android:tint="@color/primary_green"
-            android:layout_width="40dp" android:layout_height="40dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="4dp" />
 
+        <!-- Botón Eliminar -->
         <ImageButton
             android:id="@+id/btnDelete"
             android:src="@android:drawable/ic_menu_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Eliminar"
-            android:tint="@color/primary_green"
-            android:layout_width="40dp" android:layout_height="40dp"/>
+            android:tint="@android:color/holo_red_dark"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="4dp" />
     </LinearLayout>
 
+    <!-- 🔹 Subtítulo -->
     <TextView
         android:id="@+id/tvSubtitle"
+        android:text="Tipo: Taller | Estado: Vigente"
         android:textColor="#666"
+        android:textSize="14sp"
         android:layout_marginTop="4dp"
-        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- 🔹 Línea divisoria -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginTop="8dp" />
 </LinearLayout>

@@ -20,15 +20,23 @@ class ActivitiesListFragment : Fragment() {
     private lateinit var adapter: ActivitiesAdapter
     private lateinit var emptyView: TextView
     private lateinit var btnAdd: Button
+    private val repos = Repos()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         val v = inflater.inflate(R.layout.fragment_activities_list, container, false)
 
+        // Referencias al layout actualizado
         rv = v.findViewById(R.id.rvActividades)
-        emptyView = v.findViewById(R.id.tvEmpty)
+        emptyView = v.findViewById(R.id.tvNoActividades)
         btnAdd = v.findViewById(R.id.btnAddActividad)
 
         rv.layoutManager = LinearLayoutManager(requireContext())
+
+        // Configurar adaptador con callbacks
         adapter = ActivitiesAdapter(
             onEdit = { id ->
                 val b = Bundle().apply { putString("actividadId", id) }
@@ -36,14 +44,19 @@ class ActivitiesListFragment : Fragment() {
             },
             onDelete = { id ->
                 lifecycleScope.launch {
-                    Repos().deleteActividad(id)
-                    Snackbar.make(requireView(), "Actividad eliminada correctamente", Snackbar.LENGTH_LONG).show()
-                    loadActividades()
+                    try {
+                        repos.deleteActividad(id)
+                        Snackbar.make(requireView(), "Actividad eliminada correctamente", Snackbar.LENGTH_LONG).show()
+                        loadActividades()
+                    } catch (e: Exception) {
+                        Snackbar.make(requireView(), "Error al eliminar: ${e.message}", Snackbar.LENGTH_LONG).show()
+                    }
                 }
             }
         )
         rv.adapter = adapter
 
+        // Botón para agregar nueva actividad
         btnAdd.setOnClickListener {
             findNavController().navigate(R.id.action_activities_to_activity_form)
         }
@@ -54,24 +67,29 @@ class ActivitiesListFragment : Fragment() {
 
     private fun loadActividades() {
         lifecycleScope.launch {
-            val perfil = Repos().currentUserProfile()
-            val acts = if (perfil?.rol == "admin" || perfil?.rol == "gestor") {
-                Repos().listAllActividades()
-            } else {
-                Repos().listUserActividades(perfil?.uid ?: "")
-            }
+            try {
+                val perfil = repos.currentUserProfile()
+                val actividades = if (perfil?.rol == "admin" || perfil?.rol == "gestor") {
+                    repos.listAllActividades()
+                } else {
+                    perfil?.uid?.let { repos.listUserActividades(it) } ?: emptyList()
+                }
 
-            if (acts.isEmpty()) {
-                rv.visibility = View.GONE
-                emptyView.visibility = View.VISIBLE
-            } else {
-                rv.visibility = View.VISIBLE
-                emptyView.visibility = View.GONE
-                adapter.setData(acts)
+                if (actividades.isEmpty()) {
+                    rv.visibility = View.GONE
+                    emptyView.visibility = View.VISIBLE
+                } else {
+                    rv.visibility = View.VISIBLE
+                    emptyView.visibility = View.GONE
+                    adapter.setData(actividades)
+                }
+            } catch (e: Exception) {
+                Snackbar.make(requireView(), "Error al cargar actividades: ${e.message}", Snackbar.LENGTH_LONG).show()
             }
         }
     }
 
+    // Adaptador interno
     class ActivitiesAdapter(
         private val onEdit: (String) -> Unit,
         private val onDelete: (String) -> Unit
