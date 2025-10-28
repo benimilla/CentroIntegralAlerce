@@ -1,19 +1,19 @@
 package cl.alercelab.centrointegral.domain
 
 data class Actividad(
- val id: String = "",
- val nombre: String = "",
- val descripcion: String = "",
- val tipo: String = "",
- val periodicidad: String = "",
- val cupo: Int? = null,
- val oferente: String? = null,
- val socioComunitario: String? = null,
- val beneficiarios: List<String> = emptyList(),
- val diasAvisoPrevio: Int = 0,
- val lugar: String = "",
- val fechaInicio: Long = 0,
- val fechaFin: Long = 0,
- val estado: String = "activa",
- val motivoCancelacion: String? = null
+ var id: String = "",
+ var nombre: String = "",
+ var descripcion: String = "",
+ var tipo: String = "",
+ var periodicidad: String = "",
+ var cupo: Int? = null,
+ var oferente: String? = null,
+ var socioComunitario: String? = null,
+ var beneficiarios: List<String> = emptyList(),
+ var diasAvisoPrevio: Int = 0,
+ var lugar: String = "",
+ var fechaInicio: Long = 0,
+ var fechaFin: Long = 0,
+ var estado: String = "activa",
+ var motivoCancelacion: String? = null
 )

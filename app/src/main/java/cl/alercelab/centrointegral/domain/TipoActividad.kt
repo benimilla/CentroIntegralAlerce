@@ -1,6 +1,7 @@
 package cl.alercelab.centrointegral.domain
 
 data class TipoActividad(
- val nombre: String = "",
- val descripcion: String = ""
+ var id: String = "",
+ var nombre: String = "",
+ var descripcion: String = ""
 )
