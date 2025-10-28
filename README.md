@@ -1,4 +1,4 @@
-# Centro Integral Alerce — Full Build (green theme)
+# Centro Integral Alerce 
 Incluye:
 - UI según prototipo (BottomNav, claro/oscuro, color verde)
 - Auth con roles (admin/gestor/usuario) y autorización
@@ -7,4 +7,3 @@ Incluye:
 - Pestaña Admin (aprobaciones)
 - Firebase Auth/Firestore/Storage/Messaging + WorkManager
 
-Coloca tu `app/google-services.json` (package_name: `cl.alercelab.centrointegral`) y listo.
