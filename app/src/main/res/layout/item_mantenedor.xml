@@ -4,40 +4,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardElevation="3dp"
-    app:cardCornerRadius="10dp">
+    app:cardCornerRadius="10dp"
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="12dp">
 
         <TextView
-            android:id="@+id/tvNombre"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Elemento"
+            android:id="@+id/itemNombre"
+            android:text="Nombre del elemento"
+            android:textStyle="bold"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-        <ImageButton
-            android:id="@+id/btnEditar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="Editar"
-            android:src="@android:drawable/ic_menu_edit" />
+        <TextView
+            android:id="@+id/itemDescripcion"
+            android:text="Descripción del elemento"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
 
-        <ImageButton
-            android:id="@+id/btnEliminar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="Eliminar"
-            android:src="@android:drawable/ic_menu_delete" />
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>
