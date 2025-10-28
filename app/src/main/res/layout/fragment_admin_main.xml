@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:background="@android:color/background_light"
+    tools:context=".admin.AdminMainFragment">
 
     <LinearLayout
         android:orientation="vertical"
@@ -10,44 +13,54 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- 🔹 Encabezado -->
         <TextView
             android:text="Panel de Administración"
             android:textSize="22sp"
             android:textStyle="bold"
+            android:textColor="@android:color/black"
             android:gravity="center"
             android:layout_marginBottom="24dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- 🔹 Gestión de usuarios -->
         <Button
             android:id="@+id/btnGestionUsuarios"
             android:text="Gestionar Usuarios"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="8dp" />
 
         <Button
             android:id="@+id/btnPermitirUsuarios"
             android:text="Permitir Usuarios Pendientes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@android:color/white" />
 
-        <!-- Separador -->
+        <!-- 🔸 Separador visual -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#AAA"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="28dp"
             android:layout_marginBottom="16dp" />
 
+        <!-- 🔹 Título de mantenedores -->
         <TextView
             android:text="Mantenedores"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:textColor="@android:color/black"
             android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- 🔹 Botones de mantenedores -->
         <Button
             android:id="@+id/btnTipoActividad"
             android:text="Tipos de Actividad"
@@ -81,7 +94,12 @@
             android:text="Proyectos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="24dp" />
+
+        <!-- 🔸 Separador -->
+
+
+
 
     </LinearLayout>
 </ScrollView>

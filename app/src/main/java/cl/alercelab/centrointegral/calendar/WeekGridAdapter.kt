@@ -1,59 +1,45 @@
 package cl.alercelab.centrointegral.calendar
 
-import android.graphics.Color
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import cl.alercelab.centrointegral.R
+import android.content.Context
+import android.view.*
+import android.widget.*
+import java.util.*
 
 class WeekGridAdapter(
-    private val canDrag: Boolean,
-    private val onClick: (WeekCell) -> Unit
-) : RecyclerView.Adapter<WeekGridAdapter.VH>() {
+    private val context: Context,
+    private val onRangeSelected: (startMillis: Long, endMillis: Long) -> Unit
+) : BaseAdapter() {
 
-    private val items = mutableListOf<WeekCell>()
+    private val days = mutableListOf<Calendar>()
 
-    class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val tvHour: TextView = v.findViewById(R.id.tvHour)
-        val tvTitle: TextView = v.findViewById(R.id.tvTitle)
-        val tvPlace: TextView = v.findViewById(R.id.tvPlace)
+    init {
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
+        repeat(7) {
+            days.add(cal.clone() as Calendar)
+            cal.add(Calendar.DAY_OF_MONTH, 1)
+        }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_slot_week, parent, false)
-        return VH(v)
-    }
+    override fun getCount(): Int = days.size
+    override fun getItem(position: Int): Any = days[position]
+    override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getItemCount(): Int = items.size
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val view = convertView ?: LayoutInflater.from(context)
+            .inflate(android.R.layout.simple_list_item_1, parent, false)
+        val day = days[position]
+        val tv = view.findViewById<TextView>(android.R.id.text1)
+        tv.text = day.get(Calendar.DAY_OF_MONTH).toString()
+        tv.gravity = Gravity.CENTER
+        tv.setPadding(0, 16, 0, 16)
 
-    override fun onBindViewHolder(h: VH, pos: Int) {
-        val cell = items[pos]
-        h.tvHour.text = cell.hour
-        h.tvTitle.text = cell.titulo ?: "(libre)"
-        h.tvPlace.text = cell.lugar ?: ""
+        view.setOnClickListener {
+            val start = day.timeInMillis
+            val end = day.apply { set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59) }.timeInMillis
+            onRangeSelected(start, end)
+        }
 
-        // si hay cita → fondo suave verdoso; si no → transparente (borde visible viene del Card)
-        h.itemView.alpha = if (cell.citaId == null) 0.9f else 1f
-        h.itemView.setBackgroundColor(
-            if (cell.citaId == null) Color.TRANSPARENT else Color.argb(26, 46, 125, 50) // verde muy suave
-        )
-
-        h.itemView.setOnClickListener { onClick(cell) }
-    }
-
-    fun setData(data: List<WeekCell>) {
-        items.clear()
-        items.addAll(data)
-        notifyDataSetChanged()
-    }
-
-    fun getItem(position: Int) = items[position]
-
-    fun updateItem(position: Int, newItem: WeekCell) {
-        items[position] = newItem
-        notifyItemChanged(position)
+        return view
     }
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvNombre"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_green"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvDescripcion"
+            android:text="Descripción"
+            android:layout_marginBottom="8dp" />
+
+        <TextView android:id="@+id/tvTipo" />
+        <TextView android:id="@+id/tvPeriodicidad" />
+        <TextView android:id="@+id/tvOferente" />
+        <TextView android:id="@+id/tvSocio" />
+        <TextView android:id="@+id/tvBeneficiarios" />
+        <TextView android:id="@+id/tvLugar" />
+        <TextView android:id="@+id/tvEstado"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:text="Citas Asociadas:"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:id="@+id/containerCitas"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>

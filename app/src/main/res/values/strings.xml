@@ -1,15 +1,82 @@
 <resources>
+    <!-- 🏠 Nombre de la app -->
     <string name="app_name">Centro Integral Alerce</string>
+
+    <!-- 🔹 Navegación inferior -->
     <string name="nav_calendar">Calendario</string>
     <string name="nav_activities">Actividades</string>
-    <string name="nav_admin">Admin</string>
+    <string name="nav_admin">Administración</string>
     <string name="nav_settings">Configuración</string>
+
+    <!-- 🔹 Navegación general -->
     <string name="previous">Anterior</string>
     <string name="next">Siguiente</string>
+    <string name="back">Volver</string>
+
+    <!-- 🔹 Estados y mensajes genéricos -->
     <string name="no_data">No hay actividades esta semana</string>
+    <string name="loading">Cargando...</string>
+    <string name="error_occurred">Ocurrió un error. Intente nuevamente.</string>
+    <string name="confirm_delete">¿Seguro que desea eliminar este elemento?</string>
+    <string name="deleted_successfully">Eliminado correctamente</string>
+    <string name="saved_successfully">Guardado correctamente</string>
+
+    <!-- 🔹 Botones comunes -->
     <string name="save">Guardar</string>
     <string name="cancel">Cancelar</string>
-
-    <!-- 🔹 Agregado para el botón FAB -->
     <string name="add">Agregar</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="close">Cerrar</string>
+    <string name="search">Buscar</string>
+
+    <!-- 🔹 Autenticación -->
+    <string name="login_title">Iniciar sesión</string>
+    <string name="register_title">Registro de usuario</string>
+    <string name="email_hint">Correo electrónico</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="dont_have_account">¿No tienes cuenta? Regístrate</string>
+    <string name="create_account">Crear cuenta</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="login_error">Credenciales incorrectas</string>
+
+    <!-- 🔹 Roles de usuario -->
+    <string name="role_admin">Administrador</string>
+    <string name="role_manager">Gestor de actividades</string>
+    <string name="role_user">Usuario / Consultor</string>
+
+    <!-- 🔹 Formularios -->
+    <string name="form_required_field">Campo obligatorio</string>
+    <string name="form_invalid_email">El correo no tiene un formato válido</string>
+    <string name="form_short_password">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="form_fill_all">Completa todos los campos</string>
+
+    <!-- 🔹 Citas -->
+    <string name="cita_form_title">Nueva cita</string>
+    <string name="cita_select_activity">Seleccionar actividad</string>
+    <string name="cita_place_hint">Lugar de la cita</string>
+    <string name="cita_reason_hint">Motivo (opcional)</string>
+    <string name="cita_create_success">Cita creada correctamente</string>
+    <string name="cita_create_error">Error al crear la cita</string>
+
+    <!-- 🔹 Actividades -->
+    <string name="activity_create">Nueva actividad</string>
+    <string name="activity_edit">Editar actividad</string>
+    <string name="activity_detail">Detalle de actividad</string>
+    <string name="activity_reschedule">Reagendar cita</string>
+    <string name="activity_cancel">Cancelar actividad</string>
+
+    <!-- 🔹 Calendario -->
+    <string name="calendar_no_events">No hay actividades o citas para este rango</string>
+    <string name="calendar_today">Hoy</string>
+
+    <!-- 🔹 Administración -->
+    <string name="admin_panel">Panel de administración</string>
+    <string name="admin_users">Gestión de usuarios</string>
+    <string name="admin_pending">Usuarios pendientes</string>
+
+    <!-- 🔹 Accesibilidad -->
+    <string name="content_add_cita">Agregar nueva cita</string>
+    <string name="content_add_activity">Agregar nueva actividad</string>
 </resources>

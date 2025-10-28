@@ -1,9 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/calendarDayFragment"
+        android:id="@+id/calendarFragment"
         android:title="@string/nav_calendar"
         android:icon="@android:drawable/ic_menu_my_calendar" />
+
 
     <item
         android:id="@+id/activitiesFragment"

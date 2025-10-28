@@ -1,5 +1,6 @@
 package cl.alercelab.centrointegral.activities
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -11,11 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.data.Repos
 import cl.alercelab.centrointegral.domain.Actividad
-import cl.alercelab.centrointegral.domain.UserProfile
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObjects
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ActivitiesFragment : Fragment() {
 
@@ -25,8 +27,8 @@ class ActivitiesFragment : Fragment() {
     private lateinit var tvEmpty: TextView
     private lateinit var adapter: ActivitiesAdapter
 
-    private var perfil: UserProfile? = null
     private val db = FirebaseFirestore.getInstance()
+    private val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -41,23 +43,12 @@ class ActivitiesFragment : Fragment() {
         adapter = ActivitiesAdapter(
             onEdit = { act -> goToEdit(act.id) },
             onReschedule = { act -> goToReschedule(act.id) },
-            onDelete = { act -> cancelActivity(act.id) }
+            onDelete = { act -> cancelActivity(act.id) },
+            onDetails = { act -> showActivityDetailDialog(act) } // <- detalle sin navegar
         )
         rv.adapter = adapter
 
         btnNew.setOnClickListener { goToCreate() }
-
-        // Cargar perfil y validar rol
-        viewLifecycleOwner.lifecycleScope.launch {
-            perfil = Repos().currentUserProfile()
-            val p = perfil
-            if (p == null || (p.rol != "admin" && p.rol != "gestor")) {
-                Toast.makeText(requireContext(), "Sin permisos para acceder a Actividades", Toast.LENGTH_LONG).show()
-                findNavController().popBackStack()
-                return@launch
-            }
-            loadList()
-        }
 
         // Buscar por texto (ENTER)
         etSearch.setOnEditorActionListener { _, _, _ ->
@@ -65,10 +56,12 @@ class ActivitiesFragment : Fragment() {
             true
         }
 
+        loadList()
         return v
     }
 
     private fun goToCreate() {
+        // ya existe en tu nav_graph
         findNavController().navigate(R.id.action_activities_to_activity_form)
     }
 
@@ -81,7 +74,6 @@ class ActivitiesFragment : Fragment() {
         val b = Bundle().apply { putString("actividadId", actividadId) }
         findNavController().navigate(R.id.action_activities_to_reschedule, b)
     }
-
 
     private fun cancelActivity(actividadId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -99,18 +91,51 @@ class ActivitiesFragment : Fragment() {
         val q = etSearch.text?.toString()?.trim().orEmpty()
         viewLifecycleOwner.lifecycleScope.launch {
             val snap = db.collection("actividades").get().await()
-            val list = snap.toObjects<Actividad>().sortedBy { it.nombre?.lowercase() ?: "" }
-            val filtered = if (q.isBlank()) list else list.filter { it.nombre?.contains(q, ignoreCase = true) == true }
+            val list = snap.toObjects<Actividad>()
+                .mapIndexed { idx, a -> a.copy(id = snap.documents[idx].id) }
+                .sortedBy { it.nombre.lowercase() }
+
+            val filtered = if (q.isBlank())
+                list
+            else
+                list.filter { it.nombre.contains(q, ignoreCase = true) }
+
             adapter.setData(filtered)
             tvEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
         }
+    }
+
+    private fun showActivityDetailDialog(a: Actividad) {
+        val msg = buildString {
+            appendLine("Nombre: ${a.nombre}")
+            appendLine("Tipo: ${a.tipo}")
+            appendLine("Periodicidad: ${a.periodicidad}")
+            appendLine("Lugar: ${a.lugar}")
+            appendLine("Oferente: ${a.oferente ?: "-"}")
+            appendLine("Socio Comunitario: ${a.socioComunitario ?: "-"}")
+            appendLine("Cupo: ${a.cupo ?: "-"}")
+            appendLine("Beneficiarios: ${if (a.beneficiarios.isEmpty()) "-" else a.beneficiarios.joinToString()}")
+            if (a.fechaInicio > 0L && a.fechaFin > 0L) {
+                appendLine("Desde: ${sdf.format(Date(a.fechaInicio))}")
+                appendLine("Hasta: ${sdf.format(Date(a.fechaFin))}")
+            }
+            appendLine("Estado: ${a.estado}")
+            a.motivoCancelacion?.let { appendLine("Motivo cancelación: $it") }
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Detalle de actividad")
+            .setMessage(msg)
+            .setPositiveButton("Cerrar", null)
+            .show()
     }
 
     // ---- Adapter ----
     class ActivitiesAdapter(
         private val onEdit: (Actividad) -> Unit,
         private val onReschedule: (Actividad) -> Unit,
-        private val onDelete: (Actividad) -> Unit
+        private val onDelete: (Actividad) -> Unit,
+        private val onDetails: (Actividad) -> Unit
     ) : RecyclerView.Adapter<ActivitiesAdapter.VH>() {
 
         private val items = mutableListOf<Actividad>()
@@ -132,12 +157,13 @@ class ActivitiesFragment : Fragment() {
 
         override fun onBindViewHolder(h: VH, pos: Int) {
             val it = items[pos]
-            h.tvTitle.text = it.nombre ?: "(sin nombre)"
-            val estado = it.estado ?: "vigente"
-            val tipo = it.tipo ?: "-"
-            val per = it.periodicidad ?: "-"
+            h.tvTitle.text = it.nombre
+            val estado = it.estado
+            val tipo = it.tipo
+            val per = it.periodicidad
             h.tvSubtitle.text = "Tipo: $tipo · Periodicidad: $per · Estado: $estado"
 
+            h.itemView.setOnClickListener { onDetails(items[pos]) }
             h.btnEdit.setOnClickListener { onEdit(items[pos]) }
             h.btnReschedule.setOnClickListener { onReschedule(items[pos]) }
             h.btnDelete.setOnClickListener { onDelete(items[pos]) }

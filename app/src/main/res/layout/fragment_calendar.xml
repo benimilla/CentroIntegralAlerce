@@ -1,39 +1,129 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="12dp"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_light"
+    tools:context=".calendar.CalendarFragment">
 
-  <!-- Filter Bar -->
+  <!-- 🔹 Contenedor principal -->
   <LinearLayout
-      android:id="@+id/filterBar"
-      android:orientation="horizontal"
+      android:orientation="vertical"
+      android:padding="12dp"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:paddingBottom="8dp">
-    <Spinner android:id="@+id/spTipo"
-        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
-    <Spinner android:id="@+id/spRango"
-        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp"/>
-    <EditText android:id="@+id/etBuscar" android:hint="Buscar..."
-        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp"/>
+      android:layout_height="match_parent">
+
+    <!-- 🔹 Barra de filtros superior -->
+    <LinearLayout
+        android:id="@+id/filterBar"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:baselineAligned="false">
+
+      <Spinner
+          android:id="@+id/spTipo"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:spinnerMode="dropdown"
+          android:backgroundTint="@color/primary_green"
+          android:popupBackground="@android:color/white"
+          android:layout_marginEnd="6dp" />
+
+      <Spinner
+          android:id="@+id/spRango"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:layout_marginEnd="6dp"
+          android:spinnerMode="dropdown"
+          android:backgroundTint="@color/primary_green"
+          android:popupBackground="@android:color/white" />
+
+      <EditText
+          android:id="@+id/etBuscar"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1.2"
+          android:hint="Buscar..."
+          android:inputType="text"
+          android:drawableStart="@android:drawable/ic_menu_search"
+          android:drawablePadding="8dp"
+          android:padding="10dp"
+          android:textColor="@android:color/black"
+          android:textColorHint="#888888"
+          android:background="@drawable/edittext_rounded_bg"
+          android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 🔹 Calendario -->
+    <CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/calendar_bg"
+        android:weekSeparatorLineColor="@color/primary_green"
+        android:focusedMonthDateColor="@color/primary_green_700"
+        android:unfocusedMonthDateColor="@android:color/darker_gray"
+        android:weekNumberColor="@color/primary_green"
+        android:weekDayTextAppearance="@style/CalendarWeekdayText"
+        android:dateTextAppearance="@style/CalendarDateText" />
+
+    <!-- 🔹 Texto cuando no hay citas -->
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No hay actividades o citas para este día."
+        android:textAlignment="center"
+        android:textColor="@color/primary_green_700"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="12dp"
+        android:visibility="gone" />
+
+    <!-- 🔹 Lista de citas del día -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/item_cita" />
   </LinearLayout>
 
-  <CalendarView
-      android:id="@+id/calendarView"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
-
-  <TextView
-      android:id="@+id/tvEmpty"
-      android:text="No hay actividades para este rango."
+  <!-- 🔹 Indicador de carga -->
+  <ProgressBar
+      android:id="@+id/progressBar"
+      style="?android:attr/progressBarStyleLarge"
+      android:layout_width="56dp"
+      android:layout_height="56dp"
+      android:layout_gravity="center"
       android:visibility="gone"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:padding="8dp"/>
+      android:indeterminate="true" />
 
-  <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rvDay"
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:paddingBottom="32dp"/>
-</LinearLayout>
+  <!-- 🔹 Botón flotante “+” para crear cita -->
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:id="@+id/btnCrearCita"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|end"
+      android:layout_margin="24dp"
+      android:src="@android:drawable/ic_input_add"
+      android:contentDescription="Crear nueva cita"
+      app:backgroundTint="@color/primary_green"
+      app:tint="@android:color/white"
+      app:elevation="8dp"
+      app:fabSize="normal"
+      android:visibility="visible" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -3,8 +3,10 @@ plugins {
   id("org.jetbrains.kotlin.android")
   id("com.google.gms.google-services")
   id("com.google.firebase.crashlytics")
+  id("androidx.navigation.safeargs.kotlin")
   kotlin("kapt")
 }
+
 
 android {
   namespace = "cl.alercelab.centrointegral"

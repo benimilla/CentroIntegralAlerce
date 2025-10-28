@@ -78,4 +78,17 @@
         android:layout_height="1dp"
         android:background="#E0E0E0"
         android:layout_marginTop="8dp" />
+
+    <!-- 🔹 Botón Detalles -->
+    <Button
+        android:id="@+id/btnDetails"
+        android:text="Ver Detalles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/primary_green"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:paddingVertical="6dp" />
+
 </LinearLayout>

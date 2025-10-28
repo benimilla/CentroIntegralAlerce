@@ -1,50 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="16dp"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <!-- Header: título + crear -->
+    <!-- 🔹 Header: título + crear -->
     <LinearLayout
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="horizontal" android:gravity="center_vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp">
 
         <TextView
-            android:text="Actividades"
-            android:textStyle="bold" android:textSize="20sp"
+            android:id="@+id/tvHeader"
+            android:text="📋 Actividades"
+            android:textStyle="bold"
+            android:textSize="22sp"
             android:textColor="@color/primary_green"
-            android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNewActivity"
-            android:text="Nueva Actividad"
-            android:backgroundTint="@color/primary_green"
-            android:textColor="@android:color/white"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:text="Nueva"
+            android:textAllCaps="false"
+            android:textColor="@color/primary_green"
+            app:icon="@drawable/ic_add"
+            app:iconTint="@color/primary_green"
+            app:iconPadding="6dp"
+            app:strokeColor="@color/primary_green"
+            app:strokeWidth="1dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!-- Buscar -->
-    <EditText
-        android:id="@+id/etSearch"
-        android:hint="Buscar por nombre"
-        android:imeOptions="actionSearch"
-        android:singleLine="true"
-        android:layout_marginTop="12dp"
-        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    <!-- 🔹 Buscar -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:background="@drawable/bg_search_bar"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <!-- Lista -->
+        <ImageView
+            android:src="@android:drawable/ic_menu_search"
+            android:tint="#777"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Buscar" />
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:hint="Buscar por nombre..."
+            android:background="@null"
+            android:paddingStart="8dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#999"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- 🔹 Lista de actividades -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvActivities"
         android:layout_marginTop="12dp"
-        android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:clipToPadding="false"
+        android:paddingBottom="12dp"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
+    <!-- 🔹 Mensaje vacío -->
     <TextView
         android:id="@+id/tvEmpty"
-        android:text="No hay actividades"
+        android:text="No hay actividades disponibles"
+        android:textSize="16sp"
         android:gravity="center"
         android:visibility="gone"
-        android:textColor="#666"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:padding="16dp"/>
+        android:textColor="#777"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp" />
 </LinearLayout>

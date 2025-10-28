@@ -27,6 +27,7 @@ class ActivityFormFragment : Fragment() {
     private lateinit var etDuracion: EditText
     private lateinit var btnAgregarCita: Button
     private lateinit var btnGuardar: Button
+    private lateinit var tvResumenCitas: TextView
 
     private val repos = Repos()
     private var listaCitas: MutableList<Cita> = mutableListOf()
@@ -41,6 +42,7 @@ class ActivityFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Referencias
         etNombre = view.findViewById(R.id.etNombre)
         spTipo = view.findViewById(R.id.spTipo)
         spPeriodicidad = view.findViewById(R.id.spPeriodicidad)
@@ -54,6 +56,20 @@ class ActivityFormFragment : Fragment() {
         btnAgregarCita = view.findViewById(R.id.btnAgregarCita)
         btnGuardar = view.findViewById(R.id.btnGuardar)
 
+        // 🔹 Buscamos el contenedor interior (LinearLayout)
+        val linearContainer = (view as? ScrollView)?.getChildAt(0) as? LinearLayout
+            ?: view.findViewById(R.id.linearContainer) // si le pones un id al LinearLayout principal
+
+        // 🔹 Creamos un texto dinámico dentro del contenedor
+        tvResumenCitas = TextView(requireContext()).apply {
+            text = "Citas agregadas: 0"
+            textSize = 14f
+            setPadding(0, 8, 0, 8)
+        }
+
+        // ✅ Agregar dentro del LinearLayout (no al ScrollView)
+        linearContainer.addView(tvResumenCitas, linearContainer.childCount - 1)
+
         // 🔹 Llenar spinner de periodicidad
         val periodicidades = listOf("Única", "Semanal", "Mensual")
         spPeriodicidad.adapter = ArrayAdapter(
@@ -62,7 +78,7 @@ class ActivityFormFragment : Fragment() {
             periodicidades
         )
 
-        // 🔹 Cargar datos Firestore
+        // 🔹 Cargar datos desde Firestore
         lifecycleScope.launch {
             try {
                 val lugares = repos.obtenerLugares()
@@ -70,28 +86,24 @@ class ActivityFormFragment : Fragment() {
                 val oferentes = repos.obtenerOferentes()
                 val socios = repos.obtenerSociosComunitarios()
 
-                // Tipos
                 spTipo.adapter = ArrayAdapter(
                     requireContext(),
                     android.R.layout.simple_spinner_dropdown_item,
                     tipos.map { it.nombre }
                 )
 
-                // Oferentes
                 spOferente.adapter = ArrayAdapter(
                     requireContext(),
                     android.R.layout.simple_spinner_dropdown_item,
                     oferentes.map { it.nombre }
                 )
 
-                // Lugares
                 spLugar.adapter = ArrayAdapter(
                     requireContext(),
                     android.R.layout.simple_spinner_dropdown_item,
                     lugares.map { it.nombre }
                 )
 
-                // Socios comunitarios (opcional)
                 val sociosOpciones = mutableListOf("Sin socio comunitario")
                 sociosOpciones.addAll(socios.map { it.nombre })
                 spSocioComunitario.adapter = ArrayAdapter(
@@ -101,18 +113,34 @@ class ActivityFormFragment : Fragment() {
                 )
 
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error cargando opciones: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error cargando opciones: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
-        // 🔹 Acción del botón agregar cita (placeholder)
+        // 🔹 Agregar cita
         btnAgregarCita.setOnClickListener {
-            Toast.makeText(requireContext(), "Función de agregar cita próximamente", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_activityFormFragment_to_citaFormFragment)
         }
 
-        btnGuardar.setOnClickListener {
-            guardarActividad()
-        }
+        // 🔹 Escuchar citas nuevas
+        findNavController().currentBackStackEntry?.savedStateHandle
+            ?.getLiveData<Cita>("nuevaCita")
+            ?.observe(viewLifecycleOwner) { cita ->
+                listaCitas.add(cita)
+                tvResumenCitas.text = "Citas agregadas: ${listaCitas.size}"
+                Toast.makeText(
+                    requireContext(),
+                    "Cita agregada (${listaCitas.size})",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+        // 🔹 Guardar
+        btnGuardar.setOnClickListener { guardarActividad() }
     }
 
     private fun guardarActividad() {
@@ -123,15 +151,42 @@ class ActivityFormFragment : Fragment() {
         val oferente = spOferente.selectedItem?.toString()
         val lugar = spLugar.selectedItem?.toString() ?: ""
         val beneficiariosTexto = etBeneficiarios.text.toString()
-        val beneficiarios = beneficiariosTexto.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        val beneficiarios =
+            beneficiariosTexto.split(",").map { it.trim() }.filter { it.isNotEmpty() }
         val diasAviso = etDiasAvisoPrevio.text.toString().toIntOrNull() ?: 0
 
         val socioSeleccionado = spSocioComunitario.selectedItem?.toString() ?: ""
-        val socioComunitario = if (socioSeleccionado == "Sin socio comunitario") null else socioSeleccionado
+        val socioComunitario =
+            if (socioSeleccionado == "Sin socio comunitario") null else socioSeleccionado
 
         if (nombre.isEmpty() || tipo.isEmpty() || oferente.isNullOrEmpty() || lugar.isEmpty()) {
-            Toast.makeText(requireContext(), "Completa todos los campos obligatorios", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Completa todos los campos obligatorios",
+                Toast.LENGTH_SHORT
+            ).show()
             return
+        }
+
+        val citasFinales = mutableListOf<Cita>().apply { addAll(listaCitas) }
+
+        if (periodicidad != "Única" && listaCitas.isNotEmpty()) {
+            val baseCita = listaCitas.first()
+            val intervalo = when (periodicidad) {
+                "Semanal" -> 7 * 24 * 60 * 60 * 1000L
+                "Mensual" -> 30 * 24 * 60 * 60 * 1000L
+                else -> 0L
+            }
+            if (intervalo > 0) {
+                for (i in 1..3) {
+                    citasFinales.add(
+                        baseCita.copy(
+                            fechaInicioMillis = baseCita.fechaInicioMillis + intervalo * i,
+                            fechaFinMillis = baseCita.fechaFinMillis + intervalo * i
+                        )
+                    )
+                }
+            }
         }
 
         val actividad = Actividad(
@@ -150,11 +205,19 @@ class ActivityFormFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                repos.crearActividadConCitas(actividad, listaCitas)
-                Toast.makeText(requireContext(), "Actividad creada con éxito", Toast.LENGTH_SHORT).show()
+                repos.crearActividadConCitas(actividad, citasFinales)
+                Toast.makeText(
+                    requireContext(),
+                    "Actividad y citas creadas con éxito",
+                    Toast.LENGTH_LONG
+                ).show()
                 findNavController().popBackStack()
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error al guardar: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

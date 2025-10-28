@@ -107,9 +107,24 @@ class Repos {
     // -----------------------------------------------------------
 
     suspend fun crearActividadConCitas(actividad: Actividad, citas: List<Cita>) {
+        // ⬇️ Calcular fechaInicio/fechaFin de la actividad a partir de las citas (si existen)
+        val (minInicio, maxFin) = if (citas.isNotEmpty()) {
+            val minI = citas.minOf { it.fechaInicioMillis }
+            val maxF = citas.maxOf { it.fechaFinMillis }
+            minI to maxF
+        } else {
+            // si no hay citas, conserva lo que venga en actividad (por compatibilidad)
+            actividad.fechaInicio to actividad.fechaFin
+        }
+
         val ref = db.collection("actividades").document()
-        val newAct = actividad.copy(id = ref.id)
+        val newAct = actividad.copy(
+            id = ref.id,
+            fechaInicio = minInicio,
+            fechaFin = maxFin
+        )
         ref.set(newAct).await()
+
         val citasRef = db.collection("citas")
         for (cita in citas) {
             citasRef.add(cita.copy(actividadId = ref.id)).await()
@@ -150,11 +165,13 @@ class Repos {
     }
 
     suspend fun citasEnRango(inicio: Long, fin: Long): List<Cita> {
+        // ✅ Rango por UN solo campo (fechaInicioMillis) + orderBy para rendimiento
         val snap = db.collection("citas")
             .whereGreaterThanOrEqualTo("fechaInicioMillis", inicio)
-            .whereLessThanOrEqualTo("fechaFinMillis", fin)
+            .whereLessThan("fechaInicioMillis", fin)   // < fin (exclusivo) para evitar duplicar bordes
             .get().await()
         return snap.documents.mapNotNull { it.toObject(Cita::class.java)?.apply { id = it.id } }
+            .sortedBy { it.fechaInicioMillis }
     }
 
     suspend fun reagendarCita(citaId: String, nuevoInicio: Long, nuevoFin: Long, nuevoLugar: String) {
@@ -280,6 +297,7 @@ class Repos {
     // -----------------------------------------------------------
 
     suspend fun actividadesEnRango(inicio: Long, fin: Long): List<Actividad> {
+        // Si usas este método, asegúrate de que la actividad tenga fechaInicio/fechaFin seteados.
         val snap = db.collection("actividades")
             .whereGreaterThanOrEqualTo("fechaInicio", inicio)
             .whereLessThanOrEqualTo("fechaFin", fin)
@@ -324,11 +342,30 @@ class Repos {
             Log.e("FCM_SEND", "Error: ${e.message}")
         }
     }
+
+    suspend fun obtenerActividades(): List<Actividad> {
+        val snapshot = db.collection("actividades").get().await()
+        return snapshot.documents.mapNotNull {
+            it.toObject(Actividad::class.java)?.apply { id = it.id }
+        }
+    }
+
+    suspend fun obtenerActividadPorId(id: String): Actividad? {
+        val doc = db.collection("actividades").document(id).get().await()
+        return doc.toObject(Actividad::class.java)?.apply { this.id = doc.id }
+    }
+
+    suspend fun obtenerCitasPorActividad(actividadId: String): List<Cita> {
+        val snap = db.collection("citas")
+            .whereEqualTo("actividadId", actividadId)
+            .get().await()
+        return snap.documents.mapNotNull {
+            it.toObject(Cita::class.java)?.apply { id = it.id }
+        }
+    }
 }
 
-/**
- * 🔸 Clase auxiliar para devolver 4 listas
- */
+/** 🔸 Auxiliar para devolver 4 listas */
 data class Quadruple<A, B, C, D>(
     val first: A,
     val second: B,
