@@ -9,4 +9,7 @@
     <string name="no_data">No hay actividades esta semana</string>
     <string name="save">Guardar</string>
     <string name="cancel">Cancelar</string>
+
+    <!-- 🔹 Agregado para el botón FAB -->
+    <string name="add">Agregar</string>
 </resources>

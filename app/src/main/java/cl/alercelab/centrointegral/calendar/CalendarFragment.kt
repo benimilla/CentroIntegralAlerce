@@ -32,7 +32,7 @@ class CalendarFragment : Fragment() {
     private lateinit var tvEmpty: TextView
 
     private var currentDate: LocalDate = LocalDate.now()
-    private val horas = (8..20).map { String.format("%02d:00", it) } // Slots por hora
+    private val horas = (8..20).map { String.format("%02d:00", it) }
 
     private var dragFromPos: Int = -1
     private var dragFromCitaId: String? = null
@@ -72,15 +72,9 @@ class CalendarFragment : Fragment() {
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
             listOf(
-                "Todos",
-                "Capacitación",
-                "Taller",
-                "Charlas",
-                "Atenciones",
-                "Operativo",
-                "Operativo rural",
-                "Práctica profesional",
-                "Diagnóstico"
+                "Todos", "Capacitación", "Taller", "Charlas",
+                "Atenciones", "Operativo", "Operativo rural",
+                "Práctica profesional", "Diagnóstico"
             )
         )
 
@@ -155,17 +149,12 @@ class CalendarFragment : Fragment() {
             return
         }
         val ldt = LocalDateTime.parse("${currentDate}T${newHour}")
-        val millis = TimeUtils.localDateTimeToEpochMillis(ldt)
+        val millisInicio = TimeUtils.localDateTimeToEpochMillis(ldt)
+        val millisFin = millisInicio + (60 * 60 * 1000) // duración 1 hora
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val ok = Repos().updateCitaTiempoYLugar(citaId, millis, lugar)
-            if (!ok) {
-                Toast.makeText(
-                    requireContext(),
-                    "Conflicto: horario o lugar ocupado",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            // Ajustado: coincide con la firma updateCitaTiempoYLugar(citaId, inicio, fin, lugar)
+            Repos().updateCitaTiempoYLugar(citaId, millisInicio, millisFin, lugar)
             loadDay()
         }
     }
@@ -180,16 +169,16 @@ class CalendarFragment : Fragment() {
 
             val rows = horas.map { h -> SlotRow(h, null, null, null) }.toMutableList()
 
-            val data = Repos().citasEnRango(start, end, tipoSel, q, false, p.rol, p.uid)
+            // ✅ Ajustado: solo 2 parámetros
+            val data = Repos().citasEnRango(start, end)
 
-            data.forEach { (cita, act) ->
-                // 👇 Cambiado: ahora usamos fechaInicioMillis
+            data.forEach { cita ->
                 val hour = TimeUtils.hourString(cita.fechaInicioMillis)
                 val idx = horas.indexOf(hour)
                 if (idx >= 0) {
                     rows[idx] = SlotRow(
                         hour,
-                        act?.nombre ?: "Actividad",
+                        "Actividad", // el nombre puede venir de la actividad si querés unir datos
                         cita.lugar,
                         cita.id
                     )

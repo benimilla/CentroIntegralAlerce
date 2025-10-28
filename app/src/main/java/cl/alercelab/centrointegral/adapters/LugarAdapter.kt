@@ -9,35 +9,32 @@ import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.domain.Lugar
 
 class LugarAdapter(
-    private val items: List<Lugar>,
+    private val items: MutableList<Lugar>,
     private val onEdit: (Lugar) -> Unit,
     private val onDelete: (Lugar) -> Unit
-) : RecyclerView.Adapter<LugarAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<LugarAdapter.VH>() {
 
-    inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    inner class VH(v: View) : RecyclerView.ViewHolder(v) {
         val nombre: TextView = v.findViewById(R.id.itemNombre)
         val descripcion: TextView = v.findViewById(R.id.itemDescripcion)
-
         init {
-            v.setOnClickListener { onEdit(items[adapterPosition]) }
-            v.setOnLongClickListener {
-                onDelete(items[adapterPosition])
-                true
-            }
+            v.setOnClickListener { onEdit(items[bindingAdapterPosition]) }
+            v.setOnLongClickListener { onDelete(items[bindingAdapterPosition]); true }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_mantenedor, parent, false)
-        return ViewHolder(v)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-        holder.nombre.text = item.nombre
-        holder.descripcion.text = "Cupo: ${item.cupo ?: "No especificado"}"
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_mantenedor, parent, false)
+        return VH(v)
     }
 
     override fun getItemCount() = items.size
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        val it = items[position]
+        holder.nombre.text = it.nombre
+        val cupoTxt = it.cupo?.toString() ?: "—"
+        holder.descripcion.visibility = View.VISIBLE
+        holder.descripcion.text = "Cupo: $cupoTxt"
+    }
 }

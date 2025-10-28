@@ -160,13 +160,12 @@ class ActivityRescheduleFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val ok = Repos().reagendarCita(cId, inicio, lugar, "Reagendado manualmente")
-                if (ok) {
-                    Toast.makeText(requireContext(), "Cita reagendada correctamente", Toast.LENGTH_SHORT).show()
-                    findNavController().popBackStack()
-                } else {
-                    Toast.makeText(requireContext(), "Conflicto: horario o lugar ocupado", Toast.LENGTH_LONG).show()
-                }
+                // 🧩 Ajuste correcto a la firma real de Repos.reagendarCita
+                Repos().reagendarCita(cId, inicio, fin, lugar)
+
+                Toast.makeText(requireContext(), "Cita reagendada correctamente", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
+
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
             }

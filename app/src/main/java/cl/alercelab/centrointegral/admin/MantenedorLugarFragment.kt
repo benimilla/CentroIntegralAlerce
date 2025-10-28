@@ -4,51 +4,39 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cl.alercelab.centrointegral.R
+import cl.alercelab.centrointegral.adapters.LugarAdapter
 import cl.alercelab.centrointegral.data.Repos
 import cl.alercelab.centrointegral.domain.Lugar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
-import cl.alercelab.centrointegral.adapters.LugarAdapter
-import android.widget.Toast
-
 
 class MantenedorLugarFragment : Fragment() {
 
     private val repo = Repos()
+    private lateinit var recycler: RecyclerView
+    private lateinit var fabAdd: FloatingActionButton
     private val items = mutableListOf<Lugar>()
     private lateinit var adapter: LugarAdapter
 
-
-    override fun onResume() {
-        super.onResume()
-        lifecycleScope.launch {
-            val user = repo.currentUserProfile()
-            if (user?.rol != "admin") {
-                Toast.makeText(requireContext(), "Acceso restringido", Toast.LENGTH_SHORT).show()
-                requireActivity().onBackPressedDispatcher.onBackPressed()
-            }
-        }
-    }
-
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_mantenedor_list, container, false)
-        val recycler = v.findViewById<RecyclerView>(R.id.recyclerMantenedor)
-        val fabAdd = v.findViewById<FloatingActionButton>(R.id.fabAdd)
+        recycler = v.findViewById(R.id.recyclerMantenedor)
+        fabAdd = v.findViewById(R.id.fabAdd)
         recycler.layoutManager = LinearLayoutManager(requireContext())
-        adapter = LugarAdapter(items, ::editar, ::eliminar)
+        adapter = LugarAdapter(items, ::editarItem, ::eliminarItem)
         recycler.adapter = adapter
         fabAdd.setOnClickListener { mostrarDialogo(null) }
-        cargar()
+        cargarDatos()
         return v
     }
 
-    private fun cargar() {
+    private fun cargarDatos() {
         lifecycleScope.launch {
             items.clear()
             items.addAll(repo.obtenerLugares())
@@ -57,40 +45,48 @@ class MantenedorLugarFragment : Fragment() {
     }
 
     private fun mostrarDialogo(item: Lugar?) {
-        val view = layoutInflater.inflate(R.layout.dialog_mantenedor, null)
+        val view = layoutInflater.inflate(R.layout.dialog_lugar, null)
         val txtNombre = view.findViewById<EditText>(R.id.txtNombre)
-        val txtDescripcion = view.findViewById<EditText>(R.id.txtDescripcion)
+        val txtCupo = view.findViewById<EditText>(R.id.txtCupo)
 
         txtNombre.setText(item?.nombre ?: "")
-        txtDescripcion.hint = "Cupo (número)"
-        txtDescripcion.setText(item?.cupo?.toString() ?: "")
+        txtCupo.setText(item?.cupo?.toString() ?: "")
 
         AlertDialog.Builder(requireContext())
             .setTitle(if (item == null) "Nuevo Lugar" else "Editar Lugar")
             .setView(view)
             .setPositiveButton("Guardar") { _, _ ->
-                val cupo = txtDescripcion.text.toString().toIntOrNull()
-                val nuevo = item?.copy(nombre = txtNombre.text.toString(), cupo = cupo)
-                    ?: Lugar(nombre = txtNombre.text.toString(), cupo = cupo)
+                val cupoParsed = txtCupo.text.toString().trim().ifEmpty { null }?.toIntOrNull()
+                val nuevo = item?.copy(
+                    nombre = txtNombre.text.toString().trim(),
+                    cupo = cupoParsed
+                ) ?: Lugar(
+                    nombre = txtNombre.text.toString().trim(),
+                    cupo = cupoParsed
+                )
                 lifecycleScope.launch {
-                    if (item == null) repo.crearLugar(nuevo)
-                    else repo.actualizarLugar(nuevo)
-                    cargar()
+                    try {
+                        if (item == null) repo.crearLugar(nuevo) else repo.actualizarLugar(nuevo)
+                        cargarDatos()
+                        Toast.makeText(requireContext(), "Guardado", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
 
-    private fun editar(item: Lugar) = mostrarDialogo(item)
+    private fun editarItem(item: Lugar) = mostrarDialogo(item)
 
-    private fun eliminar(item: Lugar) {
+    private fun eliminarItem(item: Lugar) {
         AlertDialog.Builder(requireContext())
             .setMessage("¿Eliminar ${item.nombre}?")
             .setPositiveButton("Sí") { _, _ ->
                 lifecycleScope.launch {
-                    repo.eliminarLugar(item.id!!)
-                    cargar()
+                    repo.eliminarLugar(item.id)
+                    cargarDatos()
                 }
             }
             .setNegativeButton("No", null)
