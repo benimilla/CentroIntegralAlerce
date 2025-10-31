@@ -1,49 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollViewCita"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:fillViewport="true"
+    android:background="@color/background_light">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
+        <!-- Título -->
         <TextView
             android:id="@+id/tvTitulo"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Detalle de la Cita"
+            android:text="Título de la Actividad"
+            android:textSize="22sp"
             android:textStyle="bold"
+            android:textColor="@color/primary_dark"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Fecha -->
+        <TextView
+            android:id="@+id/tvFecha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fecha:"
             android:textSize="18sp"
+            android:textColor="@color/primary_text"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Hora -->
+        <TextView
+            android:id="@+id/tvHora"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hora:"
+            android:textSize="18sp"
+            android:textColor="@color/primary_text"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Lugar -->
+        <TextView
+            android:id="@+id/tvLugar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lugar:"
+            android:textSize="18sp"
+            android:textColor="@color/primary_text"
             android:layout_marginBottom="8dp" />
 
         <TextView
-            android:id="@+id/tvDuracion"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvOferente"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Duración: 60 min" />
+            android:text="Oferente:"
+            android:textSize="18sp"
+            android:textColor="@color/primary_text"
+            android:layout_marginBottom="8dp" />
 
+        <TextView
+            android:id="@+id/tvSocio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Socio Comunitario:"
+            android:textSize="18sp"
+            android:textColor="@color/primary_text"
+            android:layout_marginBottom="16dp" />
+
+
+        <!-- Observaciones -->
         <TextView
             android:id="@+id/tvObservaciones"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Observaciones: Ninguna"
-            android:layout_marginTop="4dp" />
+            android:text="Observaciones:"
+            android:textSize="18sp"
+            android:textColor="@color/primary_text"
+            android:layout_marginBottom="24dp" />
 
-        <TextView
-            android:id="@+id/tvLugar"
-            android:layout_width="wrap_content"
+        <!-- Botón Reagendar -->
+        <Button
+            android:id="@+id/btnEditar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lugar: -"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:id="@+id/tvEstado"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Estado: programada"
-            android:layout_marginTop="4dp" />
+            android:text="Reagendar cita"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@android:color/white"
+            app:cornerRadius="8dp" />
 
     </LinearLayout>
 </ScrollView>

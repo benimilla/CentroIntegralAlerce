@@ -105,7 +105,6 @@ class Repos {
     // -----------------------------------------------------------
 
     suspend fun crearActividadConCitas(actividad: Actividad, citas: List<Cita>) {
-        // Determina la fecha de inicio según la cita más temprana
         val fechaInicio = citas.minOfOrNull { it.fechaInicioMillis } ?: actividad.fechaInicio
 
         val actRef = db.collection("actividades").document()
@@ -137,11 +136,12 @@ class Repos {
         }
 
     suspend fun deleteActividad(id: String) {
-        // Elimina citas asociadas primero
         val citasSnap = db.collection("citas")
             .whereEqualTo("actividadId", id)
             .get().await()
-        citasSnap.documents.forEach { db.collection("citas").document(it.id).delete().await() }
+        citasSnap.documents.forEach {
+            db.collection("citas").document(it.id).delete().await()
+        }
 
         db.collection("actividades").document(id).delete().await()
     }
@@ -170,12 +170,22 @@ class Repos {
     // 🔹 CITAS
     // -----------------------------------------------------------
 
+    suspend fun crearCita(cita: Cita) {
+        val ref = db.collection("citas").document()
+        db.collection("citas").document(ref.id).set(cita.copy(id = ref.id)).await()
+    }
+
     suspend fun obtenerCitasPorActividad(actividadId: String): List<Cita> =
         db.collection("citas")
             .whereEqualTo("actividadId", actividadId)
             .get().await().documents.mapNotNull {
                 it.toObject(Cita::class.java)?.apply { id = it.id }
             }
+
+    suspend fun obtenerCitaPorId(id: String): Cita? {
+        val doc = db.collection("citas").document(id).get().await()
+        return doc.toObject(Cita::class.java)?.apply { this.id = doc.id }
+    }
 
     suspend fun citasEnRango(inicio: Long, fin: Long): List<Cita> =
         db.collection("citas")
@@ -186,6 +196,14 @@ class Repos {
             }
             .sortedBy { it.fechaInicioMillis }
 
+    suspend fun existeConflictoCita(cita: Cita): Boolean {
+        val snap = db.collection("citas")
+            .whereLessThan("fechaFinMillis", cita.fechaFinMillis + 1)
+            .whereGreaterThan("fechaInicioMillis", cita.fechaInicioMillis - 1)
+            .get().await()
+        return snap.documents.any { it.id != cita.id }
+    }
+
     suspend fun reagendarCita(citaId: String, nuevoInicio: Long, nuevoFin: Long, nuevoLugar: String) {
         db.collection("citas").document(citaId)
             .update(
@@ -195,6 +213,12 @@ class Repos {
                     "lugar" to nuevoLugar
                 )
             ).await()
+    }
+
+    suspend fun cancelarCita(id: String) {
+        db.collection("citas").document(id)
+            .update("estado", "cancelada")
+            .await()
     }
 
     // -----------------------------------------------------------
@@ -307,9 +331,10 @@ class Repos {
             Log.e("FCM_SEND", "Error: ${e.message}")
         }
     }
+
     // -----------------------------------------------------------
-// 🔹 PROYECTOS
-// -----------------------------------------------------------
+    // 🔹 PROYECTOS
+    // -----------------------------------------------------------
 
     suspend fun crearProyecto(proyecto: Proyecto) {
         val doc = db.collection("proyectos").document()

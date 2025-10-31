@@ -66,4 +66,10 @@
     <color name="ic_launcher_background">@color/primary_green</color>
     <color name="ic_launcher_foreground">@color/white</color>
 
+    <!-- 🎨 Aliases requeridos por layouts nuevos -->
+    <color name="primary">@color/primary_green</color>
+    <color name="primary_dark">@color/primary_green_dark</color>
+    <color name="primary_text">@color/text_primary</color>
+    <color name="background_light">@color/bg_light</color>
+
 </resources>

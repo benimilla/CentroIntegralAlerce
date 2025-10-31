@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.data.Repos
 import cl.alercelab.centrointegral.domain.Actividad
@@ -44,25 +45,23 @@ class WeekCalendarFragment : Fragment() {
             try {
                 val (startMs, endMs) = weekBounds(System.currentTimeMillis())
 
-                // 1️⃣ Obtener todas las actividades de la semana
                 val actividades = repos.actividadesEnRango(startMs, endMs)
                 val actsById = actividades.associateBy { it.id }
 
-                // 2️⃣ Obtener citas dentro del rango semanal
                 val citasSnap = db.collection("citas")
                     .whereGreaterThanOrEqualTo("fechaInicioMillis", startMs)
-                    .whereLessThan("fechaInicioMillis", endMs)
+                    .whereLessThanOrEqualTo("fechaInicioMillis", endMs)
                     .get()
                     .await()
 
                 val citas = citasSnap.documents.mapNotNull { d ->
-                    d.toObject(Cita::class.java)?.copy(id = d.id)
+                    val c = d.toObject(Cita::class.java)
+                    c?.copy(id = d.id)
                 }.sortedBy { it.fechaInicioMillis }
 
-                // 3️⃣ Limpiar vista y agrupar citas por día
                 containerWeek.removeAllViews()
-                val days = daysOfWeek(startMs)
 
+                val days = daysOfWeek(startMs)
                 days.forEach { dayStart ->
                     val dayEnd = dayStart + 24 * 60 * 60 * 1000 - 1
                     val dayCitas = citas.filter { it.fechaInicioMillis in dayStart..dayEnd }
@@ -90,18 +89,29 @@ class WeekCalendarFragment : Fragment() {
                             val tvLugar = row.findViewById<TextView>(R.id.tvLugar)
                             val tvFecha = row.findViewById<TextView>(R.id.tvFecha)
 
-                            tvNombre.text = a?.nombre ?: "(Actividad desconocida)"
+                            tvNombre.text = a?.nombre ?: "(Actividad)"
                             tvTipo.text = a?.tipo ?: "-"
                             tvLugar.text = "Lugar: ${c.lugar}"
-                            tvFecha.text = "${sdfHour.format(Date(c.fechaInicioMillis))} - ${sdfHour.format(Date(c.fechaFinMillis))}"
+                            tvFecha.text =
+                                "${sdfHour.format(Date(c.fechaInicioMillis))} - ${sdfHour.format(Date(c.fechaFinMillis))}"
 
-                            // Mostrar detalle al tocar
-                            row.setOnClickListener { showDetailDialog(a, c) }
+                            row.setOnClickListener {
+                                val frag = CitaDetalleFragment().apply {
+                                    arguments = Bundle().apply {
+                                        putString("citaId", c.id)
+                                        putString("actividadId", c.actividadId)
+                                    }
+                                }
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.nav_host_fragment, frag)
+                                    .addToBackStack(null)
+                                    .commit()
+                            }
+
                             containerWeek.addView(row)
                         }
                     }
                 }
-
             } catch (e: Exception) {
                 containerWeek.removeAllViews()
                 val tv = TextView(requireContext()).apply {
@@ -115,49 +125,22 @@ class WeekCalendarFragment : Fragment() {
         }
     }
 
-    /** 📋 Diálogo de detalle de la cita */
-    private fun showDetailDialog(a: Actividad?, c: Cita) {
-        val duracionMin = ((c.fechaFinMillis - c.fechaInicioMillis) / (1000 * 60)).toInt()
-
-        val msg = buildString {
-            appendLine("📘 Actividad: ${a?.nombre ?: "(sin nombre)"}")
-            appendLine("Tipo: ${a?.tipo ?: "-"}")
-            appendLine("Periodicidad: ${a?.periodicidad ?: "-"}")
-            appendLine("Lugar: ${c.lugar}")
-            appendLine("Inicio: ${sdfFull.format(Date(c.fechaInicioMillis))}")
-            appendLine("Fin: ${sdfFull.format(Date(c.fechaFinMillis))}")
-            appendLine("Duración: ${duracionMin} min")
-            appendLine("Observaciones: ${c.observaciones ?: "-"}")
-            appendLine("Estado: ${c.estado}")
-            if (c.asistentes.isNotEmpty())
-                appendLine("Asistentes: ${c.asistentes.joinToString(", ")}")
-            a?.let {
-                appendLine()
-                appendLine("Oferente: ${it.oferente ?: "-"}")
-                appendLine("Socio Comunitario: ${it.socioComunitario ?: "-"}")
-                appendLine("Cupo: ${it.cupo ?: "-"}")
-                appendLine("Beneficiarios: ${if (it.beneficiarios.isEmpty()) "-" else it.beneficiarios.joinToString()}")
-            }
-        }
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Detalle de la Cita")
-            .setMessage(msg)
-            .setPositiveButton("Cerrar", null)
-            .show()
-    }
-
-    /** 📆 Retorna (inicioSemana, finSemana) en millis */
     private fun weekBounds(nowMs: Long): Pair<Long, Long> {
         val zone = ZoneId.systemDefault()
         val today = Date(nowMs).toInstant().atZone(zone).toLocalDate()
-        val monday = today.minusDays(((today.dayOfWeek.value + 6) % 7).toLong()) // lunes
+        val monday = today.minusDays(((today.dayOfWeek.value + 6) % 7).toLong())
         val start = monday.atStartOfDay(zone).toInstant().toEpochMilli()
         val end = monday.plusDays(7).atStartOfDay(zone).toInstant().toEpochMilli() - 1
         return start to end
     }
 
-    /** 📅 Devuelve lista con inicios de día (lunes..domingo) */
-    private fun daysOfWeek(weekStartMs: Long): List<Long> =
-        List(7) { i -> weekStartMs + i * 24 * 60 * 60 * 1000 }
+    private fun daysOfWeek(weekStartMs: Long): List<Long> {
+        val out = mutableListOf<Long>()
+        var d = weekStartMs
+        repeat(7) {
+            out.add(d)
+            d += 24 * 60 * 60 * 1000
+        }
+        return out
+    }
 }
