@@ -1,55 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 🎨 Colores base -->
+    <!-- 🎨 Paleta general -->
     <color name="primary_green">#2E7D32</color>
+    <color name="primary_green_dark">#1B5E20</color>
+    <color name="primary_green_light">#4CAF50</color>
     <color name="primary_green_700">#1B5E20</color>
-    <color name="primary_green_light">#A5D6A7</color>
-    <color name="primary_green_bg_light">#E8F5E9</color>
 
-    <!-- 🌿 Acentos y fondos -->
-    <color name="accent_green">#4CAF50</color>
-    <color name="accent_green_dark">#388E3C</color>
-    <color name="bg_light">#FAFAFA</color>
-    <color name="bg_card">#FFFFFF</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="purple_200">#BB86FC</color>
 
-    <!-- 🔤 Texto -->
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#616161</color>
-    <color name="text_hint">#9E9E9E</color>
-    <color name="text_inverse">#FFFFFF</color>
+    <color name="teal_700">#018786</color>
+    <color name="teal_500">#009688</color>
+    <color name="teal_200">#03DAC5</color>
 
-    <!-- 🟩 Chips -->
-    <color name="chip_stroke">#C8E6C9</color>
-    <color name="chip_text">@color/primary_green</color>
-    <color name="chip_text_checked">@color/text_inverse</color>
-    <color name="chip_bg">@color/bg_card</color>
-    <color name="chip_bg_checked">@color/primary_green</color>
+    <color name="amber_500">#FFC107</color>
+    <color name="amber_700">#FFA000</color>
 
-    <!-- ⏰ Slots y horarios -->
-    <color name="slot_border">#E0E0E0</color>
-    <color name="slot_hour">#424242</color>
-
-    <!-- 🔹 Botones -->
-    <color name="button_primary_bg">@color/primary_green</color>
-    <color name="button_primary_text">@color/text_inverse</color>
-    <color name="button_secondary_bg">@color/primary_green_light</color>
-    <color name="button_secondary_text">@color/primary_green_700</color>
-
-    <!-- ⚫️ Grises -->
+    <!-- ⚫ Grises -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
     <color name="gray_100">#F5F5F5</color>
     <color name="gray_300">#E0E0E0</color>
     <color name="gray_500">#9E9E9E</color>
     <color name="gray_700">#616161</color>
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
+    <color name="gray_900">#212121</color>
+    <color name="darker_gray">#555555</color>
 
-    <!-- 📱 Íconos del launcher -->
+    <!-- 🟢 Texto -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#616161</color>
+    <color name="text_hint">#9E9E9E</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- 🟣 Botones -->
+    <color name="button_primary_bg">@color/purple_500</color>
+    <color name="button_primary_text">@color/white</color>
+    <color name="button_secondary_bg">@color/primary_green</color>
+    <color name="button_secondary_text">@color/white</color>
+
+    <!-- 🟢 Chips -->
+    <color name="chip_stroke">#CCDDCC</color>
+    <color name="chip_text">@color/primary_green</color>
+    <color name="chip_text_checked">@color/white</color>
+    <color name="chip_bg">@color/white</color>
+    <color name="chip_bg_checked">@color/primary_green</color>
+
+    <!-- 📅 Calendario -->
+    <color name="calendar_highlight">@color/primary_green</color>
+    <color name="calendar_selected_day_bg">#C8E6C9</color>
+    <color name="slot_border">#E0E0E0</color>
+    <color name="slot_hour">#424242</color>
+
+    <!-- 🌤️ Fondos -->
+    <color name="bg_light">#FAFAFA</color>
+    <color name="bg_card">#FFFFFF</color>
+
+    <!-- 🩶 Estados -->
+    <color name="state_active">@color/primary_green</color>
+    <color name="state_cancelled">#D32F2F</color>
+    <color name="state_pending">@color/amber_700</color>
+
+    <!-- 📱 Iconos del launcher -->
     <color name="ic_launcher_background">@color/primary_green</color>
     <color name="ic_launcher_foreground">@color/white</color>
-
-    <!-- 💠 Material default -->
-    <color name="teal_200">#03DAC5</color>
-    <color name="teal_700">#018786</color>
 
 </resources>

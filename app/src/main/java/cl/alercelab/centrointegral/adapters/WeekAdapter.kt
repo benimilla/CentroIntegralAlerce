@@ -10,15 +10,18 @@ import cl.alercelab.centrointegral.domain.Actividad
 import java.text.SimpleDateFormat
 import java.util.*
 
-class WeekAdapter : RecyclerView.Adapter<WeekAdapter.ViewHolder>() {
+class WeekAdapter(
+    private var actividades: List<Actividad>
+) : RecyclerView.Adapter<WeekAdapter.ViewHolder>() {
 
-    private val data = mutableListOf<Actividad>()
-    private val sdf = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+    private val sdfFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private val sdfHora = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-    fun setData(list: List<Actividad>) {
-        data.clear()
-        data.addAll(list)
-        notifyDataSetChanged()
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvNombre: TextView = itemView.findViewById(R.id.tvNombre)
+        val tvTipo: TextView = itemView.findViewById(R.id.tvTipo)
+        val tvLugar: TextView = itemView.findViewById(R.id.tvLugar)
+        val tvFecha: TextView = itemView.findViewById(R.id.tvFecha)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -28,20 +31,12 @@ class WeekAdapter : RecyclerView.Adapter<WeekAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = data[position]
-        holder.tvNombre.text = item.nombre
-        holder.tvTipo.text = item.tipo
-        holder.tvLugar.text = "Lugar: ${item.lugar}"
-        holder.tvFecha.text =
-            "${sdf.format(Date(item.fechaInicio))} - ${sdf.format(Date(item.fechaFin))}"
+        val actividad = actividades[position]
+        holder.tvNombre.text = actividad.nombre
+        holder.tvTipo.text = actividad.tipo
+        holder.tvLugar.text = "Lugar: ${actividad.lugar}"
+        holder.tvFecha.text = "Inicio: ${sdfFecha.format(Date(actividad.fechaInicio))}"
     }
 
-    override fun getItemCount() = data.size
-
-    class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        val tvNombre: TextView = v.findViewById(R.id.tvNombre)
-        val tvTipo: TextView = v.findViewById(R.id.tvTipo)
-        val tvLugar: TextView = v.findViewById(R.id.tvLugar)
-        val tvFecha: TextView = v.findViewById(R.id.tvFecha)
-    }
+    override fun getItemCount(): Int = actividades.size
 }

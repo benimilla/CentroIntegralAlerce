@@ -30,11 +30,9 @@ class ActivityDetailFragment : DialogFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Cargar actividad
                 val doc = db.collection("actividades").document(actividadId).get().await()
                 val actividad = doc.toObject<Actividad>()?.copy(id = doc.id)
 
-                // Cargar citas por actividad
                 val citasSnap = db.collection("citas")
                     .whereEqualTo("actividadId", actividadId)
                     .get()
@@ -63,10 +61,7 @@ class ActivityDetailFragment : DialogFragment() {
             appendLine("Socio Comunitario: ${a.socioComunitario ?: "-"}")
             appendLine("Cupo: ${a.cupo ?: "-"}")
             appendLine("Beneficiarios: ${if (a.beneficiarios.isEmpty()) "-" else a.beneficiarios.joinToString()}")
-            if (a.fechaInicio > 0 && a.fechaFin > 0) {
-                appendLine("Desde: ${sdf.format(Date(a.fechaInicio))}")
-                appendLine("Hasta: ${sdf.format(Date(a.fechaFin))}")
-            }
+            appendLine("Días aviso previo: ${a.diasAvisoPrevio}")
             appendLine("Estado: ${a.estado}")
             a.motivoCancelacion?.let { appendLine("Motivo cancelación: $it") }
             appendLine()
@@ -75,7 +70,8 @@ class ActivityDetailFragment : DialogFragment() {
                 appendLine("- (sin citas)")
             } else {
                 citas.forEach { c ->
-                    appendLine("• ${sdf.format(Date(c.fechaInicioMillis))} - ${sdf.format(Date(c.fechaFinMillis))} (${c.duracionMin} min) · ${c.lugar}")
+                    val duracion = ((c.fechaFinMillis - c.fechaInicioMillis) / (1000 * 60)).toInt()
+                    appendLine("• ${sdf.format(Date(c.fechaInicioMillis))} - ${sdf.format(Date(c.fechaFinMillis))} (${duracion} min) · ${c.lugar}")
                 }
             }
         }

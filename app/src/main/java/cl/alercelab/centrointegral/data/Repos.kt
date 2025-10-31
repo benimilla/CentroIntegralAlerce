@@ -38,25 +38,23 @@ class Repos {
         }
     }
 
-    suspend fun login(email: String, password: String): Boolean {
-        return try {
+    suspend fun login(email: String, password: String): Boolean =
+        try {
             auth.signInWithEmailAndPassword(email, password).await()
             true
         } catch (e: Exception) {
             Log.e("LOGIN", "Error al iniciar sesión: ${e.message}")
             false
         }
-    }
 
-    suspend fun resetPassword(email: String): Boolean {
-        return try {
+    suspend fun resetPassword(email: String): Boolean =
+        try {
             auth.sendPasswordResetEmail(email).await()
             true
         } catch (e: Exception) {
             Log.e("RESET_PASSWORD", "Error: ${e.message}")
             false
         }
-    }
 
     fun logout() = auth.signOut()
 
@@ -70,15 +68,15 @@ class Repos {
         return doc.toObject<UserProfile>()
     }
 
-    suspend fun listAllUsers(): List<UserProfile> {
-        val snap = db.collection("usuarios").get().await()
-        return snap.documents.mapNotNull { it.toObject(UserProfile::class.java) }
-    }
+    suspend fun listAllUsers(): List<UserProfile> =
+        db.collection("usuarios").get().await().documents.mapNotNull {
+            it.toObject(UserProfile::class.java)
+        }
 
-    suspend fun listPendingUsers(): List<UserProfile> {
-        val snap = db.collection("usuarios").whereEqualTo("aprobado", false).get().await()
-        return snap.documents.mapNotNull { it.toObject(UserProfile::class.java) }
-    }
+    suspend fun listPendingUsers(): List<UserProfile> =
+        db.collection("usuarios").whereEqualTo("aprobado", false).get().await().documents.mapNotNull {
+            it.toObject(UserProfile::class.java)
+        }
 
     suspend fun approveUser(uid: String) {
         db.collection("usuarios").document(uid)
@@ -107,36 +105,29 @@ class Repos {
     // -----------------------------------------------------------
 
     suspend fun crearActividadConCitas(actividad: Actividad, citas: List<Cita>) {
-        // ⬇️ Calcular fechaInicio/fechaFin de la actividad a partir de las citas (si existen)
-        val (minInicio, maxFin) = if (citas.isNotEmpty()) {
-            val minI = citas.minOf { it.fechaInicioMillis }
-            val maxF = citas.maxOf { it.fechaFinMillis }
-            minI to maxF
-        } else {
-            // si no hay citas, conserva lo que venga en actividad (por compatibilidad)
-            actividad.fechaInicio to actividad.fechaFin
-        }
+        // Determina la fecha de inicio según la cita más temprana
+        val fechaInicio = citas.minOfOrNull { it.fechaInicioMillis } ?: actividad.fechaInicio
 
-        val ref = db.collection("actividades").document()
-        val newAct = actividad.copy(
-            id = ref.id,
-            fechaInicio = minInicio,
-            fechaFin = maxFin
+        val actRef = db.collection("actividades").document()
+        val nuevaActividad = actividad.copy(
+            id = actRef.id,
+            fechaInicio = fechaInicio,
+            citas = citas
         )
-        ref.set(newAct).await()
+        actRef.set(nuevaActividad).await()
 
         val citasRef = db.collection("citas")
-        for (cita in citas) {
-            citasRef.add(cita.copy(actividadId = ref.id)).await()
+        citas.forEach { cita ->
+            citasRef.add(cita.copy(actividadId = actRef.id)).await()
         }
     }
 
-    suspend fun modificarActividad(actividad: Actividad) {
-        db.collection("actividades").document(actividad.id).set(actividad).await()
+    suspend fun actualizarActividad(id: String, actividad: Actividad) {
+        db.collection("actividades").document(id).set(actividad.copy(id = id)).await()
     }
 
-    suspend fun cancelarActividad(id: String, motivo: String? = null): Boolean {
-        return try {
+    suspend fun cancelarActividad(id: String, motivo: String? = null): Boolean =
+        try {
             db.collection("actividades").document(id)
                 .update(mapOf("estado" to "cancelada", "motivoCancelacion" to motivo)).await()
             true
@@ -144,35 +135,56 @@ class Repos {
             Log.e("CANCELAR_ACTIVIDAD", "Error: ${e.message}")
             false
         }
-    }
 
     suspend fun deleteActividad(id: String) {
+        // Elimina citas asociadas primero
+        val citasSnap = db.collection("citas")
+            .whereEqualTo("actividadId", id)
+            .get().await()
+        citasSnap.documents.forEach { db.collection("citas").document(it.id).delete().await() }
+
         db.collection("actividades").document(id).delete().await()
     }
 
-    suspend fun listAllActividades(): List<Actividad> {
-        val snap = db.collection("actividades").get().await()
-        return snap.documents.mapNotNull { it.toObject(Actividad::class.java)?.apply { id = it.id } }
-    }
-
-    suspend fun listUserActividades(uid: String): List<Actividad> {
-        val snap = db.collection("actividades")
-            .whereEqualTo("creadorUid", uid)
-            .get().await()
-        return snap.documents.mapNotNull {
+    suspend fun listAllActividades(): List<Actividad> =
+        db.collection("actividades").get().await().documents.mapNotNull {
             it.toObject(Actividad::class.java)?.apply { id = it.id }
         }
+
+    suspend fun listUserActividades(uid: String): List<Actividad> =
+        db.collection("actividades").whereEqualTo("creadorUid", uid).get().await().documents.mapNotNull {
+            it.toObject(Actividad::class.java)?.apply { id = it.id }
+        }
+
+    suspend fun obtenerActividadPorId(id: String): Actividad? {
+        val doc = db.collection("actividades").document(id).get().await()
+        return doc.toObject(Actividad::class.java)?.apply { this.id = doc.id }
     }
 
-    suspend fun citasEnRango(inicio: Long, fin: Long): List<Cita> {
-        // ✅ Rango por UN solo campo (fechaInicioMillis) + orderBy para rendimiento
-        val snap = db.collection("citas")
+    suspend fun obtenerActividades(): List<Actividad> =
+        db.collection("actividades").get().await().documents.mapNotNull {
+            it.toObject(Actividad::class.java)?.apply { id = it.id }
+        }
+
+    // -----------------------------------------------------------
+    // 🔹 CITAS
+    // -----------------------------------------------------------
+
+    suspend fun obtenerCitasPorActividad(actividadId: String): List<Cita> =
+        db.collection("citas")
+            .whereEqualTo("actividadId", actividadId)
+            .get().await().documents.mapNotNull {
+                it.toObject(Cita::class.java)?.apply { id = it.id }
+            }
+
+    suspend fun citasEnRango(inicio: Long, fin: Long): List<Cita> =
+        db.collection("citas")
             .whereGreaterThanOrEqualTo("fechaInicioMillis", inicio)
-            .whereLessThan("fechaInicioMillis", fin)   // < fin (exclusivo) para evitar duplicar bordes
-            .get().await()
-        return snap.documents.mapNotNull { it.toObject(Cita::class.java)?.apply { id = it.id } }
+            .whereLessThan("fechaInicioMillis", fin)
+            .get().await().documents.mapNotNull {
+                it.toObject(Cita::class.java)?.apply { id = it.id }
+            }
             .sortedBy { it.fechaInicioMillis }
-    }
 
     suspend fun reagendarCita(citaId: String, nuevoInicio: Long, nuevoFin: Long, nuevoLugar: String) {
         db.collection("citas").document(citaId)
@@ -185,17 +197,8 @@ class Repos {
             ).await()
     }
 
-    suspend fun updateCitaTiempoYLugar(
-        citaId: String,
-        nuevaFechaInicio: Long,
-        nuevaFechaFin: Long,
-        nuevoLugar: String
-    ) {
-        reagendarCita(citaId, nuevaFechaInicio, nuevaFechaFin, nuevoLugar)
-    }
-
     // -----------------------------------------------------------
-    // 🔹 CRUD MANTENEDORES
+    // 🔹 CRUD MANTENEDORES (Lugares, Tipos, Oferentes, Socios)
     // -----------------------------------------------------------
 
     suspend fun crearLugar(lugar: Lugar) {
@@ -203,10 +206,10 @@ class Repos {
         doc.set(lugar.copy(id = doc.id)).await()
     }
 
-    suspend fun obtenerLugares(): List<Lugar> {
-        val snap = db.collection("lugares").get().await()
-        return snap.documents.mapNotNull { it.toObject(Lugar::class.java)?.apply { id = it.id } }
-    }
+    suspend fun obtenerLugares(): List<Lugar> =
+        db.collection("lugares").get().await().documents.mapNotNull {
+            it.toObject(Lugar::class.java)?.apply { id = it.id }
+        }
 
     suspend fun actualizarLugar(lugar: Lugar) {
         db.collection("lugares").document(lugar.id).set(lugar).await()
@@ -221,10 +224,10 @@ class Repos {
         doc.set(tipo.copy(id = doc.id)).await()
     }
 
-    suspend fun obtenerTiposActividad(): List<TipoActividad> {
-        val snap = db.collection("tiposActividad").get().await()
-        return snap.documents.mapNotNull { it.toObject(TipoActividad::class.java)?.apply { id = it.id } }
-    }
+    suspend fun obtenerTiposActividad(): List<TipoActividad> =
+        db.collection("tiposActividad").get().await().documents.mapNotNull {
+            it.toObject(TipoActividad::class.java)?.apply { id = it.id }
+        }
 
     suspend fun actualizarTipoActividad(tipo: TipoActividad) {
         db.collection("tiposActividad").document(tipo.id).set(tipo).await()
@@ -239,10 +242,10 @@ class Repos {
         doc.set(oferente.copy(id = doc.id)).await()
     }
 
-    suspend fun obtenerOferentes(): List<Oferente> {
-        val snap = db.collection("oferentes").get().await()
-        return snap.documents.mapNotNull { it.toObject(Oferente::class.java)?.apply { id = it.id } }
-    }
+    suspend fun obtenerOferentes(): List<Oferente> =
+        db.collection("oferentes").get().await().documents.mapNotNull {
+            it.toObject(Oferente::class.java)?.apply { id = it.id }
+        }
 
     suspend fun actualizarOferente(oferente: Oferente) {
         db.collection("oferentes").document(oferente.id).set(oferente).await()
@@ -252,37 +255,15 @@ class Repos {
         db.collection("oferentes").document(id).delete().await()
     }
 
-    suspend fun crearProyecto(proyecto: Proyecto) {
-        val doc = db.collection("proyectos").document()
-        doc.set(proyecto.copy(id = doc.id)).await()
-    }
-
-    suspend fun obtenerProyectos(): List<Proyecto> {
-        val snap = db.collection("proyectos").get().await()
-        return snap.documents.mapNotNull { it.toObject(Proyecto::class.java)?.apply { id = it.id } }
-    }
-
-    suspend fun actualizarProyecto(proyecto: Proyecto) {
-        db.collection("proyectos").document(proyecto.id).set(proyecto).await()
-    }
-
-    suspend fun eliminarProyecto(id: String) {
-        db.collection("proyectos").document(id).delete().await()
-    }
-
-    // -----------------------------------------------------------
-    // 🔹 SOCIOS COMUNITARIOS
-    // -----------------------------------------------------------
-
     suspend fun crearSocioComunitario(socio: SocioComunitario) {
         val doc = db.collection("sociosComunitarios").document()
         doc.set(socio.copy(id = doc.id)).await()
     }
 
-    suspend fun obtenerSociosComunitarios(): List<SocioComunitario> {
-        val snap = db.collection("sociosComunitarios").get().await()
-        return snap.documents.mapNotNull { it.toObject(SocioComunitario::class.java)?.apply { id = it.id } }
-    }
+    suspend fun obtenerSociosComunitarios(): List<SocioComunitario> =
+        db.collection("sociosComunitarios").get().await().documents.mapNotNull {
+            it.toObject(SocioComunitario::class.java)?.apply { id = it.id }
+        }
 
     suspend fun actualizarSocioComunitario(socio: SocioComunitario) {
         db.collection("sociosComunitarios").document(socio.id).set(socio).await()
@@ -296,29 +277,13 @@ class Repos {
     // 🔹 ACTIVIDADES EN RANGO
     // -----------------------------------------------------------
 
-    suspend fun actividadesEnRango(inicio: Long, fin: Long): List<Actividad> {
-        // Si usas este método, asegúrate de que la actividad tenga fechaInicio/fechaFin seteados.
-        val snap = db.collection("actividades")
+    suspend fun actividadesEnRango(inicio: Long, fin: Long): List<Actividad> =
+        db.collection("actividades")
             .whereGreaterThanOrEqualTo("fechaInicio", inicio)
-            .whereLessThanOrEqualTo("fechaFin", fin)
-            .get().await()
-        return snap.documents.mapNotNull {
-            it.toObject(Actividad::class.java)?.apply { id = it.id }
-        }
-    }
-
-    // -----------------------------------------------------------
-    // 🔹 OPCIONES PARA FORMULARIO DE ACTIVIDAD (ADMIN)
-    // -----------------------------------------------------------
-
-    suspend fun obtenerOpcionesParaFormularioActividad():
-            Quadruple<List<Lugar>, List<TipoActividad>, List<Oferente>, List<SocioComunitario>> {
-        val lugares = obtenerLugares()
-        val tipos = obtenerTiposActividad()
-        val oferentes = obtenerOferentes()
-        val socios = obtenerSociosComunitarios()
-        return Quadruple(lugares, tipos, oferentes, socios)
-    }
+            .whereLessThan("fechaInicio", fin)
+            .get().await().documents.mapNotNull {
+                it.toObject(Actividad::class.java)?.apply { id = it.id }
+            }
 
     // -----------------------------------------------------------
     // 🔹 NOTIFICACIONES FCM
@@ -342,26 +307,26 @@ class Repos {
             Log.e("FCM_SEND", "Error: ${e.message}")
         }
     }
+    // -----------------------------------------------------------
+// 🔹 PROYECTOS
+// -----------------------------------------------------------
 
-    suspend fun obtenerActividades(): List<Actividad> {
-        val snapshot = db.collection("actividades").get().await()
-        return snapshot.documents.mapNotNull {
-            it.toObject(Actividad::class.java)?.apply { id = it.id }
-        }
+    suspend fun crearProyecto(proyecto: Proyecto) {
+        val doc = db.collection("proyectos").document()
+        doc.set(proyecto.copy(id = doc.id)).await()
     }
 
-    suspend fun obtenerActividadPorId(id: String): Actividad? {
-        val doc = db.collection("actividades").document(id).get().await()
-        return doc.toObject(Actividad::class.java)?.apply { this.id = doc.id }
+    suspend fun obtenerProyectos(): List<Proyecto> {
+        val snap = db.collection("proyectos").get().await()
+        return snap.documents.mapNotNull { it.toObject(Proyecto::class.java)?.apply { id = it.id } }
     }
 
-    suspend fun obtenerCitasPorActividad(actividadId: String): List<Cita> {
-        val snap = db.collection("citas")
-            .whereEqualTo("actividadId", actividadId)
-            .get().await()
-        return snap.documents.mapNotNull {
-            it.toObject(Cita::class.java)?.apply { id = it.id }
-        }
+    suspend fun actualizarProyecto(proyecto: Proyecto) {
+        db.collection("proyectos").document(proyecto.id).set(proyecto).await()
+    }
+
+    suspend fun eliminarProyecto(id: String) {
+        db.collection("proyectos").document(id).delete().await()
     }
 }
 

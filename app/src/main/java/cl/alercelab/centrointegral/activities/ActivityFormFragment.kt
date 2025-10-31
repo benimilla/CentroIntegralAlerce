@@ -1,9 +1,8 @@
 package cl.alercelab.centrointegral.activities
 
+import android.app.AlertDialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -24,25 +23,26 @@ class ActivityFormFragment : Fragment() {
     private lateinit var etBeneficiarios: EditText
     private lateinit var etDiasAvisoPrevio: EditText
     private lateinit var spLugar: Spinner
-    private lateinit var etDuracion: EditText
     private lateinit var btnAgregarCita: Button
     private lateinit var btnGuardar: Button
-    private lateinit var tvResumenCitas: TextView
+    private lateinit var tvTituloActividad: TextView
+
+    private var citas: MutableList<Cita> = mutableListOf()
+    private var actividadExistente: Actividad? = null
 
     private val repos = Repos()
-    private var listaCitas: MutableList<Cita> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return inflater.inflate(R.layout.fragment_activity_form, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Referencias
+        // Asignación de vistas
         etNombre = view.findViewById(R.id.etNombre)
         spTipo = view.findViewById(R.id.spTipo)
         spPeriodicidad = view.findViewById(R.id.spPeriodicidad)
@@ -52,95 +52,64 @@ class ActivityFormFragment : Fragment() {
         etBeneficiarios = view.findViewById(R.id.etBeneficiarios)
         etDiasAvisoPrevio = view.findViewById(R.id.etDiasAvisoPrevio)
         spLugar = view.findViewById(R.id.spLugar)
-        etDuracion = view.findViewById(R.id.etDuracion)
         btnAgregarCita = view.findViewById(R.id.btnAgregarCita)
         btnGuardar = view.findViewById(R.id.btnGuardar)
+        tvTituloActividad = view.findViewById(R.id.tvTituloActividad)
 
-        // 🔹 Buscamos el contenedor interior (LinearLayout)
-        val linearContainer = (view as? ScrollView)?.getChildAt(0) as? LinearLayout
-            ?: view.findViewById(R.id.linearContainer) // si le pones un id al LinearLayout principal
-
-        // 🔹 Creamos un texto dinámico dentro del contenedor
-        tvResumenCitas = TextView(requireContext()).apply {
-            text = "Citas agregadas: 0"
-            textSize = 14f
-            setPadding(0, 8, 0, 8)
+        // Verificar si estamos editando
+        val actividadId = arguments?.getString("actividadId")
+        if (actividadId != null) {
+            cargarActividadExistente(actividadId)
         }
 
-        // ✅ Agregar dentro del LinearLayout (no al ScrollView)
-        linearContainer.addView(tvResumenCitas, linearContainer.childCount - 1)
-
-        // 🔹 Llenar spinner de periodicidad
-        val periodicidades = listOf("Única", "Semanal", "Mensual")
-        spPeriodicidad.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            periodicidades
-        )
-
-        // 🔹 Cargar datos desde Firestore
-        lifecycleScope.launch {
-            try {
-                val lugares = repos.obtenerLugares()
-                val tipos = repos.obtenerTiposActividad()
-                val oferentes = repos.obtenerOferentes()
-                val socios = repos.obtenerSociosComunitarios()
-
-                spTipo.adapter = ArrayAdapter(
-                    requireContext(),
-                    android.R.layout.simple_spinner_dropdown_item,
-                    tipos.map { it.nombre }
-                )
-
-                spOferente.adapter = ArrayAdapter(
-                    requireContext(),
-                    android.R.layout.simple_spinner_dropdown_item,
-                    oferentes.map { it.nombre }
-                )
-
-                spLugar.adapter = ArrayAdapter(
-                    requireContext(),
-                    android.R.layout.simple_spinner_dropdown_item,
-                    lugares.map { it.nombre }
-                )
-
-                val sociosOpciones = mutableListOf("Sin socio comunitario")
-                sociosOpciones.addAll(socios.map { it.nombre })
-                spSocioComunitario.adapter = ArrayAdapter(
-                    requireContext(),
-                    android.R.layout.simple_spinner_dropdown_item,
-                    sociosOpciones
-                )
-
-            } catch (e: Exception) {
-                Toast.makeText(
-                    requireContext(),
-                    "Error cargando opciones: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-
-        // 🔹 Agregar cita
         btnAgregarCita.setOnClickListener {
-            findNavController().navigate(R.id.action_activityFormFragment_to_citaFormFragment)
+            val bundle = Bundle().apply {
+                putBoolean("desdeActividad", true)
+            }
+            findNavController().navigate(R.id.action_activityFormFragment_to_citaFormFragment, bundle)
         }
 
-        // 🔹 Escuchar citas nuevas
-        findNavController().currentBackStackEntry?.savedStateHandle
-            ?.getLiveData<Cita>("nuevaCita")
+        btnGuardar.setOnClickListener {
+            guardarActividad()
+        }
+
+        // Observa las citas agregadas desde CitaFormFragment
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Cita>("nuevaCita")
             ?.observe(viewLifecycleOwner) { cita ->
-                listaCitas.add(cita)
-                tvResumenCitas.text = "Citas agregadas: ${listaCitas.size}"
-                Toast.makeText(
-                    requireContext(),
-                    "Cita agregada (${listaCitas.size})",
-                    Toast.LENGTH_SHORT
-                ).show()
+                citas.add(cita)
+                Toast.makeText(requireContext(), "Cita agregada correctamente", Toast.LENGTH_SHORT).show()
             }
 
-        // 🔹 Guardar
-        btnGuardar.setOnClickListener { guardarActividad() }
+        cargarListasDesplegables()
+    }
+
+    private fun cargarListasDesplegables() {
+        lifecycleScope.launch {
+            val tipos = repos.obtenerTiposActividad().map { it.nombre }
+            val oferentes = repos.obtenerOferentes().map { it.nombre }
+            val socios = repos.obtenerSociosComunitarios().map { it.nombre }
+            val lugares = repos.obtenerLugares().map { it.nombre }
+
+            spTipo.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, tipos)
+            spPeriodicidad.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, listOf("Única", "Semanal", "Mensual"))
+            spOferente.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, oferentes)
+            spSocioComunitario.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, socios)
+            spLugar.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, lugares)
+        }
+    }
+
+    private fun cargarActividadExistente(id: String) {
+        lifecycleScope.launch {
+            val act = repos.obtenerActividadPorId(id)
+            if (act != null) {
+                actividadExistente = act
+                tvTituloActividad.text = "Editar Actividad"
+                etNombre.setText(act.nombre)
+                etCupo.setText(act.cupo?.toString() ?: "")
+                etBeneficiarios.setText(act.beneficiarios.joinToString(", "))
+                etDiasAvisoPrevio.setText(act.diasAvisoPrevio.toString())
+            }
+        }
     }
 
     private fun guardarActividad() {
@@ -149,75 +118,42 @@ class ActivityFormFragment : Fragment() {
         val periodicidad = spPeriodicidad.selectedItem?.toString() ?: ""
         val cupo = etCupo.text.toString().toIntOrNull()
         val oferente = spOferente.selectedItem?.toString()
-        val lugar = spLugar.selectedItem?.toString() ?: ""
-        val beneficiariosTexto = etBeneficiarios.text.toString()
-        val beneficiarios =
-            beneficiariosTexto.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        val socio = spSocioComunitario.selectedItem?.toString()
+        val beneficiarios = etBeneficiarios.text.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() }
         val diasAviso = etDiasAvisoPrevio.text.toString().toIntOrNull() ?: 0
+        val lugar = spLugar.selectedItem?.toString() ?: ""
 
-        val socioSeleccionado = spSocioComunitario.selectedItem?.toString() ?: ""
-        val socioComunitario =
-            if (socioSeleccionado == "Sin socio comunitario") null else socioSeleccionado
-
-        if (nombre.isEmpty() || tipo.isEmpty() || oferente.isNullOrEmpty() || lugar.isEmpty()) {
-            Toast.makeText(
-                requireContext(),
-                "Completa todos los campos obligatorios",
-                Toast.LENGTH_SHORT
-            ).show()
+        if (nombre.isEmpty() || tipo.isEmpty() || lugar.isEmpty()) {
+            Toast.makeText(requireContext(), "Completa los campos obligatorios", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val citasFinales = mutableListOf<Cita>().apply { addAll(listaCitas) }
-
-        if (periodicidad != "Única" && listaCitas.isNotEmpty()) {
-            val baseCita = listaCitas.first()
-            val intervalo = when (periodicidad) {
-                "Semanal" -> 7 * 24 * 60 * 60 * 1000L
-                "Mensual" -> 30 * 24 * 60 * 60 * 1000L
-                else -> 0L
-            }
-            if (intervalo > 0) {
-                for (i in 1..3) {
-                    citasFinales.add(
-                        baseCita.copy(
-                            fechaInicioMillis = baseCita.fechaInicioMillis + intervalo * i,
-                            fechaFinMillis = baseCita.fechaFinMillis + intervalo * i
-                        )
-                    )
-                }
-            }
-        }
-
-        val actividad = Actividad(
-            id = "",
+        val nuevaActividad = Actividad(
+            id = actividadExistente?.id ?: "",
             nombre = nombre,
             tipo = tipo,
             periodicidad = periodicidad,
             cupo = cupo,
             oferente = oferente,
-            socioComunitario = socioComunitario,
+            socioComunitario = socio,
             beneficiarios = beneficiarios,
             diasAvisoPrevio = diasAviso,
             lugar = lugar,
-            estado = "activa"
+            fechaInicio = System.currentTimeMillis(),
+            citas = citas
         )
 
         lifecycleScope.launch {
             try {
-                repos.crearActividadConCitas(actividad, citasFinales)
-                Toast.makeText(
-                    requireContext(),
-                    "Actividad y citas creadas con éxito",
-                    Toast.LENGTH_LONG
-                ).show()
-                findNavController().popBackStack()
+                if (actividadExistente == null) {
+                    repos.crearActividadConCitas(nuevaActividad, citas)
+                } else {
+                    repos.actualizarActividad(nuevaActividad.id, nuevaActividad)
+                }
+                Toast.makeText(requireContext(), "Actividad guardada correctamente", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
             } catch (e: Exception) {
-                Toast.makeText(
-                    requireContext(),
-                    "Error al guardar: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

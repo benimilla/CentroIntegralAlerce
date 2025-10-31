@@ -160,7 +160,7 @@ class ActivityRescheduleFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // 🧩 Ajuste correcto a la firma real de Repos.reagendarCita
+                // 🧩 Ajuste correcto a la firma real de Repos.kt.reagendarCita
                 Repos().reagendarCita(cId, inicio, fin, lugar)
 
                 Toast.makeText(requireContext(), "Cita reagendada correctamente", Toast.LENGTH_SHORT).show()

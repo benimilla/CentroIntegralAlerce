@@ -2,40 +2,48 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/bg_light">
+    android:padding="16dp">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/tvTitulo"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Detalle de Cita"
-            android:textSize="20sp"
+            android:text="Detalle de la Cita"
             android:textStyle="bold"
-            android:textColor="@color/primary_green_700"
-            android:paddingBottom="12dp"/>
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
-            android:id="@+id/tvInfo"
-            android:layout_width="match_parent"
+            android:id="@+id/tvDuracion"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/text_primary"
-            android:lineSpacingExtra="4dp"
-            android:textSize="15sp"/>
+            android:text="Duración: 60 min" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:layout_marginTop="20dp"/>
+        <TextView
+            android:id="@+id/tvObservaciones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Observaciones: Ninguna"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvLugar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lugar: -"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvEstado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Estado: programada"
+            android:layout_marginTop="4dp" />
+
     </LinearLayout>
 </ScrollView>

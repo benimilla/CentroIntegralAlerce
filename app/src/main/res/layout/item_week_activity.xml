@@ -1,52 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="8dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
-    android:elevation="2dp"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/bg_card"
     android:layout_marginBottom="8dp">
 
     <TextView
         android:id="@+id/tvNombre"
-        android:text="Nombre de la actividad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nombre de actividad"
         android:textStyle="bold"
-        android:textSize="16sp"
-        android:textColor="@color/primary_green"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/tvTipo"
-        android:text="Tipo: Taller"
-        android:textColor="#666"
-        android:textSize="14sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tipo de actividad"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/tvLugar"
-        android:text="Lugar: Centro Alerce"
-        android:textColor="#666"
-        android:textSize="14sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lugar"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/tvFecha"
-        android:text="Fecha: 01/11/2025 - 05/11/2025"
-        android:textColor="#444"
-        android:textSize="13sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/btnDetalles"
-        android:text="Ver Detalles"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:backgroundTint="@color/primary_green"
-        android:textColor="@android:color/white" />
+        android:text="Horario"
+        android:textSize="14sp" />
 </LinearLayout>

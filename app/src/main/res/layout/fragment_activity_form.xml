@@ -4,150 +4,202 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/white">
+    android:padding="16dp"
+    android:background="@color/bg_light">
 
     <LinearLayout
         android:id="@+id/linearContainer"
-        android:orientation="vertical"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:dividerPadding="8dp"
+        android:showDividers="none">
+
+        <!-- 🔹 Título -->
+        <TextView
+            android:id="@+id/tvTituloActividad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nueva Actividad"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="8dp"
+            android:textColor="@color/black" />
 
         <!-- 🔹 Nombre -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre:"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
         <EditText
             android:id="@+id/etNombre"
-            android:hint="Nombre de la actividad"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="Ej: Taller de memoria"
+            android:inputType="textCapWords" />
 
         <!-- 🔹 Tipo -->
         <TextView
-            android:text="Tipo de actividad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tipo de actividad:"
             android:textStyle="bold"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="8dp" />
 
         <Spinner
             android:id="@+id/spTipo"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dropdown"
-            android:padding="4dp" />
+            android:layout_height="wrap_content" />
 
         <!-- 🔹 Periodicidad -->
         <TextView
-            android:text="Periodicidad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Periodicidad:"
             android:textStyle="bold"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="8dp" />
 
         <Spinner
             android:id="@+id/spPeriodicidad"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dropdown"
-            android:padding="4dp" />
+            android:layout_height="wrap_content" />
 
         <!-- 🔹 Cupo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cupo máximo:"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
         <EditText
             android:id="@+id/etCupo"
-            android:hint="Cupo"
-            android:inputType="number"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="Ej: 25" />
 
         <!-- 🔹 Oferente -->
         <TextView
-            android:text="Oferente"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Oferente:"
             android:textStyle="bold"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="8dp" />
 
         <Spinner
             android:id="@+id/spOferente"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dropdown"
-            android:padding="4dp" />
+            android:layout_height="wrap_content" />
 
         <!-- 🔹 Socio Comunitario -->
         <TextView
-            android:text="Socio comunitario (opcional)"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Socio Comunitario:"
             android:textStyle="bold"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="8dp" />
 
         <Spinner
             android:id="@+id/spSocioComunitario"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dropdown"
-            android:padding="4dp" />
+            android:layout_height="wrap_content" />
 
         <!-- 🔹 Beneficiarios -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Beneficiarios (separados por comas):"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
         <EditText
             android:id="@+id/etBeneficiarios"
-            android:hint="Beneficiarios (separar con comas)"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="Ej: Adultos mayores, Jóvenes"
+            android:inputType="text" />
 
-        <!-- 🔹 Días aviso previo -->
+        <!-- 🔹 Días de aviso previo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Días de aviso previo:"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
         <EditText
             android:id="@+id/etDiasAvisoPrevio"
-            android:hint="Días de aviso previo"
-            android:inputType="number"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="Ej: 3" />
 
         <!-- 🔹 Lugar -->
         <TextView
-            android:text="Lugar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lugar:"
             android:textStyle="bold"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="8dp" />
 
         <Spinner
             android:id="@+id/spLugar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dropdown"
-            android:padding="4dp" />
+            android:layout_height="wrap_content" />
 
         <!-- 🔹 Duración -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duración (minutos):"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
         <EditText
             android:id="@+id/etDuracion"
-            android:hint="Duración (minutos)"
-            android:inputType="number"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="Ej: 60" />
 
         <!-- 🔹 Botón agregar cita -->
         <Button
             android:id="@+id/btnAgregarCita"
-            android:text="Agregar Cita"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- 🔹 Espacio donde se insertará dinámicamente el resumen de citas -->
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="12dp" />
-
-        <!-- 🔹 Botón guardar -->
-        <Button
-            android:id="@+id/btnGuardar"
-            android:text="Guardar Actividad"
-            android:layout_marginTop="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/primary_green"
+            android:text="Agregar Cita"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/teal_700"
             android:textColor="@android:color/white" />
+
+        <!-- 🔹 Resumen de citas -->
+        <TextView
+            android:id="@+id/tvResumenCitas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Citas agregadas: 0"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            android:padding="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/transparent" />
+
+        <!-- 🔹 Botón Guardar -->
+        <Button
+            android:id="@+id/btnGuardar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guardar Actividad"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/purple_500"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
 
     </LinearLayout>
 </ScrollView>

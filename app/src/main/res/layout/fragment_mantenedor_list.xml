@@ -17,6 +17,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_margin="16dp"
-        android:contentDescription="@string/add"
+        android:text="@string/action_add"
         android:src="@android:drawable/ic_input_add"/>
 </LinearLayout>

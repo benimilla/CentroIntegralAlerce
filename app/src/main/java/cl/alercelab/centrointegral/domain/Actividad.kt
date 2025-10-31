@@ -13,7 +13,7 @@ data class Actividad(
  var diasAvisoPrevio: Int = 0,
  var lugar: String = "",
  var fechaInicio: Long = 0,
- var fechaFin: Long = 0,
  var estado: String = "activa",
- var motivoCancelacion: String? = null
+ var motivoCancelacion: String? = null,
+ var citas: List<Cita> = emptyList()
 )

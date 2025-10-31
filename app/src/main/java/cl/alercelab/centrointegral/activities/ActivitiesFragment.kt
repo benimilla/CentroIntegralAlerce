@@ -23,34 +23,34 @@ class ActivitiesFragment : Fragment() {
 
     private lateinit var rv: RecyclerView
     private lateinit var btnNew: Button
-    private lateinit var etSearch: EditText
     private lateinit var tvEmpty: TextView
+    private lateinit var etSearch: EditText
     private lateinit var adapter: ActivitiesAdapter
 
     private val db = FirebaseFirestore.getInstance()
+    private val repos = Repos()
     private val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_activities, container, false)
+
         rv = v.findViewById(R.id.rvActivities)
         btnNew = v.findViewById(R.id.btnNewActivity)
         etSearch = v.findViewById(R.id.etSearch)
         tvEmpty = v.findViewById(R.id.tvEmpty)
 
         rv.layoutManager = LinearLayoutManager(requireContext())
+
         adapter = ActivitiesAdapter(
             onEdit = { act -> goToEdit(act.id) },
             onReschedule = { act -> goToReschedule(act.id) },
-            onDelete = { act -> cancelActivity(act.id) },
-            onDetails = { act -> showActivityDetailDialog(act) } // <- detalle sin navegar
+            onDelete = { act -> confirmDelete(act) },
+            onDetail = { act -> showActivityDetailDialog(act) }
         )
         rv.adapter = adapter
 
         btnNew.setOnClickListener { goToCreate() }
 
-        // Buscar por texto (ENTER)
         etSearch.setOnEditorActionListener { _, _, _ ->
             loadList()
             true
@@ -60,51 +60,69 @@ class ActivitiesFragment : Fragment() {
         return v
     }
 
+    /** 🔹 Carga todas las actividades desde Firestore */
+    private fun loadList() {
+        val query = etSearch.text.toString().trim()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val snap = db.collection("actividades").get().await()
+                val list = snap.toObjects<Actividad>().mapIndexed { i, a ->
+                    a.copy(id = snap.documents[i].id)
+                }.sortedBy { it.nombre.lowercase() }
+
+                val filtered = if (query.isBlank()) list else list.filter {
+                    it.nombre.contains(query, ignoreCase = true)
+                }
+
+                adapter.submitList(filtered)
+                tvEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    /** 🔹 Crear nueva actividad */
     private fun goToCreate() {
-        // ya existe en tu nav_graph
         findNavController().navigate(R.id.action_activities_to_activity_form)
     }
 
+    /** 🔹 Editar actividad existente */
     private fun goToEdit(actividadId: String) {
         val b = Bundle().apply { putString("actividadId", actividadId) }
         findNavController().navigate(R.id.action_activities_to_activity_form, b)
     }
 
+    /** 🔹 Reagendar actividad */
     private fun goToReschedule(actividadId: String) {
         val b = Bundle().apply { putString("actividadId", actividadId) }
         findNavController().navigate(R.id.action_activities_to_reschedule, b)
     }
 
-    private fun cancelActivity(actividadId: String) {
+    /** 🔹 Confirmar eliminación */
+    private fun confirmDelete(act: Actividad) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Eliminar actividad")
+            .setMessage("¿Deseas eliminar '${act.nombre}'? Esta acción no se puede deshacer.")
+            .setPositiveButton("Eliminar") { _, _ -> deleteActivity(act.id) }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    /** 🔹 Eliminar actividad y sus citas */
+    private fun deleteActivity(actividadId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                Repos().cancelarActividad(actividadId, "Cancelada por administrador")
-                Toast.makeText(requireContext(), "Actividad cancelada", Toast.LENGTH_SHORT).show()
+                repos.deleteActividad(actividadId)
+                Toast.makeText(requireContext(), "Actividad eliminada correctamente", Toast.LENGTH_SHORT).show()
                 loadList()
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error al cancelar: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun loadList() {
-        val q = etSearch.text?.toString()?.trim().orEmpty()
-        viewLifecycleOwner.lifecycleScope.launch {
-            val snap = db.collection("actividades").get().await()
-            val list = snap.toObjects<Actividad>()
-                .mapIndexed { idx, a -> a.copy(id = snap.documents[idx].id) }
-                .sortedBy { it.nombre.lowercase() }
-
-            val filtered = if (q.isBlank())
-                list
-            else
-                list.filter { it.nombre.contains(q, ignoreCase = true) }
-
-            adapter.setData(filtered)
-            tvEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
-        }
-    }
-
+    /** 🔹 Mostrar detalle completo en diálogo */
     private fun showActivityDetailDialog(a: Actividad) {
         val msg = buildString {
             appendLine("Nombre: ${a.nombre}")
@@ -115,12 +133,8 @@ class ActivitiesFragment : Fragment() {
             appendLine("Socio Comunitario: ${a.socioComunitario ?: "-"}")
             appendLine("Cupo: ${a.cupo ?: "-"}")
             appendLine("Beneficiarios: ${if (a.beneficiarios.isEmpty()) "-" else a.beneficiarios.joinToString()}")
-            if (a.fechaInicio > 0L && a.fechaFin > 0L) {
-                appendLine("Desde: ${sdf.format(Date(a.fechaInicio))}")
-                appendLine("Hasta: ${sdf.format(Date(a.fechaFin))}")
-            }
+            appendLine("Días aviso previo: ${a.diasAvisoPrevio}")
             appendLine("Estado: ${a.estado}")
-            a.motivoCancelacion?.let { appendLine("Motivo cancelación: $it") }
         }
 
         AlertDialog.Builder(requireContext())
@@ -128,51 +142,5 @@ class ActivitiesFragment : Fragment() {
             .setMessage(msg)
             .setPositiveButton("Cerrar", null)
             .show()
-    }
-
-    // ---- Adapter ----
-    class ActivitiesAdapter(
-        private val onEdit: (Actividad) -> Unit,
-        private val onReschedule: (Actividad) -> Unit,
-        private val onDelete: (Actividad) -> Unit,
-        private val onDetails: (Actividad) -> Unit
-    ) : RecyclerView.Adapter<ActivitiesAdapter.VH>() {
-
-        private val items = mutableListOf<Actividad>()
-
-        class VH(v: View) : RecyclerView.ViewHolder(v) {
-            val tvTitle: TextView = v.findViewById(R.id.tvTitle)
-            val tvSubtitle: TextView = v.findViewById(R.id.tvSubtitle)
-            val btnEdit: ImageButton = v.findViewById(R.id.btnEdit)
-            val btnReschedule: ImageButton = v.findViewById(R.id.btnReschedule)
-            val btnDelete: ImageButton = v.findViewById(R.id.btnDelete)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_activity, parent, false)
-            return VH(view)
-        }
-
-        override fun getItemCount(): Int = items.size
-
-        override fun onBindViewHolder(h: VH, pos: Int) {
-            val it = items[pos]
-            h.tvTitle.text = it.nombre
-            val estado = it.estado
-            val tipo = it.tipo
-            val per = it.periodicidad
-            h.tvSubtitle.text = "Tipo: $tipo · Periodicidad: $per · Estado: $estado"
-
-            h.itemView.setOnClickListener { onDetails(items[pos]) }
-            h.btnEdit.setOnClickListener { onEdit(items[pos]) }
-            h.btnReschedule.setOnClickListener { onReschedule(items[pos]) }
-            h.btnDelete.setOnClickListener { onDelete(items[pos]) }
-        }
-
-        fun setData(data: List<Actividad>) {
-            items.clear()
-            items.addAll(data)
-            notifyDataSetChanged()
-        }
     }
 }
