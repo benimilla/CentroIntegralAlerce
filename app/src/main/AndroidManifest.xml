@@ -1,8 +1,19 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cl.alercelab.centrointegral">
 
+  <!-- ======================================================= -->
+  <!-- 🔹 PERMISOS NECESARIOS                                 -->
+  <!-- ======================================================= -->
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-permission android:name="android.permission.VIBRATE" />
 
+  <!-- ======================================================= -->
+  <!-- 🔹 APLICACIÓN PRINCIPAL                                -->
+  <!-- ======================================================= -->
   <application
       android:name=".App"
       android:allowBackup="true"
@@ -11,15 +22,44 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:supportsRtl="true"
       android:theme="@style/Theme.CIA">
-    <activity android:name=".MainActivity" android:exported="true">
+
+    <!-- 🔸 Actividad principal -->
+    <activity
+        android:name=".MainActivity"
+        android:exported="true"
+        android:windowSoftInputMode="adjustResize|stateHidden">
+
       <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
 
-    <service android:name=".notifications.MessagingService" android:exported="false">
-      <intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT"/></intent-filter>
+    <!-- ======================================================= -->
+    <!-- 🔹 SERVICIOS DE FIREBASE                               -->
+    <!-- ======================================================= -->
+
+    <!-- 🔸 Servicio de mensajería FCM -->
+    <service
+        android:name=".notifications.MessagingService"
+        android:exported="false">
+      <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+      </intent-filter>
     </service>
+
+    <!-- 🔸 Proveedor necesario para FCM (Google Services) -->
+    <meta-data
+        android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@mipmap/ic_launcher" />
+    <meta-data
+        android:name="com.google.firebase.messaging.default_notification_color"
+        android:resource="@color/primaryColor" />
+
+    <!-- 🔸 Configuración general de Firebase -->
+    <meta-data
+        android:name="com.google.firebase.analytics.application"
+        android:value="true" />
+
   </application>
 </manifest>

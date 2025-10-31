@@ -221,7 +221,7 @@
         tools:layout="@layout/fragment_admin_users" />
 
     <!-- ======================================================= -->
-    <!-- 🔹 MANTENEDORES                                         -->
+    <!-- 🔹 MANTENEDORES (corrige rutas a su subpaquete real)     -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/mantenedorTipoActividad"

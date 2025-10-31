@@ -1,205 +1,267 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:padding="16dp"
-    android:background="@color/bg_light">
+    android:background="?attr/colorSurface"
+    android:padding="16dp">
 
     <LinearLayout
         android:id="@+id/linearContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:dividerPadding="8dp"
-        android:showDividers="none">
+        android:orientation="vertical">
 
-        <!-- 🔹 Título -->
+        <!-- 🔹 Encabezado -->
         <TextView
             android:id="@+id/tvTituloActividad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Nueva Actividad"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="22sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:padding="8dp"
-            android:textColor="@color/black" />
+            android:textColor="?attr/colorPrimary"
+            android:layout_marginBottom="16dp" />
 
-        <!-- 🔹 Nombre -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nombre:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
-
-        <EditText
-            android:id="@+id/etNombre"
+        <!-- 🔹 Información general -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Ej: Taller de memoria"
-            android:inputType="textCapWords" />
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:padding="16dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
-        <!-- 🔹 Tipo -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tipo de actividad:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/spTipo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nombre:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface" />
 
-        <!-- 🔹 Periodicidad -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Periodicidad:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+                <EditText
+                    android:id="@+id/etNombre"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ej: Taller de memoria"
+                    android:inputType="textCapWords"
+                    android:background="@drawable/bg_input_field"
+                    android:padding="10dp" />
 
-        <Spinner
-            android:id="@+id/spPeriodicidad"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tipo de actividad:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="8dp" />
 
-        <!-- 🔹 Cupo -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cupo máximo:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+                <Spinner
+                    android:id="@+id/spTipo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-        <EditText
-            android:id="@+id/etCupo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="Ej: 25" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Periodicidad:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="8dp" />
 
-        <!-- 🔹 Oferente -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Oferente:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+                <Spinner
+                    android:id="@+id/spPeriodicidad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-        <Spinner
-            android:id="@+id/spOferente"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cupo máximo:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="8dp" />
 
-        <!-- 🔹 Socio Comunitario -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Socio Comunitario:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+                <EditText
+                    android:id="@+id/etCupo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ej: 25"
+                    android:inputType="number"
+                    android:background="@drawable/bg_input_field"
+                    android:padding="10dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-        <Spinner
-            android:id="@+id/spSocioComunitario"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- 🔹 Beneficiarios -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Beneficiarios (separados por comas):"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
-
-        <EditText
-            android:id="@+id/etBeneficiarios"
+        <!-- 🔹 Sección oferentes y socios -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Ej: Adultos mayores, Jóvenes"
-            android:inputType="text" />
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:padding="16dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
-        <!-- 🔹 Días de aviso previo -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Días de aviso previo:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/etDiasAvisoPrevio"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Oferente:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <Spinner
+                    android:id="@+id/spOferente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Socio Comunitario:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="8dp" />
+
+                <Spinner
+                    android:id="@+id/spSocioComunitario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Beneficiarios (separados por comas):"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/etBeneficiarios"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ej: Adultos mayores, Jóvenes"
+                    android:inputType="text"
+                    android:background="@drawable/bg_input_field"
+                    android:padding="10dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 🔹 Sección de configuración -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="Ej: 3" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:padding="16dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
-        <!-- 🔹 Lugar -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lugar:"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/spLugar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Días de aviso previo:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface" />
 
-        <!-- 🔹 Duración -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Duración (minutos):"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+                <EditText
+                    android:id="@+id/etDiasAvisoPrevio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:hint="Ej: 3"
+                    android:background="@drawable/bg_input_field"
+                    android:padding="10dp" />
 
-        <EditText
-            android:id="@+id/etDuracion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="Ej: 60" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lugar:"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="8dp" />
 
-        <!-- 🔹 Botón agregar cita -->
-        <Button
+                <Spinner
+                    android:id="@+id/spLugar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Duración (minutos):"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/etDuracion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ej: 60"
+                    android:inputType="number"
+                    android:background="@drawable/bg_input_field"
+                    android:padding="10dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 🔹 Botones -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAgregarCita"
+            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Agregar Cita"
+            android:textStyle="bold"
+            android:textAllCaps="false"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/teal_700"
-            android:textColor="@android:color/white" />
+            app:strokeColor="?attr/colorPrimary"
+            app:icon="@drawable/ic_add"
+            app:iconTint="?attr/colorPrimary"
+            app:iconGravity="textStart" />
 
-        <!-- 🔹 Resumen de citas -->
         <TextView
             android:id="@+id/tvResumenCitas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Citas agregadas: 0"
-            android:textColor="@color/black"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="14sp"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:padding="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:color/transparent" />
+            android:layout_marginTop="8dp" />
 
-        <!-- 🔹 Botón Guardar -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuardar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Guardar Actividad"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_save"
+            app:iconTint="@android:color/white"
+            app:iconGravity="textStart"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/purple_500"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
+            app:backgroundTint="?attr/colorPrimary"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 </ScrollView>
