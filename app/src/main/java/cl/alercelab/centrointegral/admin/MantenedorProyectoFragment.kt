@@ -1,4 +1,4 @@
-package cl.alercelab.centrointegral.admin.mantenedores
+package cl.alercelab.centrointegral.admin
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -38,34 +38,47 @@ class MantenedorProyectoFragment : Fragment() {
 
     private fun cargarDatos() {
         lifecycleScope.launch {
-            items.clear()
-            items.addAll(repo.obtenerProyectos())
-            adapter.notifyDataSetChanged()
+            try {
+                items.clear()
+                items.addAll(repo.obtenerProyectos())
+                adapter.notifyDataSetChanged()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error al cargar proyectos: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
     private fun mostrarDialogo(item: Proyecto?) {
         val view = layoutInflater.inflate(R.layout.dialog_proyecto, null)
         val txtNombre = view.findViewById<EditText>(R.id.txtNombre)
-
         txtNombre.setText(item?.nombre ?: "")
 
         AlertDialog.Builder(requireContext())
             .setTitle(if (item == null) "Nuevo Proyecto" else "Editar Proyecto")
             .setView(view)
             .setPositiveButton("Guardar") { _, _ ->
-                val nuevo = item?.copy(
-                    nombre = txtNombre.text.toString().trim()
-                ) ?: Proyecto(
-                    nombre = txtNombre.text.toString().trim()
-                )
+                val nombre = txtNombre.text.toString().trim()
+                if (nombre.isEmpty()) {
+                    Toast.makeText(requireContext(), "El nombre es obligatorio", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
                 lifecycleScope.launch {
                     try {
+                        val proyectosExistentes = repo.obtenerProyectos()
+                        val existeDuplicado = proyectosExistentes.any { it.nombre.equals(nombre, ignoreCase = true) && it.id != item?.id }
+
+                        if (existeDuplicado) {
+                            Toast.makeText(requireContext(), "Ya existe un proyecto con ese nombre", Toast.LENGTH_LONG).show()
+                            return@launch
+                        }
+
+                        val nuevo = item?.copy(nombre = nombre) ?: Proyecto(nombre = nombre)
                         if (item == null) repo.crearProyecto(nuevo) else repo.actualizarProyecto(nuevo)
                         cargarDatos()
-                        Toast.makeText(requireContext(), "Guardado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Proyecto guardado correctamente", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
-                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -74,13 +87,19 @@ class MantenedorProyectoFragment : Fragment() {
     }
 
     private fun editarItem(item: Proyecto) = mostrarDialogo(item)
+
     private fun eliminarItem(item: Proyecto) {
         AlertDialog.Builder(requireContext())
-            .setMessage("¿Eliminar ${item.nombre}?")
+            .setMessage("¿Seguro que deseas eliminar '${item.nombre}'?")
             .setPositiveButton("Sí") { _, _ ->
                 lifecycleScope.launch {
-                    repo.eliminarProyecto(item.id)
-                    cargarDatos()
+                    try {
+                        repo.eliminarProyecto(item.id)
+                        cargarDatos()
+                        Toast.makeText(requireContext(), "Proyecto eliminado", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
             .setNegativeButton("No", null)

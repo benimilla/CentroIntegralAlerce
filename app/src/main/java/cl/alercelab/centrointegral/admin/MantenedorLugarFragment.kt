@@ -1,4 +1,4 @@
-package cl.alercelab.centrointegral.admin.mantenedores
+package cl.alercelab.centrointegral.admin
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -38,9 +38,13 @@ class MantenedorLugarFragment : Fragment() {
 
     private fun cargarDatos() {
         lifecycleScope.launch {
-            items.clear()
-            items.addAll(repo.obtenerLugares())
-            adapter.notifyDataSetChanged()
+            try {
+                items.clear()
+                items.addAll(repo.obtenerLugares())
+                adapter.notifyDataSetChanged()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error al cargar lugares: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -56,21 +60,40 @@ class MantenedorLugarFragment : Fragment() {
             .setTitle(if (item == null) "Nuevo Lugar" else "Editar Lugar")
             .setView(view)
             .setPositiveButton("Guardar") { _, _ ->
-                val cupoParsed = txtCupo.text.toString().trim().ifEmpty { null }?.toIntOrNull()
-                val nuevo = item?.copy(
-                    nombre = txtNombre.text.toString().trim(),
-                    cupo = cupoParsed
-                ) ?: Lugar(
-                    nombre = txtNombre.text.toString().trim(),
-                    cupo = cupoParsed
-                )
+                val nombre = txtNombre.text.toString().trim()
+                val cupoStr = txtCupo.text.toString().trim()
+
+                if (nombre.isEmpty()) {
+                    Toast.makeText(requireContext(), "El nombre es obligatorio", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val cupo = if (cupoStr.isEmpty()) null else cupoStr.toIntOrNull()
+                if (cupoStr.isNotEmpty() && cupo == null) {
+                    Toast.makeText(requireContext(), "El cupo debe ser un número válido", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
                 lifecycleScope.launch {
                     try {
+                        val lugaresExistentes = repo.obtenerLugares()
+                        val existeDuplicado = lugaresExistentes.any {
+                            it.nombre.equals(nombre, ignoreCase = true) && it.id != item?.id
+                        }
+
+                        if (existeDuplicado) {
+                            Toast.makeText(requireContext(), "Ya existe un lugar con ese nombre", Toast.LENGTH_LONG).show()
+                            return@launch
+                        }
+
+                        val nuevo = item?.copy(nombre = nombre, cupo = cupo)
+                            ?: Lugar(nombre = nombre, cupo = cupo)
+
                         if (item == null) repo.crearLugar(nuevo) else repo.actualizarLugar(nuevo)
                         cargarDatos()
-                        Toast.makeText(requireContext(), "Guardado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Lugar guardado correctamente", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
-                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -82,11 +105,16 @@ class MantenedorLugarFragment : Fragment() {
 
     private fun eliminarItem(item: Lugar) {
         AlertDialog.Builder(requireContext())
-            .setMessage("¿Eliminar ${item.nombre}?")
+            .setMessage("¿Seguro que deseas eliminar '${item.nombre}'?")
             .setPositiveButton("Sí") { _, _ ->
                 lifecycleScope.launch {
-                    repo.eliminarLugar(item.id)
-                    cargarDatos()
+                    try {
+                        repo.eliminarLugar(item.id)
+                        cargarDatos()
+                        Toast.makeText(requireContext(), "Lugar eliminado", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
             .setNegativeButton("No", null)

@@ -1,4 +1,4 @@
-package cl.alercelab.centrointegral.admin.mantenedores
+package cl.alercelab.centrointegral.admin
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -38,9 +38,13 @@ class MantenedorOferenteFragment : Fragment() {
 
     private fun cargarDatos() {
         lifecycleScope.launch {
-            items.clear()
-            items.addAll(repo.obtenerOferentes())
-            adapter.notifyDataSetChanged()
+            try {
+                items.clear()
+                items.addAll(repo.obtenerOferentes())
+                adapter.notifyDataSetChanged()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error al cargar oferentes: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -56,20 +60,38 @@ class MantenedorOferenteFragment : Fragment() {
             .setTitle(if (item == null) "Nuevo Oferente" else "Editar Oferente")
             .setView(view)
             .setPositiveButton("Guardar") { _, _ ->
-                val nuevo = item?.copy(
-                    nombre = txtNombre.text.toString().trim(),
-                    docenteResponsable = txtDocente.text.toString().trim()
-                ) ?: Oferente(
-                    nombre = txtNombre.text.toString().trim(),
-                    docenteResponsable = txtDocente.text.toString().trim()
-                )
+                val nombre = txtNombre.text.toString().trim()
+                val docente = txtDocente.text.toString().trim()
+
+                if (nombre.isEmpty()) {
+                    Toast.makeText(requireContext(), "El nombre es obligatorio", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                if (docente.isEmpty()) {
+                    Toast.makeText(requireContext(), "Debe ingresar un docente responsable", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
                 lifecycleScope.launch {
                     try {
+                        val oferentesExistentes = repo.obtenerOferentes()
+                        val existeDuplicado = oferentesExistentes.any {
+                            it.nombre.equals(nombre, ignoreCase = true) && it.id != item?.id
+                        }
+
+                        if (existeDuplicado) {
+                            Toast.makeText(requireContext(), "Ya existe un oferente con ese nombre", Toast.LENGTH_LONG).show()
+                            return@launch
+                        }
+
+                        val nuevo = item?.copy(nombre = nombre, docenteResponsable = docente)
+                            ?: Oferente(nombre = nombre, docenteResponsable = docente)
+
                         if (item == null) repo.crearOferente(nuevo) else repo.actualizarOferente(nuevo)
                         cargarDatos()
-                        Toast.makeText(requireContext(), "Guardado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Oferente guardado correctamente", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
-                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -78,13 +100,19 @@ class MantenedorOferenteFragment : Fragment() {
     }
 
     private fun editarItem(item: Oferente) = mostrarDialogo(item)
+
     private fun eliminarItem(item: Oferente) {
         AlertDialog.Builder(requireContext())
-            .setMessage("¿Eliminar ${item.nombre}?")
+            .setMessage("¿Seguro que deseas eliminar '${item.nombre}'?")
             .setPositiveButton("Sí") { _, _ ->
                 lifecycleScope.launch {
-                    repo.eliminarOferente(item.id)
-                    cargarDatos()
+                    try {
+                        repo.eliminarOferente(item.id)
+                        cargarDatos()
+                        Toast.makeText(requireContext(), "Oferente eliminado", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
             .setNegativeButton("No", null)

@@ -1,4 +1,4 @@
-package cl.alercelab.centrointegral.admin.mantenedores
+package cl.alercelab.centrointegral.admin
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -38,9 +38,13 @@ class MantenedorTipoActividadFragment : Fragment() {
 
     private fun cargarDatos() {
         lifecycleScope.launch {
-            items.clear()
-            items.addAll(repo.obtenerTiposActividad())
-            adapter.notifyDataSetChanged()
+            try {
+                items.clear()
+                items.addAll(repo.obtenerTiposActividad())
+                adapter.notifyDataSetChanged()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error al cargar tipos: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -48,7 +52,6 @@ class MantenedorTipoActividadFragment : Fragment() {
         val view = layoutInflater.inflate(R.layout.dialog_tipo_actividad, null)
         val txtNombre = view.findViewById<EditText>(R.id.txtNombre)
         val txtDescripcion = view.findViewById<EditText>(R.id.txtDescripcion)
-
         txtNombre.setText(item?.nombre ?: "")
         txtDescripcion.setText(item?.descripcion ?: "")
 
@@ -56,20 +59,37 @@ class MantenedorTipoActividadFragment : Fragment() {
             .setTitle(if (item == null) "Nuevo Tipo de Actividad" else "Editar Tipo de Actividad")
             .setView(view)
             .setPositiveButton("Guardar") { _, _ ->
-                val nuevo = item?.copy(
-                    nombre = txtNombre.text.toString().trim(),
-                    descripcion = txtDescripcion.text.toString().trim()
-                ) ?: TipoActividad(
-                    nombre = txtNombre.text.toString().trim(),
-                    descripcion = txtDescripcion.text.toString().trim()
-                )
+                val nombre = txtNombre.text.toString().trim()
+                val descripcion = txtDescripcion.text.toString().trim()
+
+                if (nombre.isEmpty()) {
+                    Toast.makeText(requireContext(), "El nombre es obligatorio", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (descripcion.isEmpty()) {
+                    Toast.makeText(requireContext(), "Debe ingresar una descripción", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
                 lifecycleScope.launch {
                     try {
+                        val tipos = repo.obtenerTiposActividad()
+                        val existeDuplicado = tipos.any { it.nombre.equals(nombre, ignoreCase = true) && it.id != item?.id }
+
+                        if (existeDuplicado) {
+                            Toast.makeText(requireContext(), "Ya existe un tipo con ese nombre", Toast.LENGTH_LONG).show()
+                            return@launch
+                        }
+
+                        val nuevo = item?.copy(nombre = nombre, descripcion = descripcion)
+                            ?: TipoActividad(nombre = nombre, descripcion = descripcion)
+
                         if (item == null) repo.crearTipoActividad(nuevo) else repo.actualizarTipoActividad(nuevo)
                         cargarDatos()
-                        Toast.makeText(requireContext(), "Guardado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Tipo guardado correctamente", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
-                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -78,13 +98,19 @@ class MantenedorTipoActividadFragment : Fragment() {
     }
 
     private fun editarItem(item: TipoActividad) = mostrarDialogo(item)
+
     private fun eliminarItem(item: TipoActividad) {
         AlertDialog.Builder(requireContext())
-            .setMessage("¿Eliminar ${item.nombre}?")
+            .setMessage("¿Seguro que deseas eliminar '${item.nombre}'?")
             .setPositiveButton("Sí") { _, _ ->
                 lifecycleScope.launch {
-                    repo.eliminarTipoActividad(item.id)
-                    cargarDatos()
+                    try {
+                        repo.eliminarTipoActividad(item.id)
+                        cargarDatos()
+                        Toast.makeText(requireContext(), "Tipo eliminado", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
             .setNegativeButton("No", null)
