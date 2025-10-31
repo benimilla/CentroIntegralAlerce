@@ -1,45 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:background="@color/bg_light">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- 🔹 Título -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cita_form_title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:textColor="@color/primary_green_dark"
+            android:layout_marginBottom="20dp" />
+
+        <!-- 🔹 Spinner de Actividad -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cita_select_activity"
+            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
+
         <Spinner
             android:id="@+id/spActividad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:prompt="@string/cita_select_activity" />
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_spinner_field"
+            android:padding="10dp" />
+
+        <!-- 🔹 Lugar -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lugar"
+            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
 
         <EditText
             android:id="@+id/etLugar"
-            android:hint="Lugar de la cita"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:hint="@string/cita_place_hint"
+            android:enabled="false"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:background="@drawable/edittext_rounded_bg"
+            android:padding="12dp"
+            android:textSize="15sp"
+            android:layout_marginBottom="10dp" />
+
+        <!-- 🔹 Fecha -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fecha"
+            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
+
+
+        <EditText
+            android:id="@+id/etFecha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/cita_date_hint"
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="true"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:background="@drawable/edittext_rounded_bg"
+            android:padding="12dp"
+            android:textSize="15sp"
+            android:layout_marginBottom="10dp" />
+
+        <!-- 🔹 Aviso previo de la actividad -->
+        <TextView
+            android:id="@+id/tvAvisoPrevioInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Debe agendarse con X días de anticipación."
+            android:textColor="@color/amber_700"
+            android:textStyle="italic"
+            android:textSize="14sp"
+            android:background="@color/amber_300"
+            android:padding="8dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone" />
+
+
+        <!-- 🔹 Hora Inicio -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hora inicio"
+            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
+
+        <EditText
+            android:id="@+id/etHoraInicio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/cita_time_hint"
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="true"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:background="@drawable/edittext_rounded_bg"
+            android:padding="12dp"
+            android:textSize="15sp"
+            android:layout_marginBottom="10dp" />
+
+        <!-- 🔹 Hora Fin -->
+        <TextView
+            android:id="@+id/tvDuracionMaxInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⏱ Duración máxima permitida: 60 min"
+            android:textColor="@color/teal_700"
+            android:textSize="14sp"
+            android:padding="4dp"
+            android:layout_marginTop="6dp"
+            android:visibility="gone"/>
+
+        <EditText
+            android:id="@+id/etHoraFin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Seleccionar hora de término"
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="true"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:background="@drawable/edittext_rounded_bg"
+            android:padding="12dp"
+            android:textSize="15sp"
+            android:layout_marginBottom="10dp" />
+
+        <!-- 🔹 Motivo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Motivo o comentario"
+            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
 
         <EditText
             android:id="@+id/etMotivo"
-            android:hint="Motivo (opcional)"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textMultiLine" />
+            android:hint="@string/cita_reason_hint"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:gravity="top"
+            android:background="@drawable/edittext_rounded_bg"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:padding="12dp"
+            android:textSize="15sp"
+            android:layout_marginBottom="16dp" />
 
+        <!-- 🔹 ProgressBar -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:layout_marginTop="12dp" />
 
-        <Button
+        <!-- 🔹 Botón Guardar -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuardar"
-            android:text="Guardar cita"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:text="@string/action_save"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:cornerRadius="10dp"
+            app:backgroundTint="@color/primary_green"
+            app:icon="@drawable/ic_save"
+            app:iconGravity="textStart"
+            app:iconTint="@android:color/white"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="4dp" />
+
     </LinearLayout>
 </ScrollView>

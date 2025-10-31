@@ -1,6 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- 🏠 Aplicación -->
     <string name="app_name">Centro Integral Alerce</string>
+    <string name="app_description">Aplicación para la gestión integral de actividades y citas comunitarias.</string>
 
     <!-- 🔹 Navegación inferior -->
     <string name="nav_calendar">Calendario</string>
@@ -63,50 +66,59 @@
     <string name="form_short_password">La contraseña debe tener al menos 6 caracteres.</string>
     <string name="form_fill_all">Completa todos los campos obligatorios.</string>
 
-    <!-- 🔹 Citas -->
+    <!-- 🗓️ Citas -->
     <string name="cita_form_title">Nueva cita</string>
     <string name="cita_select_activity">Seleccionar actividad</string>
     <string name="cita_place_hint">Lugar de la cita</string>
+    <string name="cita_date_hint">Seleccionar fecha</string>
+    <string name="cita_time_hint">Seleccionar hora</string>
     <string name="cita_reason_hint">Motivo (opcional)</string>
     <string name="cita_create_success">Cita creada correctamente.</string>
     <string name="cita_create_error">Error al crear la cita.</string>
     <string name="cita_update_success">Cita actualizada correctamente.</string>
     <string name="cita_cancel_confirm">¿Deseas cancelar esta cita?</string>
+    <string name="cita_conflict_error">Conflicto de horario: ya existe una cita en este lugar y hora.</string>
+    <string name="cita_invalid_past_date">No se puede crear una cita en una fecha anterior a la actual.</string>
+    <string name="cita_too_soon_error">Esta cita debe crearse con anticipación según la actividad.</string>
 
-    <!-- 🔹 Actividades -->
+    <!-- 🎯 Actividades -->
     <string name="activity_create">Nueva actividad</string>
     <string name="activity_edit">Editar actividad</string>
     <string name="activity_detail">Detalle de actividad</string>
     <string name="activity_reschedule">Reagendar cita</string>
     <string name="activity_cancel">Cancelar actividad</string>
-    <string name="activity_create_success">Actividad creada con éxito.</string>
+    <string name="activity_create_success">Actividad creada correctamente.</string>
     <string name="activity_update_success">Actividad actualizada correctamente.</string>
     <string name="activity_delete_success">Actividad eliminada correctamente.</string>
     <string name="activity_empty_list">No hay actividades disponibles.</string>
 
-    <!-- 🔹 Calendario -->
+    <!-- 📅 Calendario -->
     <string name="calendar_no_events">No hay actividades o citas para este rango.</string>
     <string name="calendar_today">Hoy</string>
     <string name="calendar_select_date">Seleccionar fecha</string>
     <string name="calendar_select_time">Seleccionar hora</string>
 
-    <!-- 🔹 Administración -->
+    <!-- 🧭 Administración -->
     <string name="admin_panel">Panel de administración</string>
     <string name="admin_users">Gestión de usuarios</string>
     <string name="admin_pending">Usuarios pendientes</string>
     <string name="admin_approve">Aprobar usuario</string>
     <string name="admin_reject">Rechazar usuario</string>
 
-    <!-- 🔹 Accesibilidad -->
+    <!-- ♿ Accesibilidad -->
     <string name="content_add_cita">Agregar nueva cita</string>
     <string name="content_add_activity">Agregar nueva actividad</string>
 
-    <!-- 🔹 Confirmaciones -->
+    <!-- 🗑️ Confirmaciones -->
     <string name="dialog_confirm_delete_activity">¿Estás seguro de que deseas eliminar esta actividad?</string>
     <string name="dialog_confirm_delete_cita">¿Estás seguro de que deseas eliminar esta cita?</string>
 
-    <!-- 🔹 Notificaciones -->
+    <!-- 🔔 Notificaciones -->
     <string name="notif_new_activity">Nueva actividad creada</string>
     <string name="notif_activity_updated">Una actividad fue actualizada</string>
     <string name="notif_cita_reminder">Recordatorio de cita</string>
+
+    <!-- 🔑 Google Maps (requerido por el Manifest) -->
+    <string name="google_maps_key">YOUR_API_KEY_HERE</string>
+
 </resources>

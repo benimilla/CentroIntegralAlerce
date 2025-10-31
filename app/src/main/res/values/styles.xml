@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 🔹 Encabezado de día del calendario -->
+    <!-- 🔹 Encabezado del calendario -->
     <style name="DayHeader">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
@@ -25,7 +25,7 @@
         <item name="android:textSize">15sp</item>
     </style>
 
-    <!-- 🔹 Campos de texto (EditText) -->
+    <!-- 🔹 Campos de texto -->
     <style name="RoundedInput">
         <item name="android:background">@drawable/edittext_rounded_bg</item>
         <item name="android:padding">10dp</item>
@@ -34,7 +34,7 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <!-- 🔹 Botones principales -->
+    <!-- 🔹 Botones -->
     <style name="PrimaryButton">
         <item name="android:backgroundTint">@color/button_primary_bg</item>
         <item name="android:textColor">@color/button_primary_text</item>
@@ -43,7 +43,6 @@
         <item name="android:elevation">2dp</item>
     </style>
 
-    <!-- 🔹 Botones secundarios -->
     <style name="SecondaryButton">
         <item name="android:backgroundTint">@color/button_secondary_bg</item>
         <item name="android:textColor">@color/button_secondary_text</item>
@@ -52,7 +51,7 @@
         <item name="android:elevation">0dp</item>
     </style>
 
-    <!-- 🔹 Títulos o encabezados generales -->
+    <!-- 🔹 Encabezados -->
     <style name="SectionTitle">
         <item name="android:textColor">@color/primary_green_700</item>
         <item name="android:textStyle">bold</item>
