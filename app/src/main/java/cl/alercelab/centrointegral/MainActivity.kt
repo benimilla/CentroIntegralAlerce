@@ -11,12 +11,18 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import cl.alercelab.centrointegral.data.Repos
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.content.Context
 
 class MainActivity : AppCompatActivity() {
 
     private val repos = Repos()
     private lateinit var navController: NavController
+    private var snackbar: Snackbar? = null // 👈 Mantiene una sola instancia visible
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +44,9 @@ class MainActivity : AppCompatActivity() {
                 else -> View.VISIBLE
             }
         }
+
+        // 🚀 Monitorear conexión a Internet (nuevo)
+        setupNetworkCallback()
 
         // 🚀 Comenzar flujo de sesión
         lifecycleScope.launch {
@@ -120,5 +129,45 @@ class MainActivity : AppCompatActivity() {
                 else -> navController.popBackStack()
             }
         }
+    }
+
+    // ---------------------------------------------------------------------
+    // 🔹 Detección elegante de conexión a Internet con Snackbar
+    // ---------------------------------------------------------------------
+    private fun setupNetworkCallback() {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                runOnUiThread {
+                    snackbar?.dismiss() // Cierra aviso si vuelve la conexión
+                }
+            }
+
+            override fun onLost(network: Network) {
+                runOnUiThread {
+                    showOfflineBanner()
+                }
+            }
+        }
+
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+    }
+
+    private fun showOfflineBanner() {
+        val rootView = findViewById<View>(android.R.id.content)
+        snackbar = Snackbar.make(rootView, "Sin conexión a Internet ⚠️", Snackbar.LENGTH_INDEFINITE)
+            .setBackgroundTint(0xFFD32F2F.toInt()) // rojo elegante
+            .setTextColor(0xFFFFFFFF.toInt())
+            .setAction("Cerrar") { snackbar?.dismiss() }
+        snackbar?.show()
+    }
+
+    // 🔹 Función auxiliar para verificar conexión desde Fragments
+    fun isNetworkAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }
