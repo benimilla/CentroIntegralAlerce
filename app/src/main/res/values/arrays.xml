@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="repeticion_options">
+        <item>Única</item>
+        <item>Semanal</item>
+        <item>Mensual</item>
+    </string-array>
+
+    <string-array name="asistentes_options">
+        <item>Todos los estudiantes</item>
+        <item>Estudiantes seleccionados</item>
+        <item>Personal docente</item>
+        <item>Apoderados</item>
+    </string-array>
+</resources>

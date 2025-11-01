@@ -44,6 +44,18 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"/>
 
+    <!-- 🟡 Nuevo mensaje visual de estado de cuenta -->
+    <TextView
+        android:id="@+id/tvPending"
+        android:text="Tu cuenta está pendiente de aprobación."
+        android:textColor="#FFA000"
+        android:textStyle="italic"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <TextView
         android:id="@+id/tvForgotPassword"
         android:text="¿Olvidaste tu contraseña?"
