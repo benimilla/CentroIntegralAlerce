@@ -102,4 +102,8 @@
     <color name="colorPrimaryDark">@color/primary_green_dark</color>
     <color name="colorAccent">@color/purple_500</color>
 
+    <color name="text_primary_dark">#212121</color>
+
+
+
 </resources>

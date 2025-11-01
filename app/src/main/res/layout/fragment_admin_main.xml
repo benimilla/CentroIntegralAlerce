@@ -40,14 +40,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/teal_700"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="8dp" />
+
+        <!-- 🔹 Ver auditoría -->
+        <Button
+            android:id="@+id/btnAuditoria"
+            android:text="Ver Auditoría del Sistema"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/purple_500"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp" />
 
         <!-- 🔸 Separador visual -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#AAA"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp" />
 
         <!-- 🔹 Título de mantenedores -->
@@ -95,11 +106,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp" />
-
-        <!-- 🔸 Separador -->
-
-
-
 
     </LinearLayout>
 </ScrollView>

@@ -2,9 +2,7 @@ package cl.alercelab.centrointegral.admin
 
 import android.os.Bundle
 import android.view.*
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,11 +10,14 @@ import androidx.recyclerview.widget.RecyclerView
 import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.data.Repos
 import cl.alercelab.centrointegral.domain.UserProfile
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class AdminPendingFragment : Fragment() {
 
     private lateinit var adapter: PendingAdapter
+    private val repos = Repos()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -26,35 +27,85 @@ class AdminPendingFragment : Fragment() {
         val rv = v.findViewById<RecyclerView>(R.id.rvPending)
         rv.layoutManager = LinearLayoutManager(requireContext())
         adapter = PendingAdapter(
-            onApprove = { uid -> approveUser(uid) },
-            onReject = { uid -> rejectUser(uid) }
+            onApprove = { uid -> approveUser(v, uid) },
+            onReject = { uid -> rejectUser(v, uid) }
         )
         rv.adapter = adapter
-        load()
+        load(v)
         return v
     }
 
-    private fun load() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val result = Repos().listPendingUsers()
+    private fun load(view: View) {
+        lifecycleScope.launch {
+            val result = repos.listPendingUsers()
             adapter.setData(result)
         }
     }
 
-    private fun approveUser(uid: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            Repos().approveUser(uid)
-            Toast.makeText(requireContext(), "Usuario aprobado", Toast.LENGTH_SHORT).show()
-            load()
+    private fun approveUser(view: View, uid: String) {
+        lifecycleScope.launch {
+            try {
+                repos.approveUser(uid)
+                registrarAuditoria(
+                    usuarioId = "admin_local",
+                    usuarioNombre = "Administrador",
+                    modulo = "Usuarios pendientes",
+                    accion = "Aprobación",
+                    entidadId = uid,
+                    descripcion = "Usuario aprobado"
+                )
+                Toast.makeText(requireContext(), "Usuario aprobado", Toast.LENGTH_SHORT).show()
+                load(view)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
-    private fun rejectUser(uid: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            Repos().rejectUser(uid)
-            Toast.makeText(requireContext(), "Usuario rechazado", Toast.LENGTH_SHORT).show()
-            load()
+    private fun rejectUser(view: View, uid: String) {
+        lifecycleScope.launch {
+            try {
+                repos.rejectUser(uid)
+                registrarAuditoria(
+                    usuarioId = "admin_local",
+                    usuarioNombre = "Administrador",
+                    modulo = "Usuarios pendientes",
+                    accion = "Rechazo",
+                    entidadId = uid,
+                    descripcion = "Usuario rechazado"
+                )
+                Toast.makeText(requireContext(), "Usuario rechazado", Toast.LENGTH_SHORT).show()
+                load(view)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
+    }
+
+    /**
+     * 🧾 Guarda registro de auditoría en Firestore.
+     */
+    private suspend fun registrarAuditoria(
+        usuarioId: String,
+        usuarioNombre: String,
+        modulo: String,
+        accion: String,
+        entidadId: String,
+        descripcion: String,
+        cambios: Map<String, Any>? = null
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        val registro = mapOf(
+            "usuarioId" to usuarioId,
+            "usuarioNombre" to usuarioNombre,
+            "modulo" to modulo,
+            "accion" to accion,
+            "entidadId" to entidadId,
+            "descripcion" to descripcion,
+            "cambios" to (cambios ?: emptyMap<String, Any>()),
+            "fecha" to System.currentTimeMillis()
+        )
+        db.collection("auditoria").add(registro).await()
     }
 
     class PendingAdapter(

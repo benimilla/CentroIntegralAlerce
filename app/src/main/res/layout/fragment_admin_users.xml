@@ -1,22 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="12dp"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_light"
+    android:padding="16dp"
+    tools:context=".admin.AdminUsersFragment">
 
+    <!-- 🔹 Título -->
     <TextView
-        android:text="Gestión de Usuarios"
-        android:textStyle="bold"
-        android:textSize="18sp"
+        android:id="@+id/tvTitulo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp" />
+        android:text="Gestión de Usuarios"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_green_dark"
+        android:gravity="center"
+        android:paddingVertical="12dp"
+        android:layout_marginBottom="16dp" />
 
+    <!-- 🔹 Botón para crear nuevo usuario -->
+    <Button
+        android:id="@+id/btnNuevoUsuario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="➕ Nuevo Usuario"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:backgroundTint="@color/primary_green"
+        android:paddingVertical="10dp"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 🔹 Filtro de roles -->
+    <Spinner
+        android:id="@+id/spinnerRol"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_spinner"
+        android:popupBackground="@color/bg_card"
+        android:padding="8dp" />
+
+    <!-- 🔹 Lista de usuarios -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvUsers"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
 
 </LinearLayout>

@@ -19,9 +19,12 @@ class AdminMainFragment : Fragment() {
     ): View {
         val v = inflater.inflate(R.layout.fragment_admin_main, container, false)
 
+        // =========================================================
         // 🔹 BOTONES PRINCIPALES
+        // =========================================================
         val btnGestion = v.findViewById<Button>(R.id.btnGestionUsuarios)
         val btnPermitir = v.findViewById<Button>(R.id.btnPermitirUsuarios)
+        val btnAuditoria = v.findViewById<Button>(R.id.btnAuditoria)
 
         btnGestion.setOnClickListener {
             Toast.makeText(requireContext(), "Abriendo gestión de usuarios...", Toast.LENGTH_SHORT).show()
@@ -33,7 +36,14 @@ class AdminMainFragment : Fragment() {
             findNavController().navigate(R.id.action_adminMain_to_adminPending)
         }
 
-        // 🔹 MANTENEDORES (IDs corregidos para coincidir con tu XML)
+        btnAuditoria.setOnClickListener {
+            Toast.makeText(requireContext(), "Abriendo auditoría del sistema...", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_adminMain_to_auditoria)
+        }
+
+        // =========================================================
+        // 🔹 MANTENEDORES
+        // =========================================================
         val btnTipoActividad = v.findViewById<Button>(R.id.btnTipoActividad)
         val btnLugares = v.findViewById<Button>(R.id.btnLugares)
         val btnOferentes = v.findViewById<Button>(R.id.btnOferentes)

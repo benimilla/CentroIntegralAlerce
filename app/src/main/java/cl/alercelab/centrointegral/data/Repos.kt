@@ -419,6 +419,46 @@ class Repos {
             false
         }
     }
+
+
+    // -----------------------------------------------------------
+    // 🔹 AUDITORIA
+    // -----------------------------------------------------------
+
+    suspend fun registrarAuditoria(
+        usuarioId: String,
+        usuarioNombre: String,
+        modulo: String,
+        accion: String,
+        entidadId: String,
+        descripcion: String,
+        cambios: Map<String, String> = emptyMap()
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        val docRef = db.collection("auditoria").document()
+        val registro = Auditoria(
+            id = docRef.id,
+            usuarioId = usuarioId,
+            usuarioNombre = usuarioNombre,
+            fecha = System.currentTimeMillis(),
+            modulo = modulo,
+            accion = accion,
+            entidadId = entidadId,
+            descripcion = descripcion,
+            cambios = cambios
+        )
+        db.collection("auditoria").document(docRef.id).set(registro)
+    }
+
+    suspend fun obtenerAuditoria(): List<Auditoria> {
+        val db = FirebaseFirestore.getInstance()
+        val snapshot = db.collection("auditoria")
+            .orderBy("fecha", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get()
+            .await()
+        return snapshot.toObjects(Auditoria::class.java)
+    }
+
 }
 
 /** 🔸 Auxiliar para devolver 4 listas */

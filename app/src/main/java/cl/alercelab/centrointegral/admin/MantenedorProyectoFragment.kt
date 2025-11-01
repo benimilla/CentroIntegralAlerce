@@ -16,7 +16,7 @@ import cl.alercelab.centrointegral.domain.Proyecto
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
-class MantenedorProyectoFragment : Fragment() {
+class MantenedorProyectoFragment : BaseMantenedorFragment() {
 
     private val repo = Repos()
     private lateinit var recycler: RecyclerView

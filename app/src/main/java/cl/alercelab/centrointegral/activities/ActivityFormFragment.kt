@@ -77,14 +77,13 @@ class ActivityFormFragment : Fragment() {
         progressBar = v.findViewById(R.id.progressBar)
     }
 
-    /** 🌀 Inicializa los spinners de periodicidad, frecuencia y estado */
+    /** 🌀 Inicializa los spinners */
     private fun inicializarSpinners() {
         val periodicidades = listOf("Única", "Semanal", "Mensual")
         val adapterPeriodicidad = ArrayAdapter(requireContext(), R.layout.spinner_item_custom, periodicidades)
         adapterPeriodicidad.setDropDownViewResource(R.layout.spinner_item_custom)
         spPeriodicidad.adapter = adapterPeriodicidad
 
-        // Maneja el cambio de periodicidad
         spPeriodicidad.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 when (periodicidades[pos]) {
@@ -109,7 +108,6 @@ class ActivityFormFragment : Fragment() {
         }
     }
 
-    /** 🔄 Muestra el bloque de frecuencia solo si aplica */
     private fun mostrarOpcionesFrecuencia(opciones: List<String>) {
         layoutFrecuencia.visibility = View.VISIBLE
         val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item_custom, opciones)
@@ -117,7 +115,6 @@ class ActivityFormFragment : Fragment() {
         spFrecuencia.adapter = adapter
     }
 
-    /** ⚙️ Configura botones y observadores */
     private fun configurarEventos() {
         btnAgregarCita.setOnClickListener {
             val bundle = Bundle().apply { putBoolean("desdeActividad", true) }
@@ -126,7 +123,6 @@ class ActivityFormFragment : Fragment() {
 
         btnGuardar.setOnClickListener { guardarActividad() }
 
-        // Recibe cita nueva desde CitaFormFragment
         findNavController().currentBackStackEntry?.savedStateHandle
             ?.getLiveData<Cita>("nuevaCita")
             ?.observe(viewLifecycleOwner) { cita ->
@@ -134,7 +130,6 @@ class ActivityFormFragment : Fragment() {
                     observaciones = cita.observaciones?.trim().takeUnless { it.isNullOrEmpty() } ?: ""
                 )
                 citas.add(normalizada)
-
                 val ultima = citas.lastOrNull()
                 val fecha = ultima?.let {
                     SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(it.fechaInicioMillis))
@@ -147,7 +142,6 @@ class ActivityFormFragment : Fragment() {
             }
     }
 
-    /** 📦 Carga listas de oferentes, lugares, etc. */
     private fun cargarListasDesplegables() {
         lifecycleScope.launch {
             try {
@@ -169,7 +163,6 @@ class ActivityFormFragment : Fragment() {
         }
     }
 
-    /** 🧭 Carga datos de una actividad existente para editarla */
     private fun cargarActividadExistente(id: String) {
         lifecycleScope.launch {
             progressBar.visibility = View.VISIBLE
@@ -187,26 +180,22 @@ class ActivityFormFragment : Fragment() {
                     if (posEstado >= 0) spEstado.setSelection(posEstado)
                     etMotivoCancelacion.setText(act.motivoCancelacion ?: "")
 
-                    // ✅ Actualizar periodicidad y frecuencia
                     val periodicidades = listOf("Única", "Semanal", "Mensual")
                     val posPeriodicidad = periodicidades.indexOf(act.periodicidad)
                     if (posPeriodicidad >= 0) spPeriodicidad.setSelection(posPeriodicidad)
 
-                    // Mostrar opciones de frecuencia según periodicidad
                     when (act.periodicidad) {
                         "Semanal" -> mostrarOpcionesFrecuencia(listOf("Cada semana", "1 semana sí / 1 no", "Cada 3 semanas"))
                         "Mensual" -> mostrarOpcionesFrecuencia(listOf("Cada mes", "Cada 2 meses", "Cada 3 meses"))
                         else -> layoutFrecuencia.visibility = View.GONE
                     }
 
-                    // Seleccionar frecuencia si existe
                     act.frecuencia?.let { freq ->
                         val adapter = spFrecuencia.adapter as? ArrayAdapter<String>
                         val posFreq = adapter?.getPosition(freq) ?: -1
                         if (posFreq >= 0) spFrecuencia.setSelection(posFreq)
                     }
 
-                    // Cargar citas asociadas desde Firestore
                     val citasAsociadas = repos.obtenerCitasPorActividad(act.id)
                     citas.clear()
                     citas.addAll(citasAsociadas)
@@ -220,7 +209,6 @@ class ActivityFormFragment : Fragment() {
         }
     }
 
-    /** 💾 Validación y guardado final de la actividad */
     private fun guardarActividad() {
         val nombre = etNombre.text.toString().trim()
         val tipo = spTipo.selectedItem?.toString()?.trim() ?: ""
@@ -246,10 +234,6 @@ class ActivityFormFragment : Fragment() {
             estado == "cancelada" && motivoCancelacion.isNullOrBlank() -> { mostrarError("Debes indicar el motivo de cancelación"); return }
         }
 
-        if (citas.isEmpty()) {
-            Toast.makeText(requireContext(), "Nota: no se agregaron citas a esta actividad aún.", Toast.LENGTH_SHORT).show()
-        }
-
         guardarEnFirestore(
             nombre, tipo, periodicidad, frecuencia, cupo, oferente, socio,
             beneficiarios, diasAviso, lugar, duracion, estado, motivoCancelacion
@@ -260,7 +244,6 @@ class ActivityFormFragment : Fragment() {
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
     }
 
-    /** 🚀 Guarda o actualiza la actividad en Firestore */
     private fun guardarEnFirestore(
         nombre: String, tipo: String, periodicidad: String, frecuencia: String?, cupo: Int?, oferente: String?,
         socio: String?, beneficiarios: List<String>, diasAviso: Int, lugar: String, duracion: Int?,
@@ -291,18 +274,34 @@ class ActivityFormFragment : Fragment() {
                 btnGuardar.isEnabled = false
                 btnAgregarCita.isEnabled = false
 
+                val accion: String
                 if (actividadExistente == null) {
                     repos.crearActividadConCitas(actividad, citas)
+                    accion = "Creación"
                 } else {
                     repos.actualizarActividad(actividad.id, actividad.copy(citas = emptyList()))
                     if (citas.isNotEmpty()) {
                         for (c in citas) {
-                            if (c.id.isBlank()) {
-                                repos.crearCita(c.copy(actividadId = actividad.id))
-                            }
+                            if (c.id.isBlank()) repos.crearCita(c.copy(actividadId = actividad.id))
                         }
                     }
+                    accion = "Edición"
                 }
+
+                // 🔹 Registrar auditoría
+                repos.registrarAuditoria(
+                    usuarioId = "admin123", // reemplaza por el usuario actual
+                    usuarioNombre = "Administrador",
+                    modulo = "Actividades",
+                    accion = accion,
+                    entidadId = actividad.id,
+                    descripcion = "Se realizó una $accion de la actividad '${actividad.nombre}' (${actividad.periodicidad})",
+                    cambios = mapOf(
+                        "Lugar" to actividad.lugar,
+                        "Duración" to "${actividad.duracionMin} min",
+                        "Estado" to actividad.estado
+                    )
+                )
 
                 Toast.makeText(requireContext(), "Actividad guardada correctamente", Toast.LENGTH_SHORT).show()
                 findNavController().navigateUp()

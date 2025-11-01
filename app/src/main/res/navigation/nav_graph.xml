@@ -79,7 +79,6 @@
         android:label="Detalle de Cita"
         tools:layout="@layout/fragment_cita_detalle">
 
-        <!-- ✅ Acción nueva: permite abrir el formulario para editar -->
         <action
             android:id="@+id/action_citaDetalleFragment_to_citaFormFragment"
             app:destination="@id/citaFormFragment" />
@@ -146,7 +145,7 @@
         tools:layout="@layout/fragment_settings" />
 
     <!-- ======================================================= -->
-    <!-- 🔹 ADMINISTRACIÓN GENERAL -->
+    <!-- 🔹 ADMINISTRACIÓN -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/adminMainFragment"
@@ -181,6 +180,11 @@
         <action
             android:id="@+id/action_adminMain_to_mantenedorProyecto"
             app:destination="@id/mantenedorProyecto" />
+
+        <!-- ✅ Acción de Auditoría -->
+        <action
+            android:id="@+id/action_adminMain_to_auditoria"
+            app:destination="@id/auditoriaFragment" />
     </fragment>
 
     <fragment
@@ -189,11 +193,20 @@
         android:label="Usuarios Pendientes"
         tools:layout="@layout/fragment_admin_pending" />
 
+    <!-- ======================================================= -->
+    <!-- 🔹 GESTIÓN DE USUARIOS -->
+    <!-- ======================================================= -->
     <fragment
         android:id="@+id/adminUsersFragment"
         android:name="cl.alercelab.centrointegral.admin.AdminUsersFragment"
         android:label="Gestión de Usuarios"
-        tools:layout="@layout/fragment_admin_users" />
+        tools:layout="@layout/fragment_admin_users">
+
+        <!-- ✅ Nueva acción para crear usuario -->
+        <action
+            android:id="@+id/action_adminUsers_to_registerFragment"
+            app:destination="@id/registerFragment" />
+    </fragment>
 
     <!-- ======================================================= -->
     <!-- 🔹 MANTENEDORES -->
@@ -227,4 +240,14 @@
         android:name="cl.alercelab.centrointegral.admin.MantenedorProyectoFragment"
         android:label="Mantenedor - Proyectos"
         tools:layout="@layout/fragment_mantenedor_list" />
+
+    <!-- ======================================================= -->
+    <!-- 🔹 AUDITORÍA -->
+    <!-- ======================================================= -->
+    <fragment
+        android:id="@+id/auditoriaFragment"
+        android:name="cl.alercelab.centrointegral.admin.AuditoriaFragment"
+        android:label="Auditoría del Sistema"
+        tools:layout="@layout/fragment_auditoria" />
+
 </navigation>

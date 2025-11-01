@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +21,6 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.ceil
-import android.util.Log
 
 class CitaFormFragment : Fragment() {
 
@@ -37,7 +37,6 @@ class CitaFormFragment : Fragment() {
     private lateinit var btnEliminar: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var tvTituloCita: TextView
-
     private lateinit var tvPeriodicidad: TextView
 
     private val repos = Repos()
@@ -47,18 +46,12 @@ class CitaFormFragment : Fragment() {
 
     private val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_cita_form, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Inicializar vistas
         spActividad = view.findViewById(R.id.spActividad)
         tvLugar = view.findViewById(R.id.tvLugar)
         tvAvisoPrevio = view.findViewById(R.id.tvAvisoPrevio)
@@ -73,13 +66,11 @@ class CitaFormFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         tvTituloCita = view.findViewById(R.id.tvTituloCita)
         tvPeriodicidad = view.findViewById(R.id.tvPeriodicidad)
+
         configurarPickers()
         configurarSpinnerEstado()
 
-        // Guardar cita si viene desde detalle
         citaExistente = arguments?.getSerializable("cita") as? Cita
-
-        // Cambiar título según contexto
         if (citaExistente != null) {
             tvTituloCita.text = "Edición de Cita"
             btnGuardar.text = "Actualizar"
@@ -88,12 +79,10 @@ class CitaFormFragment : Fragment() {
         }
 
         cargarActividades()
-
         btnGuardar.setOnClickListener { guardarCita() }
         btnEliminar.setOnClickListener { confirmarEliminacion() }
     }
 
-    /** 📅 Configura los pickers de fecha y hora */
     private fun configurarPickers() {
         etFecha.setOnClickListener {
             val c = Calendar.getInstance()
@@ -121,7 +110,6 @@ class CitaFormFragment : Fragment() {
         etHoraFin.setOnClickListener { timePicker(etHoraFin) }
     }
 
-    /** 🔹 Configura el spinner de estados */
     private fun configurarSpinnerEstado() {
         val adapterEstado = ArrayAdapter.createFromResource(
             requireContext(),
@@ -131,14 +119,12 @@ class CitaFormFragment : Fragment() {
         adapterEstado.setDropDownViewResource(R.layout.item_spinner_estado)
         spEstado.adapter = adapterEstado
 
-        // Estado por defecto "Pendiente" si es nueva cita
         if (citaExistente == null) {
             val index = adapterEstado.getPosition("Pendiente")
             if (index >= 0) spEstado.setSelection(index)
         }
     }
 
-    /** 🔹 Carga todas las actividades disponibles */
     private fun cargarActividades() {
         lifecycleScope.launch {
             progressBar.visibility = View.VISIBLE
@@ -150,30 +136,19 @@ class CitaFormFragment : Fragment() {
                 }
 
                 val nombres = actividades.map { it.nombre }
-
-                val adapter = ArrayAdapter(
-                    requireContext(),
-                    R.layout.item_spinner_actividad,
-                    nombres
-                )
+                val adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_actividad, nombres)
                 adapter.setDropDownViewResource(R.layout.item_spinner_actividad)
                 spActividad.adapter = adapter
 
                 spActividad.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        actividadSeleccionada = actividades[position]
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                        actividadSeleccionada = actividades[pos]
                         actualizarInfoActividad()
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>?) {}
                 }
 
-                // Si venimos desde "Editar cita"
                 citaExistente?.let { cita ->
                     val index = actividades.indexOfFirst { it.id == cita.actividadId }
                     if (index >= 0) {
@@ -183,7 +158,6 @@ class CitaFormFragment : Fragment() {
                         cargarDatosCita(cita)
                     }
                 }
-
             } catch (e: Exception) {
                 toast("Error al cargar actividades: ${e.message}")
             } finally {
@@ -192,7 +166,6 @@ class CitaFormFragment : Fragment() {
         }
     }
 
-    /**  Muestra datos de la actividad seleccionada */
     private fun actualizarInfoActividad() {
         actividadSeleccionada?.let {
             tvLugar.text = "Lugar: ${it.lugar}"
@@ -200,10 +173,9 @@ class CitaFormFragment : Fragment() {
             tvDuracionMax.text = "Duración máxima: ${it.duracionMin ?: 0} min"
             tvPeriodicidad.text = "Periodicidad: ${it.periodicidad ?: "-"}"
         }
+
     }
 
-
-    /** 🧾 Carga datos al editar una cita existente */
     private fun cargarDatosCita(cita: Cita) {
         val fecha = formato.format(Date(cita.fechaInicioMillis)).split(" ")[0]
         val horaInicio = formato.format(Date(cita.fechaInicioMillis)).split(" ")[1]
@@ -221,10 +193,9 @@ class CitaFormFragment : Fragment() {
         btnEliminar.visibility = View.VISIBLE
     }
 
-    /** 💾 Guarda o actualiza la cita */
+    /** 💾 Guarda o actualiza una cita con auditoría */
     private fun guardarCita() {
-        val actividad = actividadSeleccionada
-        if (actividad == null) {
+        val actividad = actividadSeleccionada ?: run {
             toast("Selecciona una actividad antes de continuar.")
             return
         }
@@ -232,7 +203,6 @@ class CitaFormFragment : Fragment() {
         val fecha = etFecha.text.toString().trim()
         val horaInicio = etHoraInicio.text.toString().trim()
         val horaFin = etHoraFin.text.toString().trim()
-
         if (fecha.isEmpty() || horaInicio.isEmpty() || horaFin.isEmpty()) {
             toast("Completa la fecha y las horas de inicio y fin.")
             return
@@ -241,12 +211,10 @@ class CitaFormFragment : Fragment() {
         val inicio: Long
         val fin: Long
         try {
-            inicio = formato.parse("$fecha $horaInicio")?.time
-                ?: run { toast("Fecha u hora inválida."); return }
-            fin = formato.parse("$fecha $horaFin")?.time
-                ?: run { toast("Fecha u hora inválida."); return }
+            inicio = formato.parse("$fecha $horaInicio")?.time ?: return toast("Fecha inválida").run {}
+            fin = formato.parse("$fecha $horaFin")?.time ?: return toast("Hora inválida").run {}
         } catch (e: ParseException) {
-            toast("Formato de fecha/hora inválido.")
+            toast("Formato de fecha u hora inválido.")
             return
         }
 
@@ -280,6 +248,8 @@ class CitaFormFragment : Fragment() {
                     return@launch
                 }
 
+                val accion: String
+                val citaId: String
                 if (citaExistente == null) {
                     val nuevaCita = Cita(
                         actividadId = actividad.id,
@@ -291,13 +261,13 @@ class CitaFormFragment : Fragment() {
                         estado = estadoSeleccionado
                     )
                     repos.crearCita(nuevaCita)
-                    toast("✅ Cita creada correctamente.")
+                    citaId = nuevaCita.id
+                    accion = "Creación"
+                    toast(" Cita creada correctamente.")
 
-                    // Generar repeticiones si aplica
                     if (actividad.periodicidad != null && actividad.periodicidad != "Única") {
                         generarRepeticiones(actividad, inicio, fin)
                     }
-
                 } else {
                     val citaEditada = citaExistente!!.copy(
                         actividadId = actividad.id,
@@ -310,15 +280,29 @@ class CitaFormFragment : Fragment() {
                         ultimaActualizacion = System.currentTimeMillis()
                     )
                     repos.actualizarCita(citaEditada.id, citaEditada)
-                    toast("✅ Cita actualizada correctamente.")
+                    citaId = citaEditada.id
+                    accion = "Edición"
+                    toast(" Cita actualizada correctamente.")
                 }
 
-                findNavController().previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("citaGuardada", true)
+                // 🔹 Registrar auditoría
+                repos.registrarAuditoria(
+                    usuarioId = "admin123", // reemplaza por usuario real
+                    usuarioNombre = "Administrador",
+                    modulo = "Citas",
+                    accion = accion,
+                    entidadId = citaId,
+                    descripcion = "Se realizó una $accion de la cita de la actividad '${actividad.nombre}' (${actividad.lugar})",
+                    cambios = mapOf(
+                        "Estado" to estadoSeleccionado,
+                        "Fecha" to fecha,
+                        "Hora Inicio" to horaInicio,
+                        "Hora Fin" to horaFin
+                    )
+                )
 
+                findNavController().previousBackStackEntry?.savedStateHandle?.set("citaGuardada", true)
                 findNavController().navigateUp()
-
             } catch (e: Exception) {
                 Log.e("CITA_FORM", "Error al guardar cita", e)
                 toast("Error al guardar cita: ${e.message}")
@@ -328,54 +312,49 @@ class CitaFormFragment : Fragment() {
         }
     }
 
-    /** 🔁 Genera automáticamente repeticiones semanales o mensuales */
     private suspend fun generarRepeticiones(actividad: Actividad, inicioBase: Long, finBase: Long) {
-        val calendarioInicio = Calendar.getInstance()
-        val calendarioFin = Calendar.getInstance()
-        calendarioInicio.timeInMillis = inicioBase
-        calendarioFin.timeInMillis = finBase
+        val calInicio = Calendar.getInstance()
+        val calFin = Calendar.getInstance()
+        calInicio.timeInMillis = inicioBase
+        calFin.timeInMillis = finBase
 
         val repeticiones = mutableListOf<Cita>()
-        val cantidadRepeticiones = when (actividad.periodicidad) {
-            "Semanal" -> 4  // 4 semanas
-            "Mensual" -> 3  // 3 meses
+        val cantidad = when (actividad.periodicidad) {
+            "Semanal" -> 4
+            "Mensual" -> 3
             else -> 0
         }
 
-        repeat(cantidadRepeticiones) {
+        repeat(cantidad) {
             when (actividad.periodicidad) {
                 "Semanal" -> {
-                    calendarioInicio.add(Calendar.WEEK_OF_YEAR, 1)
-                    calendarioFin.add(Calendar.WEEK_OF_YEAR, 1)
+                    calInicio.add(Calendar.WEEK_OF_YEAR, 1)
+                    calFin.add(Calendar.WEEK_OF_YEAR, 1)
                 }
                 "Mensual" -> {
-                    calendarioInicio.add(Calendar.MONTH, 1)
-                    calendarioFin.add(Calendar.MONTH, 1)
+                    calInicio.add(Calendar.MONTH, 1)
+                    calFin.add(Calendar.MONTH, 1)
                 }
             }
 
-            val citaRepetida = Cita(
+            val repetida = Cita(
                 actividadId = actividad.id,
-                fechaInicioMillis = calendarioInicio.timeInMillis,
-                fechaFinMillis = calendarioFin.timeInMillis,
+                fechaInicioMillis = calInicio.timeInMillis,
+                fechaFinMillis = calFin.timeInMillis,
                 lugar = actividad.lugar,
                 observaciones = "Repetición automática (${actividad.periodicidad?.lowercase()})",
                 duracionMin = actividad.duracionMin,
                 estado = "Pendiente"
             )
-
-            repeticiones.add(citaRepetida)
+            repeticiones.add(repetida)
         }
 
         if (repeticiones.isNotEmpty()) {
-            for (cita in repeticiones) {
-                repos.crearCita(cita)
-            }
+            for (cita in repeticiones) repos.crearCita(cita)
             toast("🔁 ${repeticiones.size} citas recurrentes creadas automáticamente.")
         }
     }
 
-    /** 🗑️ Confirmar eliminación */
     private fun confirmarEliminacion() {
         AlertDialog.Builder(requireContext())
             .setTitle("Eliminar cita")
@@ -385,7 +364,6 @@ class CitaFormFragment : Fragment() {
             .show()
     }
 
-    /** ❌ Elimina la cita */
     private fun eliminarCita() {
         citaExistente?.let { cita ->
             lifecycleScope.launch {
@@ -393,6 +371,17 @@ class CitaFormFragment : Fragment() {
                 try {
                     repos.eliminarCita(cita.id)
                     toast("🗑️ Cita eliminada correctamente.")
+
+                    // 🔹 Registrar auditoría de eliminación
+                    repos.registrarAuditoria(
+                        usuarioId = "admin123",
+                        usuarioNombre = "Administrador",
+                        modulo = "Citas",
+                        accion = "Eliminación",
+                        entidadId = cita.id,
+                        descripcion = "Se eliminó la cita de la actividad '${actividadSeleccionada?.nombre}' en ${cita.lugar}"
+                    )
+
                     findNavController().navigateUp()
                 } catch (e: Exception) {
                     toast("Error al eliminar cita: ${e.message}")
@@ -403,7 +392,6 @@ class CitaFormFragment : Fragment() {
         }
     }
 
-    /** ⏳ Calcula diferencia de días */
     private fun diasEntreAhoraY(futuroMillis: Long): Int {
         val ahora = System.currentTimeMillis()
         val diffMs = futuroMillis - ahora

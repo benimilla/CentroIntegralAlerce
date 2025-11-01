@@ -4,11 +4,13 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 
 /**
  * Clase base para todos los mantenedores del módulo Admin.
- * Proporciona manejo centralizado de corrutinas, errores y notificaciones.
+ * Proporciona manejo centralizado de corrutinas, errores, notificaciones y registro de auditoría.
  */
 abstract class BaseMantenedorFragment : Fragment() {
 
@@ -75,6 +77,53 @@ abstract class BaseMantenedorFragment : Fragment() {
                 onError(e)
             }
         }
+    }
+
+    /**
+     * 🔍 Registra una acción de auditoría en Firestore.
+     *
+     * Este método puede ser invocado por cualquier mantenedor que herede de esta clase.
+     *
+     * @param usuarioId ID del usuario que realiza la acción.
+     * @param usuarioNombre Nombre del usuario.
+     * @param modulo Nombre del módulo (Ej: "Citas", "Actividades", "Usuarios").
+     * @param accion Tipo de acción ("Creación", "Edición", "Eliminación", etc.).
+     * @param entidadId ID del objeto afectado.
+     * @param descripcion Texto descriptivo del cambio realizado.
+     * @param cambios Mapa opcional con los campos modificados (clave = campo, valor = nuevo valor).
+     */
+    protected fun registrarAuditoria(
+        usuarioId: String,
+        usuarioNombre: String,
+        modulo: String,
+        accion: String,
+        entidadId: String,
+        descripcion: String,
+        cambios: Map<String, Any>? = null
+    ) {
+        launchIO(
+            block = {
+                val auditoria = mapOf(
+                    "usuarioId" to usuarioId,
+                    "usuarioNombre" to usuarioNombre,
+                    "modulo" to modulo,
+                    "accion" to accion,
+                    "entidadId" to entidadId,
+                    "descripcion" to descripcion,
+                    "cambios" to (cambios ?: emptyMap<String, Any>()),
+                    "fecha" to System.currentTimeMillis()
+                )
+                val db = FirebaseFirestore.getInstance()
+                db.collection("auditoria").add(auditoria).await()
+                true
+            },
+            onResult = {
+                view?.let { showSuccess(it, "Registro de auditoría guardado") }
+            },
+            onError = { e ->
+                view?.let { showError(it, e) }
+            }
+        )
     }
 
     override fun onDestroyView() {

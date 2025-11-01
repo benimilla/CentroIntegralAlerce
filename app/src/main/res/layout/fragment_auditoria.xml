@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutAuditoria"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/background_light"
+    tools:context=".admin.AuditoriaFragment">
+
+    <!-- 🔹 Título -->
+    <TextView
+        android:id="@+id/tvTituloAuditoria"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Auditoría del Sistema"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 🔹 Contenedor de filtros -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:weightSum="2">
+
+        <Spinner
+            android:id="@+id/spModulo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:spinnerMode="dropdown"
+            android:layout_marginEnd="8dp" />
+
+        <Spinner
+            android:id="@+id/spAccion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
+    <!-- 🔹 Botones -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="12dp">
+
+        <Button
+            android:id="@+id/btnFiltrar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Filtrar"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/btnLimpiar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Limpiar"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+    <!-- 🔹 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerAuditoria"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        tools:listitem="@layout/item_auditoria" />
+
+    <!-- 🔹 Texto para mensajes de vacío o error -->
+    <TextView
+        android:id="@+id/tvVacio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No hay registros disponibles"
+        android:textSize="16sp"
+        android:textAlignment="center"
+        android:textColor="@android:color/darker_gray"
+        android:visibility="gone"
+        android:layout_marginTop="12dp" />
+
+    <!-- 🔹 Indicador de carga -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:visibility="gone" />
+
+</LinearLayout>
