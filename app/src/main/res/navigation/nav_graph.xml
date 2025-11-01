@@ -6,7 +6,7 @@
     app:startDestination="@id/loginFragment">
 
     <!-- ======================================================= -->
-    <!-- 🔹 AUTENTICACIÓN                                        -->
+    <!-- 🔹 AUTENTICACIÓN -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/loginFragment"
@@ -50,7 +50,7 @@
         tools:layout="@layout/fragment_forgot_password" />
 
     <!-- ======================================================= -->
-    <!-- 🔹 CALENDARIO Y CITAS                                   -->
+    <!-- 🔹 CALENDARIO Y CITAS -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/calendarFragment"
@@ -70,17 +70,23 @@
     <fragment
         android:id="@+id/citaFormFragment"
         android:name="cl.alercelab.centrointegral.activities.CitaFormFragment"
-        android:label="Nueva cita"
+        android:label="Formulario de Cita"
         tools:layout="@layout/fragment_cita_form" />
 
     <fragment
         android:id="@+id/citaDetalleFragment"
         android:name="cl.alercelab.centrointegral.calendar.CitaDetalleFragment"
-        android:label="Detalle de cita"
-        tools:layout="@layout/fragment_cita_detalle" />
+        android:label="Detalle de Cita"
+        tools:layout="@layout/fragment_cita_detalle">
+
+        <!-- ✅ Acción nueva: permite abrir el formulario para editar -->
+        <action
+            android:id="@+id/action_citaDetalleFragment_to_citaFormFragment"
+            app:destination="@id/citaFormFragment" />
+    </fragment>
 
     <!-- ======================================================= -->
-    <!-- 🔹 ACTIVIDADES                                          -->
+    <!-- 🔹 ACTIVIDADES -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/activitiesFragment"
@@ -104,13 +110,13 @@
     <fragment
         android:id="@+id/activityDetailFragment"
         android:name="cl.alercelab.centrointegral.activities.ActivityDetailFragment"
-        android:label="Detalle de actividad"
+        android:label="Detalle de Actividad"
         tools:layout="@layout/fragment_activity_detail" />
 
     <fragment
         android:id="@+id/activityFormFragment"
         android:name="cl.alercelab.centrointegral.activities.ActivityFormFragment"
-        android:label="Nueva actividad"
+        android:label="Nueva Actividad"
         tools:layout="@layout/fragment_activity_form">
 
         <action
@@ -127,11 +133,11 @@
     <fragment
         android:id="@+id/activityRescheduleFragment"
         android:name="cl.alercelab.centrointegral.activities.ActivityRescheduleFragment"
-        android:label="Reagendar cita"
+        android:label="Reagendar Cita"
         tools:layout="@layout/fragment_activity_reschedule" />
 
     <!-- ======================================================= -->
-    <!-- 🔹 CONFIGURACIÓN                                        -->
+    <!-- 🔹 CONFIGURACIÓN -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/settingsFragment"
@@ -140,12 +146,12 @@
         tools:layout="@layout/fragment_settings" />
 
     <!-- ======================================================= -->
-    <!-- 🔹 ADMINISTRACIÓN GENERAL                               -->
+    <!-- 🔹 ADMINISTRACIÓN GENERAL -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/adminMainFragment"
         android:name="cl.alercelab.centrointegral.admin.AdminMainFragment"
-        android:label="Panel de administración"
+        android:label="Panel de Administración"
         tools:layout="@layout/fragment_admin_main">
 
         <action
@@ -156,72 +162,41 @@
             android:id="@+id/action_adminMain_to_adminPending"
             app:destination="@id/adminPendingFragment" />
 
-        <!-- ✅ Acciones a mantenedores -->
         <action
             android:id="@+id/action_adminMain_to_mantenedorTipoActividad"
-            app:destination="@id/mantenedorTipoActividad"
-            app:popUpTo="@id/adminMainFragment"
-            app:launchSingleTop="true"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+            app:destination="@id/mantenedorTipoActividad" />
 
         <action
             android:id="@+id/action_adminMain_to_mantenedorLugar"
-            app:destination="@id/mantenedorLugar"
-            app:popUpTo="@id/adminMainFragment"
-            app:launchSingleTop="true"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+            app:destination="@id/mantenedorLugar" />
 
         <action
             android:id="@+id/action_adminMain_to_mantenedorOferente"
-            app:destination="@id/mantenedorOferente"
-            app:popUpTo="@id/adminMainFragment"
-            app:launchSingleTop="true"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+            app:destination="@id/mantenedorOferente" />
 
         <action
             android:id="@+id/action_adminMain_to_mantenedorSocio"
-            app:destination="@id/mantenedorSocio"
-            app:popUpTo="@id/adminMainFragment"
-            app:launchSingleTop="true"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+            app:destination="@id/mantenedorSocio" />
 
         <action
             android:id="@+id/action_adminMain_to_mantenedorProyecto"
-            app:destination="@id/mantenedorProyecto"
-            app:popUpTo="@id/adminMainFragment"
-            app:launchSingleTop="true"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+            app:destination="@id/mantenedorProyecto" />
     </fragment>
 
     <fragment
         android:id="@+id/adminPendingFragment"
         android:name="cl.alercelab.centrointegral.admin.AdminPendingFragment"
-        android:label="Usuarios pendientes"
+        android:label="Usuarios Pendientes"
         tools:layout="@layout/fragment_admin_pending" />
 
     <fragment
         android:id="@+id/adminUsersFragment"
         android:name="cl.alercelab.centrointegral.admin.AdminUsersFragment"
-        android:label="Gestión de usuarios"
+        android:label="Gestión de Usuarios"
         tools:layout="@layout/fragment_admin_users" />
 
     <!-- ======================================================= -->
-    <!-- 🔹 MANTENEDORES (corrige rutas a su subpaquete real)     -->
+    <!-- 🔹 MANTENEDORES -->
     <!-- ======================================================= -->
     <fragment
         android:id="@+id/mantenedorTipoActividad"
@@ -252,5 +227,4 @@
         android:name="cl.alercelab.centrointegral.admin.MantenedorProyectoFragment"
         android:label="Mantenedor - Proyectos"
         tools:layout="@layout/fragment_mantenedor_list" />
-
 </navigation>

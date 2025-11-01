@@ -55,7 +55,6 @@
                 android:padding="8dp"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Información visual de la actividad -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -88,6 +87,17 @@
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:paddingVertical="2dp" />
+
+            <TextView
+                android:id="@+id/tvPeriodicidad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Periodicidad: -"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:paddingVertical="2dp" />
+
+
         </LinearLayout>
 
         <!-- 🔸 SECCIÓN: Datos de la cita -->
@@ -108,7 +118,6 @@
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp" />
 
-            <!-- Fecha -->
             <EditText
                 android:id="@+id/etFecha"
                 android:layout_width="match_parent"
@@ -123,7 +132,6 @@
                 android:padding="10dp"
                 android:layout_marginBottom="10dp" />
 
-            <!-- Hora inicio -->
             <EditText
                 android:id="@+id/etHoraInicio"
                 android:layout_width="match_parent"
@@ -138,7 +146,6 @@
                 android:padding="10dp"
                 android:layout_marginBottom="10dp" />
 
-            <!-- Hora fin -->
             <EditText
                 android:id="@+id/etHoraFin"
                 android:layout_width="match_parent"
@@ -153,7 +160,6 @@
                 android:padding="10dp"
                 android:layout_marginBottom="10dp" />
 
-            <!-- Observaciones -->
             <EditText
                 android:id="@+id/etObservaciones"
                 android:layout_width="match_parent"
@@ -168,19 +174,55 @@
                 android:padding="10dp" />
         </LinearLayout>
 
-        <!-- 🔹 Botón guardar -->
-        <Button
-            android:id="@+id/btnGuardar"
+        <!-- 🔹 Estado de la cita -->
+        <TextView
+            android:id="@+id/tvEstadoLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar Cita"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/primary_green"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp" />
+            android:text="Estado de la cita"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginTop="16dp" />
 
-        <!-- 🔹 Progress bar -->
+        <Spinner
+            android:id="@+id/spEstado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/estados_cita"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_spinner" />
+
+        <!-- 🔹 Botones de acción -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnGuardar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Guardar"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary_green"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnEliminar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Eliminar"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/red_500"
+                android:visibility="gone" />
+        </LinearLayout>
+
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -188,7 +230,7 @@
             android:layout_gravity="center"
             android:visibility="gone"
             android:indeterminate="true"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="24dp" />
 
     </LinearLayout>
 </ScrollView>

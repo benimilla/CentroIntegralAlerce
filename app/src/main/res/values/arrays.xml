@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- 🔹 Opciones de repetición -->
     <string-array name="repeticion_options">
         <item>Única</item>
         <item>Semanal</item>
         <item>Mensual</item>
     </string-array>
 
+    <!-- 👥 Opciones de asistentes -->
     <string-array name="asistentes_options">
         <item>Todos los estudiantes</item>
         <item>Estudiantes seleccionados</item>
         <item>Personal docente</item>
         <item>Apoderados</item>
     </string-array>
+
+    <!-- 📅 Estados de la cita -->
+    <string-array name="estados_cita">
+        <item>Activa</item>
+        <item>Pendiente</item>
+        <item>Inactiva</item>
+        <item>Cancelada</item>
+    </string-array>
+
 </resources>

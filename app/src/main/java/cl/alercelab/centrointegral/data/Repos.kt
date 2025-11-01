@@ -4,6 +4,7 @@ import android.util.Log
 import cl.alercelab.centrointegral.domain.*
 import cl.alercelab.centrointegral.utils.FcmSender
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.messaging.FirebaseMessaging
@@ -105,19 +106,41 @@ class Repos {
     // -----------------------------------------------------------
 
     suspend fun crearActividadConCitas(actividad: Actividad, citas: List<Cita>) {
-        val fechaInicio = citas.minOfOrNull { it.fechaInicioMillis } ?: actividad.fechaInicio
+        try {
+            val actRef = db.collection("actividades").document()
+            val fechaInicio = citas.minOfOrNull { it.fechaInicioMillis } ?: actividad.fechaInicio
 
-        val actRef = db.collection("actividades").document()
-        val nuevaActividad = actividad.copy(
-            id = actRef.id,
-            fechaInicio = fechaInicio,
-            citas = citas
-        )
-        actRef.set(nuevaActividad).await()
+            // Guardamos solo IDs de citas, no objetos
+            val nuevaActividad = actividad.copy(
+                id = actRef.id,
+                fechaInicio = fechaInicio,
+                citas = emptyList()
+            )
 
-        val citasRef = db.collection("citas")
-        citas.forEach { cita ->
-            citasRef.add(cita.copy(actividadId = actRef.id)).await()
+            actRef.set(nuevaActividad).await()
+
+            if (citas.isNotEmpty()) {
+                val citasRef = db.collection("citas")
+                val idsCitas = mutableListOf<String>()
+
+                for (cita in citas) {
+                    val citaId = citasRef.document().id
+                    val citaFinal = cita.copy(
+                        id = citaId,
+                        actividadId = actRef.id
+                    )
+                    citasRef.document(citaId).set(citaFinal).await()
+                    idsCitas.add(citaId)
+                }
+
+                db.collection("actividades").document(actRef.id)
+                    .update("citas", idsCitas)
+                    .await()
+            }
+
+        } catch (e: Exception) {
+            Log.e("CREAR_ACTIVIDAD", "Error al guardar actividad: ${e.message}", e)
+            throw Exception("Error al guardar cita: ${e.message}")
         }
     }
 
@@ -142,7 +165,6 @@ class Repos {
         citasSnap.documents.forEach {
             db.collection("citas").document(it.id).delete().await()
         }
-
         db.collection("actividades").document(id).delete().await()
     }
 
@@ -171,9 +193,31 @@ class Repos {
     // -----------------------------------------------------------
 
     suspend fun crearCita(cita: Cita) {
-        val ref = db.collection("citas").document()
-        db.collection("citas").document(ref.id).set(cita.copy(id = ref.id)).await()
+        try {
+            val db = FirebaseFirestore.getInstance()
+            val docRef = db.collection("citas").add(cita).await()
+
+            // 🔗 Enlazar la cita con la actividad correspondiente
+            if (cita.actividadId.isNotEmpty()) {
+                db.collection("actividades")
+                    .document(cita.actividadId)
+                    .update("citas", FieldValue.arrayUnion(docRef.id))
+                    .await()
+            }
+        } catch (e: Exception) {
+            Log.e("REPOS", "Error creando cita: ${e.message}", e)
+            throw e
+        }
     }
+
+    suspend fun actualizarCita(id: String, cita: Cita) {
+        db.collection("citas").document(id).set(cita.copy(id = id)).await()
+    }
+
+    suspend fun eliminarCita(id: String) {
+        db.collection("citas").document(id).delete().await()
+    }
+
 
     suspend fun obtenerCitasPorActividad(actividadId: String): List<Cita> =
         db.collection("citas")
@@ -221,21 +265,14 @@ class Repos {
             .await()
     }
 
-    /**
-     * 🔹 NUEVO MÉTODO — Verifica si existe conflicto de horario en el mismo lugar.
-     * Se usa desde CitaFormFragment.
-     */
     suspend fun hayConflictoCita(lugar: String, inicio: Long, fin: Long): Boolean {
         return try {
             val snap = db.collection("citas")
                 .whereEqualTo("lugar", lugar)
                 .get().await()
-
             snap.documents.any { doc ->
                 val cita = doc.toObject(Cita::class.java)
-                cita != null &&
-                        inicio < cita.fechaFinMillis &&
-                        fin > cita.fechaInicioMillis
+                cita != null && inicio < cita.fechaFinMillis && fin > cita.fechaInicioMillis
             }
         } catch (e: Exception) {
             Log.e("CONFLICTO_CITA", "Error al verificar conflicto: ${e.message}")
@@ -244,7 +281,7 @@ class Repos {
     }
 
     // -----------------------------------------------------------
-    // 🔹 CRUD MANTENEDORES (Lugares, Tipos, Oferentes, Socios)
+    // 🔹 CRUD MANTENEDORES
     // -----------------------------------------------------------
 
     suspend fun crearLugar(lugar: Lugar) {
@@ -318,10 +355,6 @@ class Repos {
     suspend fun eliminarSocioComunitario(id: String) {
         db.collection("sociosComunitarios").document(id).delete().await()
     }
-
-    // -----------------------------------------------------------
-    // 🔹 ACTIVIDADES EN RANGO
-    // -----------------------------------------------------------
 
     suspend fun actividadesEnRango(inicio: Long, fin: Long): List<Actividad> =
         db.collection("actividades")

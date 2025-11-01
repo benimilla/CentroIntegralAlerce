@@ -1,19 +1,19 @@
 package cl.alercelab.centrointegral.calendar
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import cl.alercelab.centrointegral.R
 import cl.alercelab.centrointegral.data.Repos
-import cl.alercelab.centrointegral.domain.Cita
 import cl.alercelab.centrointegral.domain.Actividad
+import cl.alercelab.centrointegral.domain.Cita
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -35,15 +35,17 @@ class CitaDetalleFragment : Fragment() {
     private lateinit var tvLugar: TextView
     private lateinit var tvOferente: TextView
     private lateinit var tvSocio: TextView
+    private lateinit var tvEstado: TextView
     private lateinit var tvObservaciones: TextView
-    private lateinit var btnEditar: Button
+    private lateinit var btnReagendar: Button
+    private lateinit var btnEditarCita: Button
+    private lateinit var btnEliminarCita: Button
 
     private val formatoFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     private val formatoHora = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_cita_detalle, container, false)
@@ -54,53 +56,65 @@ class CitaDetalleFragment : Fragment() {
         tvLugar = view.findViewById(R.id.tvLugar)
         tvOferente = view.findViewById(R.id.tvOferente)
         tvSocio = view.findViewById(R.id.tvSocio)
+        tvEstado = view.findViewById(R.id.tvEstado)
         tvObservaciones = view.findViewById(R.id.tvObservaciones)
-        btnEditar = view.findViewById(R.id.btnEditar)
+        btnReagendar = view.findViewById(R.id.btnEditar)
+        btnEditarCita = view.findViewById(R.id.btnEditarCita)
+        btnEliminarCita = view.findViewById(R.id.btnEliminarCita)
 
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         citaId = arguments?.getString("citaId")
 
         if (citaId == null) {
-            Toast.makeText(requireContext(), "Error: cita no encontrada", Toast.LENGTH_LONG).show()
+            toast("Error: cita no encontrada")
             requireActivity().onBackPressedDispatcher.onBackPressed()
             return
         }
 
         cargarDatosCita()
 
-        btnEditar.setOnClickListener {
+        btnReagendar.setOnClickListener {
             citaActual?.let { mostrarDialogoReagendar(it) }
-                ?: Toast.makeText(requireContext(), "No hay cita cargada", Toast.LENGTH_SHORT).show()
+        }
+
+        btnEditarCita.setOnClickListener {
+            citaActual?.let {
+                val bundle = Bundle().apply {
+                    putString("citaId", it.id)
+                    putString("modo", "editar")
+                }
+                findNavController().navigate(R.id.action_citaDetalleFragment_to_citaFormFragment, bundle)
+            }
+        }
+
+        btnEliminarCita.setOnClickListener {
+            citaActual?.let { confirmarEliminacion(it) }
         }
     }
 
     private fun cargarDatosCita() {
         lifecycleScope.launch {
             try {
-                // 🔹 Cargar cita desde Firestore
                 val doc = db.collection("citas").document(citaId!!).get().await()
                 citaActual = doc.toObject(Cita::class.java)?.apply { id = doc.id }
 
                 if (citaActual == null) {
-                    Toast.makeText(requireContext(), "No se encontró la cita", Toast.LENGTH_SHORT).show()
+                    toast("No se encontró la cita")
                     return@launch
                 }
 
-                // 🔹 Cargar la actividad asociada
                 if (citaActual!!.actividadId.isNotEmpty()) {
                     actividadActual = repo.obtenerActividadPorId(citaActual!!.actividadId)
                 }
 
                 mostrarDatosCompletos()
-
             } catch (e: Exception) {
                 Log.e("CITA_DETALLE", "Error cargando datos", e)
-                Toast.makeText(requireContext(), "Error al cargar datos: ${e.message}", Toast.LENGTH_LONG).show()
+                toast("Error al cargar datos: ${e.message}")
             }
         }
     }
@@ -110,22 +124,20 @@ class CitaDetalleFragment : Fragment() {
         val actividad = actividadActual
 
         tvTitulo.text = actividad?.nombre ?: "(Actividad sin nombre)"
-        tvFecha.text = "📅 Fecha: ${formatoFecha.format(Date(cita.fechaInicioMillis))}"
-        tvHora.text = "⏰ Hora: ${formatoHora.format(Date(cita.fechaInicioMillis))}"
-        tvLugar.text = "📍 Lugar: ${cita.lugar.ifEmpty { actividad?.lugar ?: "Sin lugar" }}"
-        tvOferente.text = "👤 Oferente: ${actividad?.oferente ?: "No especificado"}"
-        tvSocio.text = "🤝 Socio Comunitario: ${actividad?.socioComunitario ?: "No aplica"}"
-        tvObservaciones.text = "📝 Observaciones: ${cita.observaciones ?: "-"}"
+        tvFecha.text = " Fecha: ${formatoFecha.format(Date(cita.fechaInicioMillis))}"
+        tvHora.text = " Hora: ${formatoHora.format(Date(cita.fechaInicioMillis))}"
+        tvLugar.text = " Lugar: ${cita.lugar.ifEmpty { actividad?.lugar ?: "Sin lugar" }}"
+        tvOferente.text = " Oferente: ${actividad?.oferente ?: "No especificado"}"
+        tvSocio.text = " Socio: ${actividad?.socioComunitario ?: "No aplica"}"
+        tvEstado.text = " Estado: ${cita.estado ?: "Pendiente"}"
+        tvObservaciones.text = " Observaciones: ${cita.observaciones ?: "-"}"
     }
 
     private fun mostrarDialogoReagendar(cita: Cita) {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = cita.fechaInicioMillis
-
+        val calendar = Calendar.getInstance().apply { timeInMillis = cita.fechaInicioMillis }
         DatePickerDialog(requireContext(),
             { _, year, month, day ->
                 calendar.set(year, month, day)
-
                 TimePickerDialog(requireContext(),
                     { _, hour, minute ->
                         calendar.set(Calendar.HOUR_OF_DAY, hour)
@@ -137,11 +149,11 @@ class CitaDetalleFragment : Fragment() {
 
                         lifecycleScope.launch {
                             if (hayConflicto(nuevoInicio, nuevoFin, cita.id)) {
-                                Toast.makeText(requireContext(), "⚠️ Ya existe una cita en ese horario", Toast.LENGTH_LONG).show()
+                                toast("⚠️ Ya existe una cita en ese horario.")
                             } else {
                                 repo.reagendarCita(cita.id, nuevoInicio, nuevoFin, cita.lugar)
-                                Toast.makeText(requireContext(), "✅ Cita reagendada correctamente", Toast.LENGTH_SHORT).show()
-                                requireActivity().onBackPressedDispatcher.onBackPressed()
+                                toast("✅ Cita reagendada correctamente.")
+                                findNavController().navigateUp()
                             }
                         }
                     },
@@ -161,9 +173,31 @@ class CitaDetalleFragment : Fragment() {
         return citas.any {
             it.id != citaId && (
                     (inicio in it.fechaInicioMillis..it.fechaFinMillis) ||
-                            (fin in it.fechaInicioMillis..it.fechaFinMillis) ||
-                            (inicio <= it.fechaInicioMillis && fin >= it.fechaFinMillis)
+                            (fin in it.fechaInicioMillis..it.fechaFinMillis)
                     )
         }
+    }
+
+    private fun confirmarEliminacion(cita: Cita) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Eliminar Cita")
+            .setMessage("¿Estás seguro de eliminar esta cita? Esta acción no se puede deshacer.")
+            .setPositiveButton("Eliminar") { _, _ ->
+                lifecycleScope.launch {
+                    try {
+                        db.collection("citas").document(cita.id).delete().await()
+                        toast("🗑️ Cita eliminada correctamente.")
+                        findNavController().navigateUp()
+                    } catch (e: Exception) {
+                        toast("Error al eliminar cita: ${e.message}")
+                    }
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun toast(msg: String) {
+        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
     }
 }

@@ -1,15 +1,17 @@
 package cl.alercelab.centrointegral.domain
 
+import java.io.Serializable
+
 data class Cita(
- var id: String = "",                      // ID único de la cita
- var actividadId: String = "",             // ID de la actividad relacionada
- var fechaInicioMillis: Long = 0,          // Timestamp de inicio (en milisegundos)
- var fechaFinMillis: Long = 0,             // Timestamp de finalización (en milisegundos)
- var lugar: String = "",                   // Lugar donde se realizará la cita
- var observaciones: String? = null,        // Comentarios, notas o motivo
- var asistentes: List<String> = emptyList(), // Lista de asistentes o beneficiarios
- var estado: String = "programada",        // Estado actual: programada, completada, cancelada
- var duracionMin: Int? = null,             // Duración real o planificada en minutos (opcional)
- var fechaCreacion: Long = System.currentTimeMillis(), // Fecha de registro
- var ultimaActualizacion: Long? = null     // Última modificación (si la cita se edita)
-)
+ var id: String = "",
+ var actividadId: String = "",
+ var fechaInicioMillis: Long = 0,
+ var fechaFinMillis: Long = 0,
+ var lugar: String = "",
+ var observaciones: String? = null,
+ var asistentes: List<String> = emptyList(),
+ var estado: String = "programada",
+ var duracionMin: Int? = null,
+ var fechaCreacion: Long = System.currentTimeMillis(),
+ var ultimaActualizacion: Long? = null
+) : Serializable

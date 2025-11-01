@@ -17,5 +17,5 @@ data class Actividad(
  var fechaInicio: Long = 0,                     // Fecha de inicio de la actividad (timestamp)
  var estado: String = "activa",                 // Estado actual: activa / inactiva / cancelada
  var motivoCancelacion: String? = null,         // Razón si fue cancelada
- var citas: List<Cita> = emptyList()            // Citas asociadas a la actividad
+ var citas: List<String> = emptyList()          // Guarda solo los IDs de las citas asociadas
 )

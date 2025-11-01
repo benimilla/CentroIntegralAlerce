@@ -1,100 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/scrollViewCita"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/background_light">
+    android:padding="16dp"
+    android:background="@android:color/white"
+    tools:context=".calendar.CitaDetalleFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:gravity="center_horizontal">
 
-        <!-- Título -->
+        <!-- 🔹 Título -->
         <TextView
             android:id="@+id/tvTitulo"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Título de la Actividad"
+            android:text="Detalle de Cita"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/primary_dark"
-            android:gravity="center"
-            android:layout_marginBottom="16dp" />
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp" />
 
-        <!-- Fecha -->
         <TextView
             android:id="@+id/tvFecha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Fecha:"
-            android:textSize="18sp"
-            android:textColor="@color/primary_text"
-            android:layout_marginBottom="8dp" />
+            android:text="📅 Fecha: "
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/black" />
 
-        <!-- Hora -->
         <TextView
             android:id="@+id/tvHora"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hora:"
-            android:textSize="18sp"
-            android:textColor="@color/primary_text"
-            android:layout_marginBottom="8dp" />
+            android:text="⏰ Hora: "
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/black" />
 
-        <!-- Lugar -->
         <TextView
             android:id="@+id/tvLugar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lugar:"
-            android:textSize="18sp"
-            android:textColor="@color/primary_text"
-            android:layout_marginBottom="8dp" />
+            android:text="📍 Lugar: "
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/tvOferente"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Oferente:"
-            android:textSize="18sp"
-            android:textColor="@color/primary_text"
-            android:layout_marginBottom="8dp" />
+            android:text="👤 Oferente: "
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/tvSocio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Socio Comunitario:"
-            android:textSize="18sp"
-            android:textColor="@color/primary_text"
-            android:layout_marginBottom="16dp" />
+            android:text="🤝 Socio Comunitario: "
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/black" />
 
+        <TextView
+            android:id="@+id/tvEstado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔘 Estado: "
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/black" />
 
-        <!-- Observaciones -->
         <TextView
             android:id="@+id/tvObservaciones"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Observaciones:"
-            android:textSize="18sp"
-            android:textColor="@color/primary_text"
-            android:layout_marginBottom="24dp" />
+            android:text="📝 Observaciones:"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/black" />
 
-        <!-- Botón Reagendar -->
-        <Button
-            android:id="@+id/btnEditar"
+        <!-- 🔹 Botones -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Reagendar cita"
-            android:textAllCaps="false"
-            android:textSize="18sp"
-            android:backgroundTint="@color/primary"
-            android:textColor="@android:color/white"
-            app:cornerRadius="8dp" />
+            android:orientation="vertical"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/btnEditar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reagendar Cita"
+                android:backgroundTint="@color/colorPrimary"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <Button
+                android:id="@+id/btnEditarCita"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Editar Cita"
+                android:backgroundTint="@color/teal_700"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <Button
+                android:id="@+id/btnEliminarCita"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Eliminar Cita"
+                android:backgroundTint="@android:color/holo_red_light"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

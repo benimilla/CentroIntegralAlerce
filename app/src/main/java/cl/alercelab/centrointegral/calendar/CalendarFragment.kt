@@ -45,7 +45,7 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Referencias UI
+        // 🔹 Referencias UI
         calendarView = view.findViewById(R.id.calendarView)
         rvDay = view.findViewById(R.id.rvDay)
         tvEmpty = view.findViewById(R.id.tvEmpty)
@@ -60,7 +60,22 @@ class CalendarFragment : Fragment() {
         verificarRolUsuario()
         cargarCitas()
 
-        // Cambio de día en el calendario
+        // 🔹 Actualiza lista si se creó o modificó una cita
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            findNavController().currentBackStackEntry
+                ?.savedStateHandle
+                ?.getLiveData<Boolean>("citaGuardada")
+                ?.observe(viewLifecycleOwner) { guardada ->
+                    if (guardada == true) {
+                        cargarCitas() //  Recargar todo desde Firestore
+                        findNavController().currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("citaGuardada", false)
+                    }
+                }
+        }
+
+        // 🔹 Cambio de día en el calendario
         calendarView.setOnDateChangeListener { _, year, month, day ->
             val cal = Calendar.getInstance().apply {
                 set(year, month, day, 0, 0, 0)
@@ -68,7 +83,7 @@ class CalendarFragment : Fragment() {
             mostrarCitasDelDia(cal.timeInMillis)
         }
 
-        // Botón para crear nueva cita
+        // 🔹 Botón para crear nueva cita
         btnCrearCita.setOnClickListener {
             try {
                 findNavController().navigate(R.id.action_calendarFragment_to_citaFormFragment)
@@ -93,7 +108,11 @@ class CalendarFragment : Fragment() {
                     if (rol == "admin" || rol == "gestor") View.VISIBLE else View.GONE
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error verificando rol del usuario", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error verificando rol del usuario",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -111,7 +130,11 @@ class CalendarFragment : Fragment() {
                 })
                 mostrarCitasDelDia(Calendar.getInstance().timeInMillis)
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error al cargar citas: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error al cargar citas: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
                 progressBar.visibility = View.GONE
             }
@@ -141,7 +164,7 @@ class CalendarFragment : Fragment() {
             tvEmpty.visibility = View.GONE
             rvDay.visibility = View.VISIBLE
             rvDay.adapter = CitaAdapter(citasFiltradas, formato) { citaSeleccionada ->
-                // ✅ Navegación al detalle con Bundle
+                //  Navegación al detalle con Bundle
                 val bundle = Bundle().apply {
                     putString("citaId", citaSeleccionada.id)
                 }
@@ -157,7 +180,7 @@ class CalendarFragment : Fragment() {
 class CitaAdapter(
     private val citas: List<Cita>,
     private val formato: SimpleDateFormat,
-    private val onCitaClick: (Cita) -> Unit // ✅ callback de clic
+    private val onCitaClick: (Cita) -> Unit //  callback de clic
 ) : RecyclerView.Adapter<CitaViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitaViewHolder {
@@ -168,13 +191,14 @@ class CitaAdapter(
 
     override fun onBindViewHolder(holder: CitaViewHolder, position: Int) {
         val cita = citas[position]
-        val inicio = cita.fechaInicioMillis.takeIf { it > 0 }?.let { formato.format(Date(it)) } ?: "?"
-        val fin = cita.fechaFinMillis.takeIf { it > 0 }?.let { formato.format(Date(it)) } ?: "?"
+        val inicio =
+            cita.fechaInicioMillis.takeIf { it > 0 }?.let { formato.format(Date(it)) } ?: "?"
+        val fin =
+            cita.fechaFinMillis.takeIf { it > 0 }?.let { formato.format(Date(it)) } ?: "?"
         val lugar = cita.lugar ?: "Sin lugar"
 
         holder.bind(lugar, "$inicio - $fin")
 
-        // ✅ Acción de clic
         holder.itemView.setOnClickListener {
             onCitaClick(cita)
         }
