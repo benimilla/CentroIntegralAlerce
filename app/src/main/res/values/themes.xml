@@ -1,26 +1,19 @@
-<resources>
-    <style name="Theme.CIA" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-        <!-- GREEN palette -->
-        <item name="colorPrimary">#2E7D32</item>
-        <item name="colorSecondary">#66BB6A</item>
-        <item name="colorTertiary">#A5D6A7</item>
+    <style name="Theme.CentroIntegralAlerce" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryVariant">@color/primary_green_dark</item>
+        <item name="colorSecondary">@color/purple_500</item>
 
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <item name="android:navigationBarColor">?attr/colorSurface</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:windowBackground">@color/bg_light</item>
 
-        <!-- Larger touch targets for buttons -->
-        <item name="materialButtonStyle">@style/AppButton</item>
+        <item name="android:fontFamily">sans-serif</item>
+
+        <item name="android:buttonStyle">@style/Widget.Centro.Button</item>
+        <item name="materialButtonStyle">@style/Widget.Centro.Button</item>
+        <item name="editTextStyle">@style/Widget.Centro.EditText</item>
     </style>
 
-    <style name="AppButton" parent="Widget.Material3.Button">
-        <item name="android:minHeight">56dp</item>
-        <item name="cornerRadius">20dp</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:insetBottom">12dp</item>
-        <item name="android:insetTop">12dp</item>
-    </style>
 </resources>

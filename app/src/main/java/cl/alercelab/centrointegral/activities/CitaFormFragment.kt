@@ -11,90 +11,110 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import cl.alercelab.centrointegral.R
-import com.google.firebase.firestore.FirebaseFirestore
+import cl.alercelab.centrointegral.data.Repos
+import cl.alercelab.centrointegral.domain.Actividad
+import cl.alercelab.centrointegral.domain.Cita
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.ceil
 
 class CitaFormFragment : Fragment() {
 
     private lateinit var spActividad: Spinner
-    private lateinit var tvAvisoPrevioInfo: TextView
-    private lateinit var etLugar: EditText
-    private lateinit var etMotivo: EditText
+    private lateinit var tvLugar: TextView
+    private lateinit var tvAvisoPrevio: TextView
+    private lateinit var tvDuracionMax: TextView
     private lateinit var etFecha: EditText
     private lateinit var etHoraInicio: EditText
     private lateinit var etHoraFin: EditText
+    private lateinit var etObservaciones: EditText
     private lateinit var btnGuardar: Button
-    private lateinit var progress: ProgressBar
-    private lateinit var tvDuracionMaxInfo: TextView // 🟢 NUEVO
+    private lateinit var progressBar: ProgressBar
 
-    private val db = FirebaseFirestore.getInstance()
-    private val actividades = mutableListOf<Pair<String, String>>() // (id, nombre)
-    private var actividadSeleccionadaId: String? = null
+    private val repos = Repos()
+    private var actividades: List<Actividad> = emptyList()
+    private var actividadSeleccionada: Actividad? = null
 
-    private val formatoFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    private val formatoHora = SimpleDateFormat("HH:mm", Locale.getDefault())
-
-    private var fechaInicioMillis: Long = 0
-    private var fechaFinMillis: Long = 0
-
-    private var duracionMaxMinutos: Int? = null
-    private var diasAvisoPrevio: Int? = null
+    private val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val v = inflater.inflate(R.layout.fragment_cita_form, container, false)
+        return inflater.inflate(R.layout.fragment_cita_form, container, false)
+    }
 
-        spActividad = v.findViewById(R.id.spActividad)
-        tvAvisoPrevioInfo = v.findViewById(R.id.tvAvisoPrevioInfo)
-        etLugar = v.findViewById(R.id.etLugar)
-        etMotivo = v.findViewById(R.id.etMotivo)
-        etFecha = v.findViewById(R.id.etFecha)
-        etHoraInicio = v.findViewById(R.id.etHoraInicio)
-        etHoraFin = v.findViewById(R.id.etHoraFin)
-        btnGuardar = v.findViewById(R.id.btnGuardar)
-        progress = v.findViewById(R.id.progressBar)
-        tvDuracionMaxInfo = v.findViewById(R.id.tvDuracionMaxInfo) // 🟢 NUEVO
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        etLugar.isEnabled = false
-        etFecha.isFocusable = false
-        etHoraInicio.isFocusable = false
-        etHoraFin.isFocusable = false
-        tvAvisoPrevioInfo.visibility = View.GONE
-        tvDuracionMaxInfo.visibility = View.GONE // 🟢 NUEVO
+        // Inicializar vistas
+        spActividad = view.findViewById(R.id.spActividad)
+        tvLugar = view.findViewById(R.id.tvLugar)
+        tvAvisoPrevio = view.findViewById(R.id.tvAvisoPrevio)
+        tvDuracionMax = view.findViewById(R.id.tvDuracionMax)
+        etFecha = view.findViewById(R.id.etFecha)
+        etHoraInicio = view.findViewById(R.id.etHoraInicio)
+        etHoraFin = view.findViewById(R.id.etHoraFin)
+        etObservaciones = view.findViewById(R.id.etObservaciones)
+        btnGuardar = view.findViewById(R.id.btnGuardar)
+        progressBar = view.findViewById(R.id.progressBar)
 
         configurarPickers()
         cargarActividades()
-        configurarBotonGuardar()
-
-        return v
+        btnGuardar.setOnClickListener { guardarCita() }
     }
 
-    /** 🔹 Carga actividades */
+    /** 📅 Configura los pickers de fecha y hora */
+    private fun configurarPickers() {
+        etFecha.setOnClickListener {
+            val c = Calendar.getInstance()
+            DatePickerDialog(
+                requireContext(),
+                { _, y, m, d -> etFecha.setText("%02d/%02d/%04d".format(d, m + 1, y)) },
+                c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        val timePicker = { target: EditText ->
+            val c = Calendar.getInstance()
+            TimePickerDialog(
+                requireContext(),
+                { _, h, m -> target.setText("%02d:%02d".format(h, m)) },
+                c.get(Calendar.HOUR_OF_DAY),
+                c.get(Calendar.MINUTE),
+                true
+            ).show()
+        }
+
+        etHoraInicio.setOnClickListener { timePicker(etHoraInicio) }
+        etHoraFin.setOnClickListener { timePicker(etHoraFin) }
+    }
+
+    /** 🔹 Carga todas las actividades disponibles */
     private fun cargarActividades() {
         lifecycleScope.launch {
+            progressBar.visibility = View.VISIBLE
             try {
-                progress.visibility = View.VISIBLE
-                val snap = db.collection("actividades").get().await()
-                actividades.clear()
-                actividades.addAll(
-                    snap.documents.mapNotNull {
-                        val nombre = it.getString("nombre")
-                        val id = it.id
-                        if (nombre != null) id to nombre else null
-                    }
-                )
+                actividades = repos.obtenerActividades()
+                if (actividades.isEmpty()) {
+                    toast("No hay actividades disponibles.")
+                    return@launch
+                }
 
+                val nombres = actividades.map { it.nombre }
+
+                // Adaptador con layout personalizado (texto oscuro, visible)
                 val adapter = ArrayAdapter(
                     requireContext(),
-                    android.R.layout.simple_spinner_dropdown_item,
-                    actividades.map { it.second }
+                    R.layout.item_spinner_actividad,
+                    nombres
                 )
+                adapter.setDropDownViewResource(R.layout.item_spinner_actividad)
                 spActividad.adapter = adapter
 
                 spActividad.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -104,216 +124,117 @@ class CitaFormFragment : Fragment() {
                         position: Int,
                         id: Long
                     ) {
-                        actividadSeleccionadaId = actividades[position].first
-                        cargarDatosDeActividad(actividadSeleccionadaId!!)
+                        actividadSeleccionada = actividades[position]
+                        actualizarInfoActividad()
                     }
 
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-                        actividadSeleccionadaId = null
-                        etLugar.setText("")
-                        tvAvisoPrevioInfo.visibility = View.GONE
-                        tvDuracionMaxInfo.visibility = View.GONE // 🟢 NUEVO
-                    }
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
                 }
+
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error cargando actividades: ${e.message}", Toast.LENGTH_SHORT).show()
+                toast("Error al cargar actividades: ${e.message}")
             } finally {
-                progress.visibility = View.GONE
+                progressBar.visibility = View.GONE
             }
         }
     }
 
-    /** 🔹 Carga datos de la actividad seleccionada */
-    private fun cargarDatosDeActividad(actividadId: String) {
+    /** 📋 Muestra datos de la actividad seleccionada */
+    private fun actualizarInfoActividad() {
+        actividadSeleccionada?.let {
+            tvLugar.text = "Lugar: ${it.lugar}"
+            tvAvisoPrevio.text = "Aviso previo: ${it.diasAvisoPrevio} día(s)"
+            tvDuracionMax.text = "Duración máxima: ${it.duracionMin ?: 0} min"
+        }
+    }
+
+    /** 💾 Guarda la cita luego de validar */
+    private fun guardarCita() {
+        val actividad = actividadSeleccionada
+        if (actividad == null) {
+            toast("Selecciona una actividad antes de continuar.")
+            return
+        }
+
+        val fecha = etFecha.text.toString().trim()
+        val horaInicio = etHoraInicio.text.toString().trim()
+        val horaFin = etHoraFin.text.toString().trim()
+
+        if (fecha.isEmpty() || horaInicio.isEmpty() || horaFin.isEmpty()) {
+            toast("Completa la fecha y las horas de inicio y fin.")
+            return
+        }
+
+        val inicio: Long
+        val fin: Long
+        try {
+            inicio = formato.parse("$fecha $horaInicio")?.time
+                ?: run { toast("Fecha u hora inválida."); return }
+            fin = formato.parse("$fecha $horaFin")?.time
+                ?: run { toast("Fecha u hora inválida."); return }
+        } catch (e: ParseException) {
+            toast("Formato de fecha/hora inválido.")
+            return
+        }
+
+        if (fin <= inicio) {
+            toast("La hora de fin debe ser posterior al inicio.")
+            return
+        }
+
+        val minDias = maxOf(1, actividad.diasAvisoPrevio)
+        val diasDiff = diasEntreAhoraY(inicio)
+        if (diasDiff < minDias) {
+            toast("Debe programarse con al menos $minDias día(s) de anticipación.")
+            return
+        }
+
+        val duracion = ((fin - inicio) / (1000 * 60)).toInt()
+        val duracionMax = actividad.duracionMin
+        if (duracionMax != null && duracion > duracionMax) {
+            toast("La duración supera el máximo permitido (${duracionMax} min).")
+            return
+        }
+
         lifecycleScope.launch {
+            progressBar.visibility = View.VISIBLE
             try {
-                val doc = db.collection("actividades").document(actividadId).get().await()
-                val lugar = doc.getString("lugar") ?: "Sin lugar"
-                duracionMaxMinutos = (doc.getLong("duracionMin") ?: 60L).toInt()
-                diasAvisoPrevio = (doc.getLong("diasAvisoPrevio") ?: 0L).toInt()
-                etLugar.setText(lugar)
-
-                // 🔹 Mostrar aviso previo
-                if (diasAvisoPrevio!! > 0) {
-                    tvAvisoPrevioInfo.text = "🕓 Requiere programarse con $diasAvisoPrevio día(s) de anticipación."
-                } else {
-                    tvAvisoPrevioInfo.text = "🕓 No requiere anticipación especial."
+                val conflicto = repos.hayConflictoCita(actividad.lugar, inicio, fin)
+                if (conflicto) {
+                    toast("Conflicto: ya hay una cita en ese lugar y horario.")
+                    return@launch
                 }
-                tvAvisoPrevioInfo.visibility = View.VISIBLE
 
-                // 🟢 NUEVO: mostrar duración máxima
-                tvDuracionMaxInfo.text = "⏱️ Duración máxima permitida: ${duracionMaxMinutos} min"
-                tvDuracionMaxInfo.visibility = View.VISIBLE
+                val cita = Cita(
+                    actividadId = actividad.id,
+                    fechaInicioMillis = inicio,
+                    fechaFinMillis = fin,
+                    lugar = actividad.lugar,
+                    observaciones = etObservaciones.text?.toString(),
+                    duracionMin = duracion
+                )
+
+                findNavController().previousBackStackEntry?.savedStateHandle?.set("nuevaCita", cita)
+                toast("Cita agregada correctamente.")
+                findNavController().navigateUp()
 
             } catch (e: Exception) {
-                etLugar.setText("Error al cargar datos")
-                tvAvisoPrevioInfo.visibility = View.GONE
-                tvDuracionMaxInfo.visibility = View.GONE // 🟢 NUEVO
-                duracionMaxMinutos = null
-                diasAvisoPrevio = null
+                toast("Error al guardar cita: ${e.message}")
+            } finally {
+                progressBar.visibility = View.GONE
             }
         }
     }
 
-    /** 🔹 Configura los selectores */
-    private fun configurarPickers() {
-        val calendar = Calendar.getInstance()
-
-        etFecha.setOnClickListener {
-            DatePickerDialog(
-                requireContext(),
-                { _, year, month, day ->
-                    calendar.set(year, month, day)
-                    etFecha.setText(formatoFecha.format(calendar.time))
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
-        }
-
-        etHoraInicio.setOnClickListener {
-            TimePickerDialog(
-                requireContext(),
-                { _, hour, minute ->
-                    calendar.set(Calendar.HOUR_OF_DAY, hour)
-                    calendar.set(Calendar.MINUTE, minute)
-                    fechaInicioMillis = calendar.timeInMillis
-                    etHoraInicio.setText(formatoHora.format(calendar.time))
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                true
-            ).show()
-        }
-
-        etHoraFin.setOnClickListener {
-            TimePickerDialog(
-                requireContext(),
-                { _, hour, minute ->
-                    calendar.set(Calendar.HOUR_OF_DAY, hour)
-                    calendar.set(Calendar.MINUTE, minute)
-                    fechaFinMillis = calendar.timeInMillis
-                    etHoraFin.setText(formatoHora.format(calendar.time))
-
-                    // 🟢 NUEVO: mostrar duración real si ambas horas están elegidas
-                    if (fechaInicioMillis > 0) {
-                        val duracion = ((fechaFinMillis - fechaInicioMillis) / 60000).toInt()
-                        if (duracion > 0) {
-                            tvDuracionMaxInfo.text = "⏱️ Duración seleccionada: $duracion min (máx ${duracionMaxMinutos ?: "?"} min)"
-                        }
-                    }
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                true
-            ).show()
-        }
+    /** ⏳ Calcula diferencia de días */
+    private fun diasEntreAhoraY(futuroMillis: Long): Int {
+        val ahora = System.currentTimeMillis()
+        val diffMs = futuroMillis - ahora
+        val unDiaMs = 24 * 60 * 60 * 1000.0
+        return ceil(diffMs / unDiaMs).toInt()
     }
 
-    /** 🔹 Botón Guardar */
-    private fun configurarBotonGuardar() {
-        btnGuardar.setOnClickListener {
-            val motivo = etMotivo.text.toString().trim()
-            val actividadId = actividadSeleccionadaId
-            val lugar = etLugar.text.toString().trim()
-
-            if (actividadId == null) {
-                Toast.makeText(requireContext(), "Seleccione una actividad", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (etFecha.text.isEmpty() || etHoraInicio.text.isEmpty() || etHoraFin.text.isEmpty()) {
-                Toast.makeText(requireContext(), "Seleccione fecha y horas válidas", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (fechaFinMillis <= fechaInicioMillis) {
-                Toast.makeText(requireContext(), "La hora de fin debe ser posterior al inicio", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // 🔹 Duración real
-            val duracionReal = ((fechaFinMillis - fechaInicioMillis) / 60000).toInt()
-            duracionMaxMinutos?.let {
-                if (duracionReal > it) {
-                    Toast.makeText(
-                        requireContext(),
-                        "La duración excede el máximo permitido (${it} min).",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@setOnClickListener
-                }
-            }
-
-            // 🔹 Validación de anticipación mínima
-            val hoy = Calendar.getInstance()
-            val fechaSeleccionada = Calendar.getInstance().apply { timeInMillis = fechaInicioMillis }
-
-            hoy.set(Calendar.HOUR_OF_DAY, 0)
-            hoy.set(Calendar.MINUTE, 0)
-            hoy.set(Calendar.SECOND, 0)
-            hoy.set(Calendar.MILLISECOND, 0)
-            fechaSeleccionada.set(Calendar.HOUR_OF_DAY, 0)
-            fechaSeleccionada.set(Calendar.MINUTE, 0)
-            fechaSeleccionada.set(Calendar.SECOND, 0)
-            fechaSeleccionada.set(Calendar.MILLISECOND, 0)
-
-            val diffMillis = fechaSeleccionada.timeInMillis - hoy.timeInMillis
-            val diferenciaDias = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
-
-            if (diferenciaDias < 1) {
-                Toast.makeText(requireContext(), "No se pueden crear citas para hoy o días pasados.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            diasAvisoPrevio?.let {
-                if (diferenciaDias < it) {
-                    Toast.makeText(requireContext(), "Debe programarse con al menos $it día(s) de anticipación.", Toast.LENGTH_LONG).show()
-                    return@setOnClickListener
-                }
-            }
-
-            lifecycleScope.launch {
-                progress.visibility = View.VISIBLE
-                try {
-                    val conflicto = hayConflicto(lugar, fechaInicioMillis, fechaFinMillis)
-                    if (conflicto) {
-                        Toast.makeText(requireContext(), "⚠️ Ya existe una cita en este lugar y horario.", Toast.LENGTH_LONG).show()
-                    } else {
-                        val cita = hashMapOf(
-                            "actividadId" to actividadId,
-                            "fechaInicioMillis" to fechaInicioMillis,
-                            "fechaFinMillis" to fechaFinMillis,
-                            "lugar" to lugar,
-                            "observaciones" to motivo,
-                            "estado" to "programada"
-                        )
-
-                        db.collection("citas").add(cita).await()
-                        Toast.makeText(requireContext(), "✅ Cita creada correctamente", Toast.LENGTH_SHORT).show()
-                        findNavController().popBackStack()
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Error al crear cita: ${e.message}", Toast.LENGTH_LONG).show()
-                } finally {
-                    progress.visibility = View.GONE
-                }
-            }
-        }
-    }
-
-    /** 🔹 Comprueba conflictos */
-    private suspend fun hayConflicto(lugar: String, inicio: Long, fin: Long): Boolean {
-        val snap = db.collection("citas")
-            .whereEqualTo("lugar", lugar)
-            .whereEqualTo("estado", "programada")
-            .get().await()
-
-        return snap.documents.any { doc ->
-            val i = doc.getLong("fechaInicioMillis") ?: return@any false
-            val f = doc.getLong("fechaFinMillis") ?: return@any false
-            (inicio in i..f) || (fin in i..f) || (inicio <= i && fin >= f)
-        }
+    private fun toast(msg: String) {
+        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
     }
 }

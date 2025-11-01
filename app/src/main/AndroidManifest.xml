@@ -9,32 +9,38 @@
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <uses-permission android:name="android.permission.VIBRATE" />
-  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+  <!-- Permiso condicional según versión (Android 13+) -->
+  <uses-permission
+      android:name="android.permission.POST_NOTIFICATIONS"
+      android:required="false" />
 
   <!-- ======================================================= -->
-  <!-- 🔹 APLICACIÓN PRINCIPAL                                -->
+  <!-- 🔹 APLICACIÓN PRINCIPAL                                 -->
   <!-- ======================================================= -->
   <application
       android:name=".App"
       android:allowBackup="true"
+      android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
-      android:label="@string/app_name"
       android:supportsRtl="true"
-      android:theme="@style/Theme.CIA">
+      android:theme="@style/Theme.CentroIntegralAlerce"
+      android:usesCleartextTraffic="true">
 
     <!-- 🔸 Actividad principal -->
     <activity
         android:name=".MainActivity"
         android:exported="true"
-        android:windowSoftInputMode="adjustResize|stateHidden">
+        android:windowSoftInputMode="adjustResize|stateHidden"
+        android:configChanges="orientation|screenSize|keyboardHidden">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
 
-    <!-- 🔸 Servicio de notificaciones Firebase -->
+    <!-- 🔸 Servicio de notificaciones de Firebase -->
     <service
         android:name=".notifications.MessagingService"
         android:exported="false">
@@ -43,24 +49,30 @@
       </intent-filter>
     </service>
 
-    <!-- 🔸 Notificaciones por defecto -->
+    <!-- ======================================================= -->
+    <!-- 🔹 CONFIGURACIONES DE FIREBASE Y GOOGLE MAPS            -->
+    <!-- ======================================================= -->
+
+    <!-- Ícono por defecto de notificaciones -->
     <meta-data
         android:name="com.google.firebase.messaging.default_notification_icon"
         android:resource="@mipmap/ic_launcher" />
 
+    <!-- Color de notificación (✅ corregido) -->
     <meta-data
         android:name="com.google.firebase.messaging.default_notification_color"
-        android:resource="@color/primaryColor" />
+        android:resource="@color/primary_green" />
 
-    <!-- 🔸 API Key de Google Maps -->
+    <!-- API Key de Google Maps -->
     <meta-data
         android:name="com.google.android.geo.API_KEY"
         android:value="@string/google_maps_key" />
 
-    <!-- 🔸 Firebase Analytics -->
+    <!-- Firebase Analytics habilitado -->
     <meta-data
         android:name="com.google.firebase.analytics.application"
         android:value="true" />
 
   </application>
+
 </manifest>

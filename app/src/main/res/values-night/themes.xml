@@ -1,17 +1,16 @@
-<resources>
-    <style name="Theme.CIA" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-        <!-- GREEN night variants -->
-        <item name="colorPrimary">#66BB6A</item>
-        <item name="colorSecondary">#81C784</item>
-        <item name="colorTertiary">#C8E6C9</item>
+    <style name="Theme.CentroIntegralAlerce" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_green_light</item>
+        <item name="colorPrimaryVariant">@color/primary_green_dark</item>
+        <item name="colorSecondary">@color/purple_200</item>
 
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <item name="android:navigationBarColor">?attr/colorSurface</item>
+        <item name="android:windowBackground">@color/gray_900</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/gray_300</item>
 
-        <item name="materialButtonStyle">@style/AppButton</item>
+        <item name="android:buttonStyle">@style/Widget.Centro.Button</item>
+        <item name="materialButtonStyle">@style/Widget.Centro.Button</item>
     </style>
+
 </resources>

@@ -221,6 +221,28 @@ class Repos {
             .await()
     }
 
+    /**
+     * 🔹 NUEVO MÉTODO — Verifica si existe conflicto de horario en el mismo lugar.
+     * Se usa desde CitaFormFragment.
+     */
+    suspend fun hayConflictoCita(lugar: String, inicio: Long, fin: Long): Boolean {
+        return try {
+            val snap = db.collection("citas")
+                .whereEqualTo("lugar", lugar)
+                .get().await()
+
+            snap.documents.any { doc ->
+                val cita = doc.toObject(Cita::class.java)
+                cita != null &&
+                        inicio < cita.fechaFinMillis &&
+                        fin > cita.fechaInicioMillis
+            }
+        } catch (e: Exception) {
+            Log.e("CONFLICTO_CITA", "Error al verificar conflicto: ${e.message}")
+            false
+        }
+    }
+
     // -----------------------------------------------------------
     // 🔹 CRUD MANTENEDORES (Lugares, Tipos, Oferentes, Socios)
     // -----------------------------------------------------------

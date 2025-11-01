@@ -1,110 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 🎨 PALETA PRINCIPAL -->
+    <!-- 🟢 Paleta principal -->
     <color name="primary_green">#2E7D32</color>
     <color name="primary_green_dark">#1B5E20</color>
     <color name="primary_green_light">#4CAF50</color>
-    <color name="primary_green_700">#256F2A</color>
+    <color name="primary_green_700">#1B5E20</color>
 
+    <!-- 🟣 Tonos secundarios -->
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>
     <color name="purple_200">#BB86FC</color>
 
+    <!-- 🟢 Tonos teal -->
     <color name="teal_700">#00796B</color>
     <color name="teal_500">#009688</color>
-    <color name="teal_200">#80CBC4</color>
+    <color name="teal_200">#03DAC5</color>
 
-    <color name="amber_700">#FFA000</color>
-    <color name="amber_500">#FFC107</color>
+    <!-- 🟡 Tonos amber -->
     <color name="amber_300">#FFD54F</color>
+    <color name="amber_500">#FFC107</color>
+    <color name="amber_700">#FFA000</color>
 
-    <!-- ⚫ ESCALA DE GRISES -->
-    <color name="black">#000000</color>
+    <!-- ⚫ Escala de grises suaves -->
     <color name="white">#FFFFFF</color>
-    <color name="gray_50">#FAFAFA</color>
-    <color name="gray_100">#F5F5F5</color>
-    <color name="gray_200">#EEEEEE</color>
+    <color name="gray_100">#F9F9F9</color>
+    <color name="gray_200">#F0F0F0</color>
     <color name="gray_300">#E0E0E0</color>
-    <color name="gray_400">#BDBDBD</color>
-    <color name="gray_500">#9E9E9E</color>
-    <color name="gray_600">#757575</color>
-    <color name="gray_700">#616161</color>
-    <color name="gray_800">#424242</color>
-    <color name="gray_900">#212121</color>
-    <color name="gray">@color/gray_400</color>
-    <color name="darker_gray">#555555</color>
+    <color name="gray_400">#CCCCCC</color>
+    <color name="gray_500">#B0B0B0</color>
+    <color name="gray_600">#999999</color>
+    <color name="gray_700">#777777</color>
+    <color name="gray_800">#555555</color>
+    <color name="gray_900">#444444</color>
+    <color name="darker_gray">#666666</color>
+    <color name="dark_gray">#666666</color>
+    <color name="light_gray">#DDDDDD</color>
+    <color name="gray">#BDBDBD</color>
 
-    <!-- ✍️ TEXTO -->
-    <color name="text_primary">#1A1A1A</color>
-    <color name="text_secondary">#5C5C5C</color>
-    <color name="text_hint">#9E9E9E</color>
-    <color name="text_disabled">#BDBDBD</color>
+    <!-- 🧾 Texto -->
+    <color name="text_primary">#333333</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_hint">#999999</color>
     <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_primary_light">#F2F2F2</color>
+    <color name="text_secondary_light">#CCCCCC</color>
 
-    <!-- 🔘 BOTONES -->
-    <color name="button_primary_bg">@color/primary_green</color>
+    <!-- 🟣 Botones -->
+    <color name="button_primary_bg">@color/purple_500</color>
     <color name="button_primary_text">@color/white</color>
-    <color name="button_secondary_bg">@color/purple_500</color>
+    <color name="button_secondary_bg">@color/primary_green</color>
     <color name="button_secondary_text">@color/white</color>
 
-    <!-- 🟩 CHIPS -->
-    <color name="chip_stroke">#C8E6C9</color>
+    <!-- 🟢 Chips -->
+    <color name="chip_stroke">#DDEEDD</color>
     <color name="chip_text">@color/primary_green</color>
     <color name="chip_text_checked">@color/white</color>
     <color name="chip_bg">@color/white</color>
     <color name="chip_bg_checked">@color/primary_green</color>
 
-    <!-- 📅 CALENDARIO -->
+    <!-- 📅 Calendario -->
     <color name="calendar_highlight">@color/primary_green</color>
-    <color name="calendar_selected_day_bg">#C8E6C9</color>
+    <color name="calendar_selected_day_bg">#E8F5E9</color>
     <color name="slot_border">#E0E0E0</color>
-    <color name="slot_hour">#424242</color>
+    <color name="slot_hour">#666666</color>
 
-    <!-- 🌤️ FONDOS -->
+    <!-- 🌤️ Fondos -->
     <color name="bg_light">#FAFAFA</color>
     <color name="bg_card">#FFFFFF</color>
-    <color name="bg_surface">#FDFDFD</color>
     <color name="background_light">@color/bg_light</color>
 
-    <!-- 🩶 ESTADOS -->
+    <!-- 🩶 Estados -->
     <color name="state_active">@color/primary_green</color>
-    <color name="state_cancelled">#D32F2F</color>
+    <color name="state_cancelled">#E53935</color>
     <color name="state_pending">@color/amber_700</color>
-    <color name="state_inactive">@color/gray_400</color>
 
-    <!-- 🧭 ICONOS DEL LAUNCHER -->
+    <!-- 📱 Iconos del launcher -->
     <color name="ic_launcher_background">@color/primary_green</color>
     <color name="ic_launcher_foreground">@color/white</color>
 
-    <!-- 🧱 ALIASES Y COMPATIBILIDAD -->
+    <!-- 🎨 Aliases requeridos -->
     <color name="primary">@color/primary_green</color>
     <color name="primary_dark">@color/primary_green_dark</color>
-    <color name="primary_light">@color/primary_green_light</color>
     <color name="primary_text">@color/text_primary</color>
 
-    <!-- 🔹 Compatibilidad para temas y manifest -->
-    <color name="primaryColor">@color/primary_green</color>
-    <color name="primaryColorDark">@color/primary_green_dark</color>
-    <color name="colorAccent">@color/amber_500</color>
-
-    <!-- 🧩 Material Design 3 -->
-    <color name="colorPrimary">@color/primary_green</color>
-    <color name="colorPrimaryContainer">@color/primary_green_light</color>
-    <color name="colorPrimaryDark">@color/primary_green_dark</color>
-    <color name="colorOnPrimary">@color/text_on_primary</color>
-
-    <color name="colorSecondary">@color/purple_500</color>
-    <color name="colorSecondaryContainer">@color/purple_200</color>
-    <color name="colorOnSecondary">@color/white</color>
-
-    <color name="colorSurface">@color/bg_card</color>
-    <color name="colorOnSurface">@color/text_primary</color>
-    <color name="colorBackground">@color/bg_light</color>
-    <color name="colorOnBackground">@color/text_primary</color>
-
-    <color name="colorError">#D32F2F</color>
-    <color name="colorOnError">@color/white</color>
-    <color name="colorOutline">@color/gray_300</color>
+    <!-- ✅ Compatibilidad / alias usados por layouts -->
+    <color name="black">#333333</color>
+    <color name="green">@color/primary_green</color>
+    <color name="background">@color/bg_light</color>
 
 </resources>
