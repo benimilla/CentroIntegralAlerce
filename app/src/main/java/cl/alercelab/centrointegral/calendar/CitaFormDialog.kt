@@ -14,6 +14,11 @@ import cl.alercelab.centrointegral.data.Repos
 import cl.alercelab.centrointegral.domain.Cita
 import kotlinx.coroutines.launch
 import java.util.*
+import cl.alercelab.centrointegral.notifications.NotificationHelper
+import androidx.work.WorkManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
+import java.util.concurrent.TimeUnit
 
 class CitaFormDialog(
     private val actividadId: String,
@@ -103,8 +108,22 @@ class CitaFormDialog(
             } else {
                 if (citaExistente != null) {
                     repos.reagendarCita(nuevaCita.id, fechaInicio, fechaFin, nuevaCita.lugar)
+
+                    NotificationHelper.showSimpleNotification(
+                        requireContext(),
+                        "Cita reagendada",
+                        "Tu cita ha sido reagendada para el ${Date(fechaInicio)}."
+                    )
                 } else {
                     repos.crearCita(nuevaCita)
+
+                    NotificationHelper.showSimpleNotification(
+                        requireContext(),
+                        "Nueva cita creada",
+                        "Se agendó una cita el ${Date(fechaInicio)} a las ${
+                            String.format("%02d:%02d", Date(fechaInicio).hours, Date(fechaInicio).minutes)
+                        }."
+                    )
                 }
                 onCitaCreada(nuevaCita)
                 dismiss()

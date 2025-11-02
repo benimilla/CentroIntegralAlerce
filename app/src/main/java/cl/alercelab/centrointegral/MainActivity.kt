@@ -18,11 +18,14 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.content.Context
 
+import cl.alercelab.centrointegral.notifications.NotificationHelper
+import android.content.pm.PackageManager
 class MainActivity : AppCompatActivity() {
 
     private val repos = Repos()
     private lateinit var navController: NavController
     private var snackbar: Snackbar? = null // 👈 Mantiene una sola instancia visible
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +46,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.loginFragment, R.id.registerFragment, R.id.forgotFragment -> View.GONE
                 else -> View.VISIBLE
             }
+
         }
 
         // 🚀 Monitorear conexión a Internet (nuevo)
@@ -129,10 +133,11 @@ class MainActivity : AppCompatActivity() {
                 else -> navController.popBackStack()
             }
         }
+
     }
 
     // ---------------------------------------------------------------------
-    // 🔹 Detección elegante de conexión a Internet con Snackbar
+    // 🔹 Detección de conexión a Internet con Snackbar
     // ---------------------------------------------------------------------
     private fun setupNetworkCallback() {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -170,4 +175,5 @@ class MainActivity : AppCompatActivity() {
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
+
 }

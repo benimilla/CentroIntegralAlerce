@@ -1,3 +1,4 @@
+
 package cl.alercelab.centrointegral.activities
 
 import android.app.AlertDialog
@@ -21,6 +22,9 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.ceil
+import cl.alercelab.centrointegral.notifications.NotificationHelper
+import androidx.work.*
+import java.util.concurrent.TimeUnit
 
 class CitaFormFragment : Fragment() {
 
@@ -173,7 +177,6 @@ class CitaFormFragment : Fragment() {
             tvDuracionMax.text = "Duración máxima: ${it.duracionMin ?: 0} min"
             tvPeriodicidad.text = "Periodicidad: ${it.periodicidad ?: "-"}"
         }
-
     }
 
     private fun cargarDatosCita(cita: Cita) {
@@ -263,7 +266,15 @@ class CitaFormFragment : Fragment() {
                     repos.crearCita(nuevaCita)
                     citaId = nuevaCita.id
                     accion = "Creación"
-                    toast(" Cita creada correctamente.")
+                    toast("Cita creada correctamente.")
+
+                    NotificationHelper.showSimpleNotification(
+                        requireContext(),
+                        "Nueva cita creada 🗓",
+                        "Se agendó la actividad '${actividad.nombre}' para el $fecha a las $horaInicio."
+                    )
+
+                    programarAlerta(actividad.id, nuevaCita.id, inicio)
 
                     if (actividad.periodicidad != null && actividad.periodicidad != "Única") {
                         generarRepeticiones(actividad, inicio, fin)
@@ -282,12 +293,19 @@ class CitaFormFragment : Fragment() {
                     repos.actualizarCita(citaEditada.id, citaEditada)
                     citaId = citaEditada.id
                     accion = "Edición"
-                    toast(" Cita actualizada correctamente.")
+                    toast("Cita actualizada correctamente.")
+
+                    NotificationHelper.showSimpleNotification(
+                        requireContext(),
+                        "Cita reagendada",
+                        "La actividad '${actividad.nombre}' se ha reagendado para el $fecha a las $horaInicio."
+                    )
+
+                    programarAlerta(actividad.id, citaEditada.id, inicio)
                 }
 
-                // 🔹 Registrar auditoría
                 repos.registrarAuditoria(
-                    usuarioId = "admin123", // reemplaza por usuario real
+                    usuarioId = "admin123",
                     usuarioNombre = "Administrador",
                     modulo = "Citas",
                     accion = accion,
@@ -351,7 +369,7 @@ class CitaFormFragment : Fragment() {
 
         if (repeticiones.isNotEmpty()) {
             for (cita in repeticiones) repos.crearCita(cita)
-            toast("🔁 ${repeticiones.size} citas recurrentes creadas automáticamente.")
+            toast("${repeticiones.size} citas recurrentes creadas automáticamente.")
         }
     }
 
@@ -370,9 +388,14 @@ class CitaFormFragment : Fragment() {
                 progressBar.visibility = View.VISIBLE
                 try {
                     repos.eliminarCita(cita.id)
-                    toast("🗑️ Cita eliminada correctamente.")
+                    toast("🗑 Cita eliminada correctamente.")
 
-                    // 🔹 Registrar auditoría de eliminación
+                    NotificationHelper.showSimpleNotification(
+                        requireContext(),
+                        "Cita cancelada",
+                        "Se ha cancelado la cita de la actividad '${actividadSeleccionada?.nombre}'."
+                    )
+
                     repos.registrarAuditoria(
                         usuarioId = "admin123",
                         usuarioNombre = "Administrador",
@@ -401,5 +424,24 @@ class CitaFormFragment : Fragment() {
 
     private fun toast(msg: String) {
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+    }
+
+    /** 🔔 Programa alertas automáticas (1 día y 30 min antes) */
+    private fun programarAlerta(actividadId: String, citaId: String, fechaHora: Long) {
+        // ⏰ 30 minutos antes
+        val delay30Min = (fechaHora - System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(30)).coerceAtLeast(0)
+        val alerta30Min = OneTimeWorkRequestBuilder<cl.alercelab.centrointegral.notifications.AlertWorker>()
+            .setInputData(workDataOf("actividadId" to actividadId, "citaId" to citaId, "tipo" to "30min"))
+            .setInitialDelay(delay30Min, TimeUnit.MILLISECONDS)
+            .build()
+        WorkManager.getInstance(requireContext()).enqueue(alerta30Min)
+
+        // 📅 1 día antes
+        val delay1Dia = (fechaHora - System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)).coerceAtLeast(0)
+        val alerta1Dia = OneTimeWorkRequestBuilder<cl.alercelab.centrointegral.notifications.AlertWorker>()
+            .setInputData(workDataOf("actividadId" to actividadId, "citaId" to citaId, "tipo" to "1dia"))
+            .setInitialDelay(delay1Dia, TimeUnit.MILLISECONDS)
+            .build()
+        WorkManager.getInstance(requireContext()).enqueue(alerta1Dia)
     }
 }

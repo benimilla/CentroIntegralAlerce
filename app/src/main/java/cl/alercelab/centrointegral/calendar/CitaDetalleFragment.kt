@@ -19,7 +19,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
-
+import cl.alercelab.centrointegral.notifications.NotificationHelper
+import androidx.work.WorkManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
+import java.util.concurrent.TimeUnit
 class CitaDetalleFragment : Fragment() {
 
     private val repo = Repos()
@@ -153,6 +157,25 @@ class CitaDetalleFragment : Fragment() {
                             } else {
                                 repo.reagendarCita(cita.id, nuevoInicio, nuevoFin, cita.lugar)
                                 toast("✅ Cita reagendada correctamente.")
+
+                                //  Nueva notificación
+                                NotificationHelper.showSimpleNotification(
+                                    requireContext(),
+                                    "Cita reagendada",
+                                    "La cita de '${actividadActual?.nombre ?: "Actividad"}' se ha reagendado para el ${
+                                        formatoFecha.format(Date(nuevoInicio))
+                                    } a las ${formatoHora.format(Date(nuevoInicio))}."
+                                )
+
+// 👉 Programar alerta 30 min antes
+                                val delay = (nuevoInicio - System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(30))
+                                    .coerceAtLeast(0)
+                                val work = OneTimeWorkRequestBuilder<cl.alercelab.centrointegral.notifications.AlertWorker>()
+                                    .setInputData(workDataOf("actividadId" to (actividadActual?.id ?: ""), "citaId" to cita.id))
+                                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                                    .build()
+                                WorkManager.getInstance(requireContext()).enqueue(work)
+
                                 findNavController().navigateUp()
                             }
                         }
@@ -187,6 +210,14 @@ class CitaDetalleFragment : Fragment() {
                     try {
                         db.collection("citas").document(cita.id).delete().await()
                         toast("🗑️ Cita eliminada correctamente.")
+
+                        //  Nueva notificación
+                        NotificationHelper.showSimpleNotification(
+                            requireContext(),
+                            "Cita cancelada",
+                            "Se ha cancelado la cita de la actividad '${actividadActual?.nombre ?: "sin nombre"}'."
+                        )
+
                         findNavController().navigateUp()
                     } catch (e: Exception) {
                         toast("Error al eliminar cita: ${e.message}")

@@ -1,3 +1,4 @@
+
 package cl.alercelab.centrointegral.notifications
 
 import android.app.NotificationChannel
@@ -20,6 +21,7 @@ class AlertWorker(
     override fun doWork(): Result = runBlocking {
         val actividadId = inputData.getString("actividadId") ?: return@runBlocking Result.failure()
         val citaId = inputData.getString("citaId") ?: return@runBlocking Result.failure()
+        val tipo = inputData.getString("tipo") ?: "30min"
 
         val db = FirebaseFirestore.getInstance()
         val auth = FirebaseAuth.getInstance()
@@ -27,7 +29,7 @@ class AlertWorker(
 
         val actSnap = db.collection("actividades").document(actividadId).get().await()
         val actividad = actSnap.getString("nombre") ?: "Actividad"
-        val tipo = actSnap.getString("tipo") ?: "-"
+        val tipoActividad = actSnap.getString("tipo") ?: "-"
         val beneficiarios = actSnap.get("beneficiarios") as? List<String> ?: emptyList()
         val oferente = actSnap.getString("oferente")
         val socio = actSnap.getString("socioComunitario")
@@ -43,12 +45,12 @@ class AlertWorker(
 
         if (!permitido) return@runBlocking Result.success()
 
-        // --- Mostrar notificación ---
-        showNotification(actividad, tipo)
+        // --- Mostrar notificación personalizada según el tipo ---
+        showNotification(actividad, tipoActividad, tipo)
         Result.success()
     }
 
-    private fun showNotification(nombre: String, tipo: String) {
+    private fun showNotification(nombre: String, tipoActividad: String, tipo: String) {
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "alertas_actividades"
 
@@ -61,10 +63,19 @@ class AlertWorker(
             manager.createNotificationChannel(channel)
         }
 
+        // Personalizar mensaje según el tipo de alerta
+        val (titulo, mensaje) = when (tipo) {
+            "1dia" -> "Recordatorio: cita mañana 🗓" to
+                    "Tienes una cita programada mañana: $nombre ($tipoActividad)"
+            else -> "Tu cita es en 30 minutos ⏰" to
+                    "Se aproxima: $nombre ($tipoActividad)"
+        }
+
         val notif = NotificationCompat.Builder(ctx, channelId)
-            .setSmallIcon(R.drawable.ic_notification) // asegúrate de tener un ícono válido
-            .setContentTitle("Recordatorio de actividad")
-            .setContentText("Se aproxima: $nombre ($tipo)")
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(titulo)
+            .setContentText(mensaje)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(mensaje))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
