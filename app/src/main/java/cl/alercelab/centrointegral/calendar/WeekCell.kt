@@ -7,3 +7,6 @@ data class WeekCell(
     val lugar: String? = null,
     val citaId: String? = null
 )
+
+// Representa una celda en la vista semanal del calendario,
+// indicando el día, hora y datos opcionales de una cita (título, lugar e identificador).

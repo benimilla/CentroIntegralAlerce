@@ -10,3 +10,6 @@ data class UserProfile(
  var estado: String = "pendiente",
  var fcmToken: String? = null
 )
+
+// Representa el perfil de un usuario en la aplicación, incluyendo datos personales,
+// rol, estado de aprobación y token de notificaciones FCM.

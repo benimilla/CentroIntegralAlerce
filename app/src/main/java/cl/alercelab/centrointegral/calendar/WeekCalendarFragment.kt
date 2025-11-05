@@ -48,12 +48,14 @@ class WeekCalendarFragment : Fragment() {
                 val actividades = repos.actividadesEnRango(startMs, endMs)
                 val actsById = actividades.associateBy { it.id }
 
+                // Consulta a Firestore todas las citas que se encuentren dentro del rango semanal actual
                 val citasSnap = db.collection("citas")
                     .whereGreaterThanOrEqualTo("fechaInicioMillis", startMs)
                     .whereLessThanOrEqualTo("fechaInicioMillis", endMs)
                     .get()
                     .await()
 
+                // Convierte los documentos en objetos Cita y los ordena por fecha
                 val citas = citasSnap.documents.mapNotNull { d ->
                     val c = d.toObject(Cita::class.java)
                     c?.copy(id = d.id)
@@ -74,6 +76,7 @@ class WeekCalendarFragment : Fragment() {
                     containerWeek.addView(header)
 
                     if (dayCitas.isEmpty()) {
+                        // Muestra texto cuando no hay actividades para el día
                         val empty = TextView(requireContext()).apply {
                             text = "— Sin actividades —"
                             setPadding(24, 0, 24, 8)
@@ -95,6 +98,7 @@ class WeekCalendarFragment : Fragment() {
                             tvFecha.text =
                                 "${sdfHour.format(Date(c.fechaInicioMillis))} - ${sdfHour.format(Date(c.fechaFinMillis))}"
 
+                            // Abre el fragmento de detalle de la cita al tocar la actividad
                             row.setOnClickListener {
                                 val frag = CitaDetalleFragment().apply {
                                     arguments = Bundle().apply {
@@ -113,6 +117,7 @@ class WeekCalendarFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
+                // Muestra un mensaje de error si ocurre un problema al cargar las citas
                 containerWeek.removeAllViews()
                 val tv = TextView(requireContext()).apply {
                     text = "Error al cargar: ${e.message}"
@@ -144,3 +149,6 @@ class WeekCalendarFragment : Fragment() {
         return out
     }
 }
+
+// Fragmento encargado de mostrar el calendario semanal, obteniendo las citas desde Firestore,
+// agrupándolas por día y permitiendo acceder al detalle de cada cita al seleccionarla.

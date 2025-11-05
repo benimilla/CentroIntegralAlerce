@@ -18,24 +18,32 @@ import kotlinx.coroutines.launch
 
 class MantenedorOferenteFragment : BaseMantenedorFragment() {
 
-    private val repo = Repos()
-    private lateinit var recycler: RecyclerView
-    private lateinit var fabAdd: FloatingActionButton
-    private val items = mutableListOf<Oferente>()
-    private lateinit var adapter: OferenteAdapter
+    private val repo = Repos() // Repositorio de datos para manejar oferentes
+    private lateinit var recycler: RecyclerView // Vista para mostrar la lista de oferentes
+    private lateinit var fabAdd: FloatingActionButton // Botón flotante para agregar oferentes
+    private val items = mutableListOf<Oferente>() // Lista local de oferentes
+    private lateinit var adapter: OferenteAdapter // Adaptador para manejar la vista de oferentes
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_mantenedor_list, container, false)
         recycler = v.findViewById(R.id.recyclerMantenedor)
         fabAdd = v.findViewById(R.id.fabAdd)
+
+        // Configura el RecyclerView con un layout vertical
         recycler.layoutManager = LinearLayoutManager(requireContext())
+
+        // Crea el adaptador con funciones para editar y eliminar
         adapter = OferenteAdapter(items, ::editarItem, ::eliminarItem)
         recycler.adapter = adapter
+
+        // Al presionar el botón flotante se abre el diálogo para agregar un nuevo oferente
         fabAdd.setOnClickListener { mostrarDialogo(null) }
-        cargarDatos()
+
+        cargarDatos() // Carga inicial de oferentes
         return v
     }
 
+    // Carga los oferentes desde el repositorio
     private fun cargarDatos() {
         lifecycleScope.launch {
             try {
@@ -48,6 +56,7 @@ class MantenedorOferenteFragment : BaseMantenedorFragment() {
         }
     }
 
+    // Muestra un diálogo para crear o editar un oferente
     private fun mostrarDialogo(item: Oferente?) {
         val view = layoutInflater.inflate(R.layout.dialog_oferente, null)
         val txtNombre = view.findViewById<EditText>(R.id.txtNombre)
@@ -63,6 +72,7 @@ class MantenedorOferenteFragment : BaseMantenedorFragment() {
                 val nombre = txtNombre.text.toString().trim()
                 val docente = txtDocente.text.toString().trim()
 
+                // Validaciones de campos obligatorios
                 if (nombre.isEmpty()) {
                     Toast.makeText(requireContext(), "El nombre es obligatorio", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
@@ -74,6 +84,7 @@ class MantenedorOferenteFragment : BaseMantenedorFragment() {
 
                 lifecycleScope.launch {
                     try {
+                        // Verifica que no exista un oferente con el mismo nombre
                         val oferentesExistentes = repo.obtenerOferentes()
                         val existeDuplicado = oferentesExistentes.any {
                             it.nombre.equals(nombre, ignoreCase = true) && it.id != item?.id
@@ -84,6 +95,7 @@ class MantenedorOferenteFragment : BaseMantenedorFragment() {
                             return@launch
                         }
 
+                        // Crea un nuevo oferente o actualiza uno existente
                         val nuevo = item?.copy(nombre = nombre, docenteResponsable = docente)
                             ?: Oferente(nombre = nombre, docenteResponsable = docente)
 
@@ -99,8 +111,10 @@ class MantenedorOferenteFragment : BaseMantenedorFragment() {
             .show()
     }
 
+    // Permite editar un oferente existente
     private fun editarItem(item: Oferente) = mostrarDialogo(item)
 
+    // Muestra confirmación antes de eliminar un oferente
     private fun eliminarItem(item: Oferente) {
         AlertDialog.Builder(requireContext())
             .setMessage("¿Seguro que deseas eliminar '${item.nombre}'?")
@@ -119,3 +133,8 @@ class MantenedorOferenteFragment : BaseMantenedorFragment() {
             .show()
     }
 }
+
+// Comentario resumen:
+// Este fragmento implementa un mantenedor de oferentes que permite listar, crear, editar y eliminar oferentes.
+// Se usa un RecyclerView para mostrar los datos, un FloatingActionButton para agregar nuevos oferentes,
+// y cuadros de diálogo (AlertDialog) para realizar las operaciones CRUD con validaciones y control de duplicados.

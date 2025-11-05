@@ -33,12 +33,14 @@ class AuditoriaFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Infla la vista principal del fragmento
         return inflater.inflate(R.layout.fragment_auditoria, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Inicializa componentes de UI
         recyclerAuditoria = view.findViewById(R.id.recyclerAuditoria)
         progressBar = view.findViewById(R.id.progressBar)
         spModulo = view.findViewById(R.id.spModulo)
@@ -47,18 +49,21 @@ class AuditoriaFragment : Fragment() {
         btnLimpiar = view.findViewById(R.id.btnLimpiar)
         tvVacio = view.findViewById(R.id.tvVacio)
 
+        // Configuración del RecyclerView
         recyclerAuditoria.layoutManager = LinearLayoutManager(requireContext())
         adapter = AuditoriaAdapter()
         recyclerAuditoria.adapter = adapter
 
+        // Configura filtros y carga inicial de datos
         configurarSpinners()
         cargarAuditoria()
 
+        // Asigna eventos a botones
         btnFiltrar.setOnClickListener { aplicarFiltros() }
         btnLimpiar.setOnClickListener { limpiarFiltros() }
     }
 
-    /** 🔹 Configura los filtros de módulo y acción */
+    /**  Configura los spinners con opciones predefinidas para módulo y acción */
     private fun configurarSpinners() {
         val modulos = listOf("Todos", "Actividades", "Citas", "Usuarios", "Gestor de Usuarios", "Mantenedores")
         val acciones = listOf("Todas", "Creación", "Edición", "Eliminación", "Aprobación", "Rechazo", "Actualización")
@@ -72,14 +77,14 @@ class AuditoriaFragment : Fragment() {
         spAccion.adapter = adapterAccion
     }
 
-    /** 🚀 Carga todos los registros desde Firestore */
+    /**  Obtiene todos los registros de auditoría desde Firestore mediante el repositorio */
     private fun cargarAuditoria() {
         lifecycleScope.launch {
             progressBar.visibility = View.VISIBLE
             recyclerAuditoria.visibility = View.GONE
             tvVacio.visibility = View.GONE
             try {
-                registros = repos.obtenerAuditoria()
+                registros = repos.obtenerAuditoria() // Llamada a Firestore
                 if (registros.isEmpty()) {
                     tvVacio.visibility = View.VISIBLE
                     tvVacio.text = "No hay registros de auditoría disponibles."
@@ -88,6 +93,7 @@ class AuditoriaFragment : Fragment() {
                     recyclerAuditoria.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
+                // En caso de error en la carga
                 tvVacio.visibility = View.VISIBLE
                 tvVacio.text = "Error al cargar auditoría: ${e.message}"
                 Toast.makeText(requireContext(), "Error al cargar auditoría", Toast.LENGTH_LONG).show()
@@ -97,7 +103,7 @@ class AuditoriaFragment : Fragment() {
         }
     }
 
-    /** 🔍 Filtra por módulo y acción */
+    /**  Aplica los filtros seleccionados en los spinners sobre la lista de auditorías */
     private fun aplicarFiltros() {
         val modulo = spModulo.selectedItem.toString()
         val accion = spAccion.selectedItem.toString()
@@ -118,7 +124,7 @@ class AuditoriaFragment : Fragment() {
         adapter.actualizar(filtrados)
     }
 
-    /** ♻️ Limpia los filtros */
+    /**  Restablece los filtros y muestra todos los registros nuevamente */
     private fun limpiarFiltros() {
         spModulo.setSelection(0)
         spAccion.setSelection(0)
@@ -129,12 +135,13 @@ class AuditoriaFragment : Fragment() {
     }
 }
 
-/** 🧾 Adaptador del RecyclerView */
+/**  Adaptador para mostrar los registros de auditoría en el RecyclerView */
 class AuditoriaAdapter : RecyclerView.Adapter<AuditoriaAdapter.ViewHolder>() {
 
     private var registros: List<Auditoria> = emptyList()
-    private val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+    private val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) // Formato de fecha legible
 
+    /** ViewHolder que asocia los campos de cada ítem */
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvUsuario: TextView = view.findViewById(R.id.tvUsuario)
         val tvModulo: TextView = view.findViewById(R.id.tvModulo)
@@ -151,6 +158,7 @@ class AuditoriaAdapter : RecyclerView.Adapter<AuditoriaAdapter.ViewHolder>() {
 
     override fun getItemCount(): Int = registros.size
 
+    /** Asigna los datos a las vistas de cada fila */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val registro = registros[position]
         holder.tvUsuario.text = "👤 ${registro.usuarioNombre}"
@@ -160,7 +168,7 @@ class AuditoriaAdapter : RecyclerView.Adapter<AuditoriaAdapter.ViewHolder>() {
         holder.tvFecha.text = "🕓 ${formato.format(Date(registro.fecha))}"
     }
 
-    /** 🔄 Actualiza el listado */
+    /**  Actualiza la lista con nuevos registros ordenados por fecha descendente */
     fun actualizar(lista: List<Auditoria>) {
         registros = lista.sortedByDescending { it.fecha }
         notifyDataSetChanged()
