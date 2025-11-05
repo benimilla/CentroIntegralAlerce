@@ -24,6 +24,7 @@ import androidx.work.WorkManager
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.workDataOf
 import java.util.concurrent.TimeUnit
+
 class CitaDetalleFragment : Fragment() {
 
     private val repo = Repos()
@@ -54,6 +55,7 @@ class CitaDetalleFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_cita_detalle, container, false)
 
+        // Inicializa los elementos de la interfaz
         tvTitulo = view.findViewById(R.id.tvTitulo)
         tvFecha = view.findViewById(R.id.tvFecha)
         tvHora = view.findViewById(R.id.tvHora)
@@ -81,10 +83,12 @@ class CitaDetalleFragment : Fragment() {
 
         cargarDatosCita()
 
+        // Botón para reagendar cita existente
         btnReagendar.setOnClickListener {
             citaActual?.let { mostrarDialogoReagendar(it) }
         }
 
+        // Botón para abrir formulario de edición de cita
         btnEditarCita.setOnClickListener {
             citaActual?.let {
                 val bundle = Bundle().apply {
@@ -95,11 +99,13 @@ class CitaDetalleFragment : Fragment() {
             }
         }
 
+        // Botón para eliminar cita
         btnEliminarCita.setOnClickListener {
             citaActual?.let { confirmarEliminacion(it) }
         }
     }
 
+    /** Carga los datos de la cita desde Firestore **/
     private fun cargarDatosCita() {
         lifecycleScope.launch {
             try {
@@ -111,6 +117,7 @@ class CitaDetalleFragment : Fragment() {
                     return@launch
                 }
 
+                // Carga los datos de la actividad asociada si existe
                 if (citaActual!!.actividadId.isNotEmpty()) {
                     actividadActual = repo.obtenerActividadPorId(citaActual!!.actividadId)
                 }
@@ -123,6 +130,7 @@ class CitaDetalleFragment : Fragment() {
         }
     }
 
+    /** Muestra todos los datos de la cita y su actividad asociada **/
     private fun mostrarDatosCompletos() {
         val cita = citaActual ?: return
         val actividad = actividadActual
@@ -137,11 +145,16 @@ class CitaDetalleFragment : Fragment() {
         tvObservaciones.text = " Observaciones: ${cita.observaciones ?: "-"}"
     }
 
+    /** Muestra el diálogo para reagendar una cita **/
     private fun mostrarDialogoReagendar(cita: Cita) {
         val calendar = Calendar.getInstance().apply { timeInMillis = cita.fechaInicioMillis }
+
+        // Diálogo para seleccionar nueva fecha
         DatePickerDialog(requireContext(),
             { _, year, month, day ->
                 calendar.set(year, month, day)
+
+                // Diálogo para seleccionar nueva hora
                 TimePickerDialog(requireContext(),
                     { _, hour, minute ->
                         calendar.set(Calendar.HOUR_OF_DAY, hour)
@@ -151,14 +164,15 @@ class CitaDetalleFragment : Fragment() {
                         val duracion = cita.fechaFinMillis - cita.fechaInicioMillis
                         val nuevoFin = nuevoInicio + duracion
 
+                        // Revisa si hay conflicto antes de reagendar
                         lifecycleScope.launch {
                             if (hayConflicto(nuevoInicio, nuevoFin, cita.id)) {
-                                toast("⚠️ Ya existe una cita en ese horario.")
+                                toast("️ Ya existe una cita en ese horario.")
                             } else {
                                 repo.reagendarCita(cita.id, nuevoInicio, nuevoFin, cita.lugar)
-                                toast("✅ Cita reagendada correctamente.")
+                                toast(" Cita reagendada correctamente.")
 
-                                //  Nueva notificación
+                                // Notificación local al usuario
                                 NotificationHelper.showSimpleNotification(
                                     requireContext(),
                                     "Cita reagendada",
@@ -167,7 +181,7 @@ class CitaDetalleFragment : Fragment() {
                                     } a las ${formatoHora.format(Date(nuevoInicio))}."
                                 )
 
-// 👉 Programar alerta 30 min antes
+                                // Programar alerta 30 minutos antes de la nueva cita
                                 val delay = (nuevoInicio - System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(30))
                                     .coerceAtLeast(0)
                                 val work = OneTimeWorkRequestBuilder<cl.alercelab.centrointegral.notifications.AlertWorker>()
@@ -191,6 +205,7 @@ class CitaDetalleFragment : Fragment() {
         ).show()
     }
 
+    /** Verifica si hay conflicto con otras citas en el rango horario **/
     private suspend fun hayConflicto(inicio: Long, fin: Long, citaId: String): Boolean {
         val citas = repo.citasEnRango(inicio - 3600000, fin + 3600000)
         return citas.any {
@@ -201,6 +216,7 @@ class CitaDetalleFragment : Fragment() {
         }
     }
 
+    /** Muestra diálogo de confirmación antes de eliminar una cita **/
     private fun confirmarEliminacion(cita: Cita) {
         AlertDialog.Builder(requireContext())
             .setTitle("Eliminar Cita")
@@ -209,9 +225,9 @@ class CitaDetalleFragment : Fragment() {
                 lifecycleScope.launch {
                     try {
                         db.collection("citas").document(cita.id).delete().await()
-                        toast("🗑️ Cita eliminada correctamente.")
+                        toast(" Cita eliminada correctamente.")
 
-                        //  Nueva notificación
+                        // Notificación de eliminación
                         NotificationHelper.showSimpleNotification(
                             requireContext(),
                             "Cita cancelada",
@@ -228,6 +244,7 @@ class CitaDetalleFragment : Fragment() {
             .show()
     }
 
+    /** Muestra un mensaje breve en pantalla **/
     private fun toast(msg: String) {
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
     }

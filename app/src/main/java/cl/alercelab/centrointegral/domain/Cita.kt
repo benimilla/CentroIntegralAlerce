@@ -15,3 +15,6 @@ data class Cita(
  var fechaCreacion: Long = System.currentTimeMillis(),
  var ultimaActualizacion: Long? = null
 ) : Serializable
+
+// Representa una cita o evento programado con información sobre la actividad asociada,
+// horarios, lugar, asistentes, estado y fechas de creación o actualización.

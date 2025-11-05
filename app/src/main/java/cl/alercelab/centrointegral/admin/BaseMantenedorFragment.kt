@@ -14,28 +14,30 @@ import kotlinx.coroutines.tasks.await
  */
 abstract class BaseMantenedorFragment : Fragment() {
 
-    // Job supervisor para evitar que un fallo en una corrutina cancele las demás
+    // SupervisorJob evita que un fallo en una corrutina cancele las demás dentro del mismo scope
     private val supervisorJob = SupervisorJob()
-    private val uiScope = CoroutineScope(Dispatchers.Main + supervisorJob)
+    private val uiScope = CoroutineScope(Dispatchers.Main + supervisorJob) // Scope principal para UI
 
     /**
-     * Muestra un mensaje breve en la parte inferior.
+     * Muestra un mensaje breve en la parte inferior (Snackbar).
+     * Si isError = true, el fondo se pinta rojo para destacar errores.
      */
     protected fun showSnackbar(view: View, message: String, isError: Boolean = false) {
         val snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT)
-        if (isError) snackbar.setBackgroundTint(0xFFD32F2F.toInt()) // rojo error
+        if (isError) snackbar.setBackgroundTint(0xFFD32F2F.toInt()) // Rojo error (Color Material)
         snackbar.show()
     }
 
     /**
-     * Muestra un mensaje de éxito estandarizado.
+     * Muestra un mensaje de éxito estandarizado en un Snackbar.
      */
     protected fun showSuccess(view: View, message: String) {
         showSnackbar(view, message, isError = false)
     }
 
     /**
-     * Muestra un mensaje de error estandarizado.
+     * Muestra un mensaje de error estandarizado en un Snackbar.
+     * También imprime el stacktrace para depuración.
      */
     protected fun showError(view: View, error: Throwable) {
         showSnackbar(view, "Error: ${error.message ?: "Desconocido"}", isError = true)
@@ -43,8 +45,8 @@ abstract class BaseMantenedorFragment : Fragment() {
     }
 
     /**
-     * Ejecuta de forma segura un bloque en corrutina, capturando excepciones.
-     * Permite operaciones con UI y backend sin bloquear el hilo principal.
+     * Ejecuta un bloque suspend de manera segura dentro del ciclo de vida del fragmento.
+     * Captura excepciones y evita bloqueos en el hilo principal.
      */
     protected fun launchSafely(
         block: suspend CoroutineScope.() -> Unit,
@@ -54,7 +56,7 @@ abstract class BaseMantenedorFragment : Fragment() {
             try {
                 block()
             } catch (e: CancellationException) {
-                // No hacemos nada: corrutina cancelada normalmente
+                // No se considera error: la corrutina fue cancelada normalmente
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) { onError(e) }
             }
@@ -62,7 +64,8 @@ abstract class BaseMantenedorFragment : Fragment() {
     }
 
     /**
-     * Ejecuta un bloque intensivo en segundo plano (Dispatchers.IO).
+     * Ejecuta un bloque intensivo o de acceso a red en el hilo de IO,
+     * y devuelve el resultado en el hilo principal para actualizar la UI.
      */
     protected fun <T> launchIO(
         block: suspend () -> T,
@@ -80,17 +83,16 @@ abstract class BaseMantenedorFragment : Fragment() {
     }
 
     /**
-     * 🔍 Registra una acción de auditoría en Firestore.
-     *
-     * Este método puede ser invocado por cualquier mantenedor que herede de esta clase.
+     *  Registra una acción de auditoría en Firestore.
+     * Cualquier mantenedor que herede esta clase puede usarlo para registrar eventos importantes.
      *
      * @param usuarioId ID del usuario que realiza la acción.
      * @param usuarioNombre Nombre del usuario.
-     * @param modulo Nombre del módulo (Ej: "Citas", "Actividades", "Usuarios").
+     * @param modulo Módulo del sistema donde ocurre la acción (Ej: "Citas", "Actividades").
      * @param accion Tipo de acción ("Creación", "Edición", "Eliminación", etc.).
      * @param entidadId ID del objeto afectado.
-     * @param descripcion Texto descriptivo del cambio realizado.
-     * @param cambios Mapa opcional con los campos modificados (clave = campo, valor = nuevo valor).
+     * @param descripcion Texto descriptivo del cambio.
+     * @param cambios Campos modificados y sus nuevos valores (opcional).
      */
     protected fun registrarAuditoria(
         usuarioId: String,
@@ -103,6 +105,7 @@ abstract class BaseMantenedorFragment : Fragment() {
     ) {
         launchIO(
             block = {
+                // Construye el objeto auditoría
                 val auditoria = mapOf(
                     "usuarioId" to usuarioId,
                     "usuarioNombre" to usuarioNombre,
@@ -113,6 +116,7 @@ abstract class BaseMantenedorFragment : Fragment() {
                     "cambios" to (cambios ?: emptyMap<String, Any>()),
                     "fecha" to System.currentTimeMillis()
                 )
+                // Inserta en Firestore
                 val db = FirebaseFirestore.getInstance()
                 db.collection("auditoria").add(auditoria).await()
                 true
@@ -126,8 +130,12 @@ abstract class BaseMantenedorFragment : Fragment() {
         )
     }
 
+    /**
+     * Cancela todas las corrutinas al destruir la vista del fragmento
+     * para evitar fugas de memoria o ejecuciones fuera del ciclo de vida.
+     */
     override fun onDestroyView() {
         super.onDestroyView()
-        supervisorJob.cancel() // Evita fugas de corrutinas
+        supervisorJob.cancel()
     }
 }

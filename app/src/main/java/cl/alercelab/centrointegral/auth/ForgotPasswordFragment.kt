@@ -16,12 +16,13 @@ class ForgotPasswordFragment : Fragment() {
 
     private var _binding: FragmentForgotPasswordBinding? = null
     private val binding get() = _binding!!
-    private val repos = Repos()
+    private val repos = Repos() // Instancia del repositorio que maneja la lógica de Firebase
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Infla el layout usando ViewBinding
         _binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -29,9 +30,11 @@ class ForgotPasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Configura el botón para enviar correo de recuperación
         binding.btnResetPassword.setOnClickListener {
             val email = binding.etEmail.text.toString()
             if (email.isNotEmpty()) {
+                // Ejecuta la llamada en una corrutina para no bloquear el hilo principal
                 lifecycleScope.launch {
                     val ok = repos.resetPassword(email)
                     if (ok) {
@@ -48,6 +51,13 @@ class ForgotPasswordFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        _binding = null // Evita fugas de memoria al liberar la referencia del binding
     }
 }
+
+/*
+Resumen:
+Este fragmento muestra una interfaz para restablecer la contraseña del usuario.
+El usuario ingresa su correo electrónico y al presionar el botón,
+se envía una solicitud a Firebase para enviar un correo de recuperación de contraseña.
+*/

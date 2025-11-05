@@ -54,7 +54,7 @@ class AdminUsersFragment : Fragment() {
         return v
     }
 
-    /** 🔹 Carga la lista de usuarios */
+    /**  Carga la lista de usuarios desde Firestore */
     private fun loadUsers(view: View) {
         lifecycleScope.launch {
             val users = repos.listAllUsers()
@@ -63,7 +63,7 @@ class AdminUsersFragment : Fragment() {
         }
     }
 
-    /** 🗑 Elimina un usuario y registra auditoría */
+    /**  Elimina un usuario y registra el evento en auditoría */
     private fun deleteUser(view: View, uid: String) {
         lifecycleScope.launch {
             try {
@@ -84,7 +84,7 @@ class AdminUsersFragment : Fragment() {
         }
     }
 
-    /** 🔁 Actualiza el rol del usuario */
+    /**  Actualiza el rol del usuario seleccionado */
     private fun updateRole(view: View, uid: String, newRole: String) {
         lifecycleScope.launch {
             try {
@@ -106,7 +106,7 @@ class AdminUsersFragment : Fragment() {
         }
     }
 
-    /** ✏️ Muestra diálogo para editar usuario */
+    /**  Muestra un diálogo para editar datos del usuario */
     private fun showEditDialog(view: View, user: UserProfile) {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_edit_user, null)
@@ -154,7 +154,7 @@ class AdminUsersFragment : Fragment() {
             .show()
     }
 
-    /** 🧾 Guarda un registro en la colección "auditoria" de Firestore. */
+    /**  Guarda un registro en la colección "auditoria" de Firestore */
     private suspend fun registrarAuditoria(
         usuarioId: String,
         usuarioNombre: String,
@@ -179,7 +179,7 @@ class AdminUsersFragment : Fragment() {
     }
 
     // -------------------------------------------------------------
-    // Adaptador
+    // Adaptador de lista de usuarios (RecyclerView)
     // -------------------------------------------------------------
     class UsersAdapter(
         private val onDelete: (String) -> Unit,
@@ -208,7 +208,7 @@ class AdminUsersFragment : Fragment() {
             holder.name.text = u.nombre
             holder.email.text = u.email
 
-            // 🔹 Asegura que el texto del rol sea visible
+            //  Configura el Spinner de roles y mantiene sincronizado el valor actual
             val roles = listOf("usuario", "gestor", "admin")
             val adapterSpinner = ArrayAdapter(
                 holder.itemView.context,
@@ -220,6 +220,7 @@ class AdminUsersFragment : Fragment() {
             holder.role.setSelection(roles.indexOf(u.rol))
             holder.role.setPopupBackgroundResource(android.R.color.white)
 
+            // Detecta cambio de rol
             holder.role.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>, view: View?, pos: Int, id: Long
@@ -236,6 +237,7 @@ class AdminUsersFragment : Fragment() {
 
         override fun getItemCount(): Int = items.size
 
+        /**  Recarga la lista completa */
         fun setData(list: List<UserProfile>) {
             items.clear()
             items.addAll(list)

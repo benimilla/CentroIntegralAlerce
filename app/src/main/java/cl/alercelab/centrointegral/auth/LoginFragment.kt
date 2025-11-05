@@ -34,21 +34,21 @@ class LoginFragment : Fragment() {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
 
-            // Validar campos vacíos
+            //  Verifica que los campos de correo y contraseña no estén vacíos
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             lifecycleScope.launch {
-                // Intentar login con Repos
+                //  Intenta iniciar sesión usando el repositorio (Firebase Auth)
                 val ok = repos.login(email, password)
                 if (!ok) {
                     Toast.makeText(requireContext(), "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
-                // Cargar perfil actual
+                //  Cargar el perfil del usuario actual desde la base de datos
                 val profile = repos.currentUserProfile()
                 if (profile == null) {
                     Toast.makeText(requireContext(), "Error al cargar usuario", Toast.LENGTH_SHORT).show()
@@ -56,11 +56,11 @@ class LoginFragment : Fragment() {
                     return@launch
                 }
 
-                // 🔒 Validar aprobación y estado antes de continuar
+                //  Validar si el usuario está aprobado y activo antes de continuar
                 if (!profile.aprobado || profile.estado.lowercase() != "activo") {
                     FirebaseAuth.getInstance().signOut()
 
-                    // Mostrar mensaje visual en pantalla
+                    //  Mostrar mensaje visual en pantalla indicando el motivo
                     binding.tvPending.visibility = View.VISIBLE
                     binding.tvPending.text = if (!profile.aprobado)
                         "Tu cuenta está pendiente de aprobación por el administrador."
@@ -74,21 +74,21 @@ class LoginFragment : Fragment() {
                     ).show()
                     return@launch
                 } else {
-                    // Si todo está OK, ocultar mensaje por si se mostró antes
+                    //  Si todo está correcto, asegurarse de ocultar mensajes previos
                     binding.tvPending.visibility = View.GONE
                 }
 
-                // ✅ Usuario aprobado → siempre navegar al calendario
+                //  Usuario validado → navegar directamente al calendario principal
                 findNavController().navigate(R.id.action_login_to_calendar)
             }
         }
 
-        // 🔹 Recuperar contraseña
+        //  Navegar a la pantalla de recuperación de contraseña
         binding.tvForgotPassword.setOnClickListener {
             findNavController().navigate(R.id.action_login_to_forgot)
         }
 
-        // 🔹 Ir al registro
+        //  Navegar a la pantalla de registro
         binding.tvRegister.setOnClickListener {
             findNavController().navigate(R.id.action_login_to_register)
         }
@@ -96,6 +96,6 @@ class LoginFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        _binding = null //  Limpieza del binding para evitar fugas de memoria
     }
 }

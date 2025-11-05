@@ -35,6 +35,7 @@ class AdminPendingFragment : Fragment() {
         return v
     }
 
+    /**  Carga usuarios pendientes desde Firestore */
     private fun load(view: View) {
         lifecycleScope.launch {
             val result = repos.listPendingUsers()
@@ -42,6 +43,7 @@ class AdminPendingFragment : Fragment() {
         }
     }
 
+    /**  Aprueba un usuario pendiente y lo registra en la auditoría */
     private fun approveUser(view: View, uid: String) {
         lifecycleScope.launch {
             try {
@@ -62,6 +64,7 @@ class AdminPendingFragment : Fragment() {
         }
     }
 
+    /**  Rechaza un usuario pendiente y registra la acción */
     private fun rejectUser(view: View, uid: String) {
         lifecycleScope.launch {
             try {
@@ -82,9 +85,7 @@ class AdminPendingFragment : Fragment() {
         }
     }
 
-    /**
-     * 🧾 Guarda registro de auditoría en Firestore.
-     */
+    /**  Registra una acción de auditoría en Firestore */
     private suspend fun registrarAuditoria(
         usuarioId: String,
         usuarioNombre: String,
@@ -108,6 +109,9 @@ class AdminPendingFragment : Fragment() {
         db.collection("auditoria").add(registro).await()
     }
 
+    // -------------------------------------------------------------
+    // Adaptador para la lista de solicitudes pendientes
+    // -------------------------------------------------------------
     class PendingAdapter(
         private val onApprove: (String) -> Unit,
         private val onReject: (String) -> Unit
@@ -135,12 +139,14 @@ class AdminPendingFragment : Fragment() {
             holder.email.text = user.email
             holder.role.text = "Rol solicitado: ${user.rol}"
 
+            // Botones de acción
             holder.btnApprove.setOnClickListener { onApprove(user.uid) }
             holder.btnReject.setOnClickListener { onReject(user.uid) }
         }
 
         override fun getItemCount() = items.size
 
+        /**  Actualiza los datos del adaptador con nueva lista */
         fun setData(data: List<UserProfile>) {
             items.clear()
             items.addAll(data)

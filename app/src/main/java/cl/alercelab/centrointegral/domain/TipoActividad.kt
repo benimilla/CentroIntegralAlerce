@@ -5,3 +5,11 @@ data class TipoActividad(
  var nombre: String = "",
  var descripcion: String = ""
 )
+
+// Representa el tipo de actividad disponible en el sistema, con su identificador, nombre y descripción.
+
+
+
+
+
+

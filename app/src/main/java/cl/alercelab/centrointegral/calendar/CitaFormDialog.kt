@@ -15,10 +15,6 @@ import cl.alercelab.centrointegral.domain.Cita
 import kotlinx.coroutines.launch
 import java.util.*
 import cl.alercelab.centrointegral.notifications.NotificationHelper
-import androidx.work.WorkManager
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.workDataOf
-import java.util.concurrent.TimeUnit
 
 class CitaFormDialog(
     private val actividadId: String,
@@ -46,6 +42,7 @@ class CitaFormDialog(
         observacionesEt = v.findViewById(R.id.etObservaciones)
         btnGuardar = v.findViewById(R.id.btnGuardar)
 
+        // Si se está editando una cita existente, se rellenan los campos con los datos previos
         citaExistente?.let {
             fechaMillis = it.fechaInicioMillis
             horaMillis = it.fechaInicioMillis
@@ -55,9 +52,11 @@ class CitaFormDialog(
             horaBtn.text = Date(it.fechaInicioMillis).hours.toString() + ":00"
         }
 
+        // Botones para elegir fecha y hora de la cita
         fechaBtn.setOnClickListener { pickDate() }
         horaBtn.setOnClickListener { pickTime() }
 
+        // Guarda la cita al presionar el botón correspondiente
         btnGuardar.setOnClickListener {
             guardarCita()
         }
@@ -66,6 +65,7 @@ class CitaFormDialog(
     }
 
     private fun pickDate() {
+        // Muestra un selector de fecha y guarda el valor elegido
         val cal = Calendar.getInstance()
         DatePickerDialog(requireContext(), { _, y, m, d ->
             cal.set(y, m, d, 0, 0)
@@ -75,6 +75,7 @@ class CitaFormDialog(
     }
 
     private fun pickTime() {
+        // Muestra un selector de hora y calcula el timestamp completo de la cita
         val cal = Calendar.getInstance()
         TimePickerDialog(requireContext(), { _, h, min ->
             cal.set(Calendar.HOUR_OF_DAY, h)
@@ -85,9 +86,11 @@ class CitaFormDialog(
     }
 
     private fun guardarCita() {
+        // Verifica que se haya seleccionado fecha y hora
         val fechaInicio = horaMillis ?: return Toast.makeText(requireContext(), "Selecciona fecha y hora", Toast.LENGTH_SHORT).show()
         val fechaFin = fechaInicio + duracionMin * 60 * 1000
 
+        // Crea una nueva cita o actualiza una existente
         val nuevaCita = citaExistente?.copy(
             fechaInicioMillis = fechaInicio,
             fechaFinMillis = fechaFin,
@@ -102,19 +105,23 @@ class CitaFormDialog(
         )
 
         viewLifecycleOwner.lifecycleScope.launch {
+            // Comprueba si existe conflicto con otra cita en el mismo horario
             val hayConflicto = repos.existeConflictoCita(nuevaCita)
             if (hayConflicto) {
-                Toast.makeText(requireContext(), "⚠️ Ese horario ya está ocupado.", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Ese horario ya está ocupado.", Toast.LENGTH_LONG).show()
             } else {
                 if (citaExistente != null) {
+                    // Actualiza (reagenda) una cita existente
                     repos.reagendarCita(nuevaCita.id, fechaInicio, fechaFin, nuevaCita.lugar)
 
+                    // Muestra notificación local informando del cambio
                     NotificationHelper.showSimpleNotification(
                         requireContext(),
                         "Cita reagendada",
                         "Tu cita ha sido reagendada para el ${Date(fechaInicio)}."
                     )
                 } else {
+                    // Crea una nueva cita y muestra notificación de confirmación
                     repos.crearCita(nuevaCita)
 
                     NotificationHelper.showSimpleNotification(
@@ -125,9 +132,13 @@ class CitaFormDialog(
                         }."
                     )
                 }
+                // Devuelve la cita creada al componente que llamó el diálogo
                 onCitaCreada(nuevaCita)
                 dismiss()
             }
         }
     }
 }
+
+// Diálogo de formulario para crear o editar una cita. Permite seleccionar fecha, hora y lugar,
+// valida conflictos de horario y muestra notificaciones cuando la cita es creada o modificada.
