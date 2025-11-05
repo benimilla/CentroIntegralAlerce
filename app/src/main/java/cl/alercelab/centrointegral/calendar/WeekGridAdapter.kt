@@ -34,6 +34,8 @@ class WeekGridAdapter(
         tv.gravity = Gravity.CENTER
         tv.setPadding(0, 16, 0, 16)
 
+        // Detecta cuando el usuario toca un día del calendario
+        // y ejecuta la función de callback pasando el rango del día seleccionado (inicio y fin en milisegundos)
         view.setOnClickListener {
             val start = day.timeInMillis
             val end = day.apply { set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59) }.timeInMillis
@@ -43,3 +45,6 @@ class WeekGridAdapter(
         return view
     }
 }
+
+// Muestra los días de la semana en una cuadrícula y permite al usuario seleccionar un día,
+// notificando el rango de tiempo correspondiente mediante una función callback.

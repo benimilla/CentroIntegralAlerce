@@ -12,3 +12,5 @@ data class Auditoria(
     var cambios: Map<String, String> = emptyMap() // detalle de campos modificados
 )
 
+// Representa un registro de auditoría que almacena la acción realizada por un usuario,
+// el módulo afectado, la descripción del cambio y los detalles específicos de los campos modificados.

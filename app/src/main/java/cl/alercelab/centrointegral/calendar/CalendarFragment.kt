@@ -23,6 +23,7 @@ import java.util.*
 
 class CalendarFragment : Fragment() {
 
+    //  Declaración de componentes de la interfaz
     private lateinit var calendarView: CalendarView
     private lateinit var rvDay: RecyclerView
     private lateinit var tvEmpty: TextView
@@ -32,6 +33,7 @@ class CalendarFragment : Fragment() {
     private lateinit var etBuscar: EditText
     private lateinit var progressBar: ProgressBar
 
+    //  Variables de apoyo
     private val db = FirebaseFirestore.getInstance()
     private val repos = Repos()
     private val citas = mutableListOf<Cita>()
@@ -45,7 +47,7 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 🔹 Referencias UI
+        //  Vinculación de vistas
         calendarView = view.findViewById(R.id.calendarView)
         rvDay = view.findViewById(R.id.rvDay)
         tvEmpty = view.findViewById(R.id.tvEmpty)
@@ -57,17 +59,18 @@ class CalendarFragment : Fragment() {
 
         rvDay.layoutManager = LinearLayoutManager(requireContext())
 
-        verificarRolUsuario()
-        cargarCitas()
+        verificarRolUsuario() //  Determina si el usuario puede crear citas
+        cargarCitas() //  Descarga citas desde Firestore
 
-        // 🔹 Actualiza lista si se creó o modificó una cita
+        //  Observa si se creó o modificó una cita para actualizar el listado
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             findNavController().currentBackStackEntry
                 ?.savedStateHandle
                 ?.getLiveData<Boolean>("citaGuardada")
                 ?.observe(viewLifecycleOwner) { guardada ->
                     if (guardada == true) {
-                        cargarCitas() //  Recargar todo desde Firestore
+                        cargarCitas()
+                        //  Se marca como false para evitar recargas continuas
                         findNavController().currentBackStackEntry
                             ?.savedStateHandle
                             ?.set("citaGuardada", false)
@@ -75,7 +78,7 @@ class CalendarFragment : Fragment() {
                 }
         }
 
-        // 🔹 Cambio de día en el calendario
+        //  Cuando el usuario cambia de día en el calendario
         calendarView.setOnDateChangeListener { _, year, month, day ->
             val cal = Calendar.getInstance().apply {
                 set(year, month, day, 0, 0, 0)
@@ -83,7 +86,7 @@ class CalendarFragment : Fragment() {
             mostrarCitasDelDia(cal.timeInMillis)
         }
 
-        // 🔹 Botón para crear nueva cita
+        //  Botón flotante para crear una nueva cita
         btnCrearCita.setOnClickListener {
             try {
                 findNavController().navigate(R.id.action_calendarFragment_to_citaFormFragment)
@@ -97,13 +100,14 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    /** 🔹 Verifica el rol del usuario para mostrar o no el botón de crear cita */
+    /**  Verifica el rol del usuario logueado (admin/gestor/usuario) */
     private fun verificarRolUsuario() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         db.collection("usuarios").document(uid).get()
             .addOnSuccessListener { doc ->
                 val rol = doc.getString("rol")?.lowercase(Locale.getDefault()) ?: ""
+                //  Solo admin o gestor pueden crear citas
                 btnCrearCita.visibility =
                     if (rol == "admin" || rol == "gestor") View.VISIBLE else View.GONE
             }
@@ -116,7 +120,7 @@ class CalendarFragment : Fragment() {
             }
     }
 
-    /** 🔹 Carga las citas desde Firestore */
+    /**  Descarga todas las citas desde Firestore */
     private fun cargarCitas() {
         lifecycleScope.launch {
             try {
@@ -125,9 +129,10 @@ class CalendarFragment : Fragment() {
                 citas.clear()
                 citas.addAll(result.mapNotNull {
                     val cita = it.toObject(Cita::class.java)
-                    cita?.id = it.id // ✅ necesario para navegar al detalle
+                    cita?.id = it.id //  Se guarda el ID del documento
                     cita
                 })
+                //  Muestra citas del día actual por defecto
                 mostrarCitasDelDia(Calendar.getInstance().timeInMillis)
             } catch (e: Exception) {
                 Toast.makeText(
@@ -141,7 +146,7 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    /** 🔹 Filtra y muestra las citas del día seleccionado */
+    /**  Filtra y muestra las citas correspondientes a un día específico */
     private fun mostrarCitasDelDia(diaMillis: Long) {
         val inicioDia = Calendar.getInstance().apply {
             timeInMillis = diaMillis
@@ -151,23 +156,25 @@ class CalendarFragment : Fragment() {
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
-        val finDia = inicioDia + 24 * 60 * 60 * 1000
+        val finDia = inicioDia + 24 * 60 * 60 * 1000 //  +24h
 
         val citasFiltradas = citas.filter {
             it.fechaInicioMillis in inicioDia..finDia
         }.sortedBy { it.fechaInicioMillis }
 
+        //  Si no hay citas, muestra mensaje vacío
         if (citasFiltradas.isEmpty()) {
             tvEmpty.visibility = View.VISIBLE
             rvDay.visibility = View.GONE
         } else {
             tvEmpty.visibility = View.GONE
             rvDay.visibility = View.VISIBLE
+            //  Carga el adaptador con las citas del día
             rvDay.adapter = CitaAdapter(citasFiltradas, formato) { citaSeleccionada ->
-                //  Navegación al detalle con Bundle
                 val bundle = Bundle().apply {
                     putString("citaId", citaSeleccionada.id)
                 }
+                //  Navega al detalle de la cita seleccionada
                 findNavController().navigate(R.id.citaDetalleFragment, bundle)
             }
         }
@@ -175,12 +182,12 @@ class CalendarFragment : Fragment() {
 }
 
 /** =======================================================
- *  🔹 Adaptador personalizado para mostrar citas en la lista
+ *   Adaptador del RecyclerView para mostrar citas diarias
  *  ======================================================= */
 class CitaAdapter(
     private val citas: List<Cita>,
     private val formato: SimpleDateFormat,
-    private val onCitaClick: (Cita) -> Unit //  callback de clic
+    private val onCitaClick: (Cita) -> Unit
 ) : RecyclerView.Adapter<CitaViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitaViewHolder {
@@ -191,6 +198,7 @@ class CitaAdapter(
 
     override fun onBindViewHolder(holder: CitaViewHolder, position: Int) {
         val cita = citas[position]
+        //  Se formatean las fechas para mostrar inicio y fin
         val inicio =
             cita.fechaInicioMillis.takeIf { it > 0 }?.let { formato.format(Date(it)) } ?: "?"
         val fin =
@@ -199,6 +207,7 @@ class CitaAdapter(
 
         holder.bind(lugar, "$inicio - $fin")
 
+        // 🔹 Acción al hacer clic en una cita
         holder.itemView.setOnClickListener {
             onCitaClick(cita)
         }
@@ -207,6 +216,7 @@ class CitaAdapter(
     override fun getItemCount(): Int = citas.size
 }
 
+/**  ViewHolder que gestiona las vistas individuales de cada cita */
 class CitaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val titulo = view.findViewById<TextView>(R.id.tvTituloCita)
     private val detalle = view.findViewById<TextView>(R.id.tvDetalleCita)
@@ -216,3 +226,8 @@ class CitaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         detalle.text = detalleTxt
     }
 }
+
+/*  En resumen:
+   Este fragmento muestra un calendario con citas descargadas desde Firestore.
+   Permite seleccionar un día, visualizar las citas agendadas y navegar al detalle.
+   Los usuarios con rol 'admin' o 'gestor' pueden crear nuevas citas. */

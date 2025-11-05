@@ -19,3 +19,6 @@ data class Actividad(
  var motivoCancelacion: String? = null,         // Razón si fue cancelada
  var citas: List<String> = emptyList()          // Guarda solo los IDs de las citas asociadas
 )
+
+// Representa una actividad programada dentro del sistema, incluyendo su tipo, frecuencia,
+// capacidad, lugar, fechas, estado y las citas asociadas.

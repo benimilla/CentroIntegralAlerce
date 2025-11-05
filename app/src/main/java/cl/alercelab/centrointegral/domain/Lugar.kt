@@ -5,3 +5,5 @@ data class Lugar(
  var nombre: String = "",
  var cupo: Int? = null
 )
+
+// Representa un lugar físico disponible para actividades, con su identificador, nombre y capacidad máxima (cupo).

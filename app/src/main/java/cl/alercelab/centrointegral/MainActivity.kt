@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private val repos = Repos()
     private lateinit var navController: NavController
-    private var snackbar: Snackbar? = null // 👈 Mantiene una sola instancia visible
+    private var snackbar: Snackbar? = null //  Mantiene una sola instancia visible
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

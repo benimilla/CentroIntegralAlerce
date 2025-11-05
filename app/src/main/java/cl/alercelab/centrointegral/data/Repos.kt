@@ -9,6 +9,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.auth.ActionCodeSettings
+
 
 class Repos {
 
@@ -16,28 +18,58 @@ class Repos {
     private val db = FirebaseFirestore.getInstance()
 
     // -----------------------------------------------------------
-    // 🔹 AUTENTICACIÓN
+    //  AUTENTICACIÓN
     // -----------------------------------------------------------
 
     suspend fun register(nombre: String, email: String, password: String, rol: String): Boolean {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
-            val uid = result.user?.uid ?: return false
-            val profile = UserProfile(
-                uid = uid,
-                nombre = nombre,
-                email = email,
-                rol = rol,
-                aprobado = false,
-                estado = "pendiente"
+            val user = result.user ?: return false
+
+            val actionCodeSettings = ActionCodeSettings.newBuilder()
+                .setUrl("https://centrointegralalerce.firebaseapp.com")
+                .setHandleCodeInApp(true)
+                .setAndroidPackageName(
+                    "cl.alercelab.centrointegral",
+                    true,
+                    null
+                )
+                .build()
+
+            user.sendEmailVerification(actionCodeSettings)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful)
+                        Log.i("AUTH", "Correo de verificación enviado a: ${user.email}")
+                    else
+                        Log.e("AUTH", "Error al enviar verificación: ${task.exception?.message}")
+                }
+
+            val uid = user.uid
+            val data = mapOf(
+                "uid" to uid,
+                "nombre" to nombre,
+                "email" to email,
+                "rol" to rol,
+                "estado" to "pendiente",
+                "aprobado" to false,
+                "emailVerificado" to false,
+                "fechaRegistro" to System.currentTimeMillis()
             )
-            db.collection("usuarios").document(uid).set(profile).await()
+
+            FirebaseFirestore.getInstance().collection("usuarios")
+                .document(uid)
+                .set(data)
+                .await()
+
             true
         } catch (e: Exception) {
-            Log.e("REGISTER", "Error al registrar: ${e.message}")
+            Log.e("REGISTER", "Error al registrar: ${e.message}", e)
             false
         }
     }
+
+
+
 
     suspend fun login(email: String, password: String): Boolean =
         try {
@@ -60,7 +92,7 @@ class Repos {
     fun logout() = auth.signOut()
 
     // -----------------------------------------------------------
-    // 🔹 USUARIOS
+    //  USUARIOS
     // -----------------------------------------------------------
 
     suspend fun currentUserProfile(): UserProfile? {
@@ -102,7 +134,7 @@ class Repos {
     }
 
     // -----------------------------------------------------------
-    // 🔹 ACTIVIDADES Y CITAS
+    //  ACTIVIDADES Y CITAS
     // -----------------------------------------------------------
 
     suspend fun crearActividadConCitas(actividad: Actividad, citas: List<Cita>) {
@@ -110,7 +142,7 @@ class Repos {
             val actRef = db.collection("actividades").document()
             val fechaInicio = citas.minOfOrNull { it.fechaInicioMillis } ?: actividad.fechaInicio
 
-            // Guardamos solo IDs de citas, no objetos
+            // Guardamos solo los IDs de las citas asociadas
             val nuevaActividad = actividad.copy(
                 id = actRef.id,
                 fechaInicio = fechaInicio,
@@ -189,7 +221,7 @@ class Repos {
         }
 
     // -----------------------------------------------------------
-    // 🔹 CITAS
+    //  CITAS
     // -----------------------------------------------------------
 
     suspend fun crearCita(cita: Cita) {
@@ -197,7 +229,7 @@ class Repos {
             val db = FirebaseFirestore.getInstance()
             val docRef = db.collection("citas").add(cita).await()
 
-            // 🔗 Enlazar la cita con la actividad correspondiente
+            //  Vincular la cita con su actividad correspondiente
             if (cita.actividadId.isNotEmpty()) {
                 db.collection("actividades")
                     .document(cita.actividadId)
@@ -217,7 +249,6 @@ class Repos {
     suspend fun eliminarCita(id: String) {
         db.collection("citas").document(id).delete().await()
     }
-
 
     suspend fun obtenerCitasPorActividad(actividadId: String): List<Cita> =
         db.collection("citas")
@@ -281,7 +312,7 @@ class Repos {
     }
 
     // -----------------------------------------------------------
-    // 🔹 CRUD MANTENEDORES
+    //  CRUD MANTENEDORES
     // -----------------------------------------------------------
 
     suspend fun crearLugar(lugar: Lugar) {
@@ -365,7 +396,7 @@ class Repos {
             }
 
     // -----------------------------------------------------------
-    // 🔹 NOTIFICACIONES FCM
+    //  NOTIFICACIONES FCM
     // -----------------------------------------------------------
 
     fun saveDeviceToken() {
@@ -388,7 +419,7 @@ class Repos {
     }
 
     // -----------------------------------------------------------
-    // 🔹 PROYECTOS
+    //  PROYECTOS
     // -----------------------------------------------------------
 
     suspend fun crearProyecto(proyecto: Proyecto) {
@@ -420,9 +451,8 @@ class Repos {
         }
     }
 
-
     // -----------------------------------------------------------
-    // 🔹 AUDITORIA
+    //  AUDITORIA
     // -----------------------------------------------------------
 
     suspend fun registrarAuditoria(
@@ -458,13 +488,16 @@ class Repos {
             .await()
         return snapshot.toObjects(Auditoria::class.java)
     }
-
 }
 
-/** 🔸 Auxiliar para devolver 4 listas */
+/**  Auxiliar para devolver 4 listas */
 data class Quadruple<A, B, C, D>(
     val first: A,
     val second: B,
     val third: C,
     val fourth: D
 )
+
+//  Comentario general: Este repositorio centraliza todas las operaciones con Firebase Authentication y Firestore,
+// incluyendo autenticación, manejo de usuarios, CRUD de actividades y citas, auditoría y notificaciones FCM.
+// Utiliza corrutinas (await) para ejecutar operaciones asíncronas de manera suspendida y estructurada.

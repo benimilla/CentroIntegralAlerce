@@ -18,11 +18,11 @@ import kotlinx.coroutines.launch
 
 class MantenedorLugarFragment : BaseMantenedorFragment() {
 
-    private val repo = Repos()
+    private val repo = Repos() // Repositorio que maneja la comunicación con la base de datos
     private lateinit var recycler: RecyclerView
     private lateinit var fabAdd: FloatingActionButton
-    private val items = mutableListOf<Lugar>()
-    private lateinit var adapter: LugarAdapter
+    private val items = mutableListOf<Lugar>() // Lista local para los lugares cargados
+    private lateinit var adapter: LugarAdapter // Adaptador del RecyclerView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_mantenedor_list, container, false)
@@ -31,11 +31,12 @@ class MantenedorLugarFragment : BaseMantenedorFragment() {
         recycler.layoutManager = LinearLayoutManager(requireContext())
         adapter = LugarAdapter(items, ::editarItem, ::eliminarItem)
         recycler.adapter = adapter
-        fabAdd.setOnClickListener { mostrarDialogo(null) }
-        cargarDatos()
+        fabAdd.setOnClickListener { mostrarDialogo(null) } // Botón para agregar un nuevo lugar
+        cargarDatos() // Carga inicial de los lugares
         return v
     }
 
+    // Carga los lugares desde la base de datos y actualiza la vista
     private fun cargarDatos() {
         lifecycleScope.launch {
             try {
@@ -48,6 +49,7 @@ class MantenedorLugarFragment : BaseMantenedorFragment() {
         }
     }
 
+    // Muestra un cuadro de diálogo para crear o editar un lugar
     private fun mostrarDialogo(item: Lugar?) {
         val view = layoutInflater.inflate(R.layout.dialog_lugar, null)
         val txtNombre = view.findViewById<EditText>(R.id.txtNombre)
@@ -63,11 +65,13 @@ class MantenedorLugarFragment : BaseMantenedorFragment() {
                 val nombre = txtNombre.text.toString().trim()
                 val cupoStr = txtCupo.text.toString().trim()
 
+                // Validación: el nombre no puede estar vacío
                 if (nombre.isEmpty()) {
                     Toast.makeText(requireContext(), "El nombre es obligatorio", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
+                // Validación: cupo debe ser un número válido si no está vacío
                 val cupo = if (cupoStr.isEmpty()) null else cupoStr.toIntOrNull()
                 if (cupoStr.isNotEmpty() && cupo == null) {
                     Toast.makeText(requireContext(), "El cupo debe ser un número válido", Toast.LENGTH_SHORT).show()
@@ -77,6 +81,7 @@ class MantenedorLugarFragment : BaseMantenedorFragment() {
                 lifecycleScope.launch {
                     try {
                         val lugaresExistentes = repo.obtenerLugares()
+                        // Evita duplicados por nombre
                         val existeDuplicado = lugaresExistentes.any {
                             it.nombre.equals(nombre, ignoreCase = true) && it.id != item?.id
                         }
@@ -86,9 +91,11 @@ class MantenedorLugarFragment : BaseMantenedorFragment() {
                             return@launch
                         }
 
+                        // Crea o actualiza el objeto Lugar según el caso
                         val nuevo = item?.copy(nombre = nombre, cupo = cupo)
                             ?: Lugar(nombre = nombre, cupo = cupo)
 
+                        // Llama al repositorio para guardar los datos
                         if (item == null) repo.crearLugar(nuevo) else repo.actualizarLugar(nuevo)
                         cargarDatos()
                         Toast.makeText(requireContext(), "Lugar guardado correctamente", Toast.LENGTH_SHORT).show()
@@ -101,8 +108,10 @@ class MantenedorLugarFragment : BaseMantenedorFragment() {
             .show()
     }
 
+    // Llama al diálogo en modo edición
     private fun editarItem(item: Lugar) = mostrarDialogo(item)
 
+    // Elimina un lugar tras confirmación del usuario
     private fun eliminarItem(item: Lugar) {
         AlertDialog.Builder(requireContext())
             .setMessage("¿Seguro que deseas eliminar '${item.nombre}'?")

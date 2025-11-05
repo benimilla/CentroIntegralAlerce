@@ -42,20 +42,44 @@ class AdminPendingFragment : Fragment() {
         }
     }
 
+    /** Aprueba usuario solo si ya verificó su correo */
     private fun approveUser(view: View, uid: String) {
         lifecycleScope.launch {
             try {
+                val db = FirebaseFirestore.getInstance()
+                val userDoc = db.collection("usuarios").document(uid).get().await()
+
+                if (!userDoc.exists()) {
+                    Toast.makeText(requireContext(), "El usuario no existe.", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+
+                val email = userDoc.getString("email") ?: "correo desconocido"
+                val emailVerificado = userDoc.getBoolean("emailVerificado") ?: false
+
+                if (!emailVerificado) {
+                    Toast.makeText(
+                        requireContext(),
+                        "El usuario '$email' aún no verificó su correo electrónico.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
                 repos.approveUser(uid)
+
                 registrarAuditoria(
                     usuarioId = "admin_local",
                     usuarioNombre = "Administrador",
                     modulo = "Usuarios pendientes",
                     accion = "Aprobación",
                     entidadId = uid,
-                    descripcion = "Usuario aprobado"
+                    descripcion = "Usuario aprobado y activado"
                 )
-                Toast.makeText(requireContext(), "Usuario aprobado", Toast.LENGTH_SHORT).show()
+
+                Toast.makeText(requireContext(), "Usuario aprobado exitosamente", Toast.LENGTH_SHORT).show()
                 load(view)
+
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
@@ -82,9 +106,6 @@ class AdminPendingFragment : Fragment() {
         }
     }
 
-    /**
-     * 🧾 Guarda registro de auditoría en Firestore.
-     */
     private suspend fun registrarAuditoria(
         usuarioId: String,
         usuarioNombre: String,
@@ -134,7 +155,6 @@ class AdminPendingFragment : Fragment() {
             holder.name.text = user.nombre
             holder.email.text = user.email
             holder.role.text = "Rol solicitado: ${user.rol}"
-
             holder.btnApprove.setOnClickListener { onApprove(user.uid) }
             holder.btnReject.setOnClickListener { onReject(user.uid) }
         }

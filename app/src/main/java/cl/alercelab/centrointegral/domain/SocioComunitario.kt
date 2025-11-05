@@ -7,3 +7,11 @@ data class SocioComunitario(
  var telefono: String = "",
  var email: String = ""
 )
+
+// Representa un socio comunitario con su información de contacto y datos básicos de identificación.
+
+
+
+
+
+
