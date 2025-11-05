@@ -29,26 +29,29 @@ class ActivitiesListFragment : Fragment() {
     ): View {
         val v = inflater.inflate(R.layout.fragment_activities_list, container, false)
 
-        // Referencias al layout actualizado
         rv = v.findViewById(R.id.rvActividades)
         emptyView = v.findViewById(R.id.tvNoActividades)
         btnAdd = v.findViewById(R.id.btnAddActividad)
 
         rv.layoutManager = LinearLayoutManager(requireContext())
 
-        // Configurar adaptador con callbacks
+        // Configura el adaptador con acciones de edición y eliminación
         adapter = ActivitiesAdapter(
             onEdit = { id ->
+                // Navega al formulario de edición de actividad
                 val b = Bundle().apply { putString("actividadId", id) }
                 findNavController().navigate(R.id.action_activities_to_activity_form, b)
             },
             onDelete = { id ->
+                // Elimina una actividad al presionar el botón eliminar
                 lifecycleScope.launch {
                     try {
                         repos.deleteActividad(id)
+                        // Muestra un mensaje al usuario cuando la eliminación fue exitosa
                         Snackbar.make(requireView(), "Actividad eliminada correctamente", Snackbar.LENGTH_LONG).show()
                         loadActividades()
                     } catch (e: Exception) {
+                        // Muestra un mensaje de error si ocurre una excepción
                         Snackbar.make(requireView(), "Error al eliminar: ${e.message}", Snackbar.LENGTH_LONG).show()
                     }
                 }
@@ -56,7 +59,7 @@ class ActivitiesListFragment : Fragment() {
         )
         rv.adapter = adapter
 
-        // Botón para agregar nueva actividad
+        // Abre el formulario para crear una nueva actividad
         btnAdd.setOnClickListener {
             findNavController().navigate(R.id.action_activities_to_activity_form)
         }
@@ -68,6 +71,7 @@ class ActivitiesListFragment : Fragment() {
     private fun loadActividades() {
         lifecycleScope.launch {
             try {
+                // Carga las actividades según el rol del usuario (admin, gestor o usuario común)
                 val perfil = repos.currentUserProfile()
                 val actividades = if (perfil?.rol == "admin" || perfil?.rol == "gestor") {
                     repos.listAllActividades()
@@ -75,6 +79,7 @@ class ActivitiesListFragment : Fragment() {
                     perfil?.uid?.let { repos.listUserActividades(it) } ?: emptyList()
                 }
 
+                // Muestra mensaje si no hay actividades o actualiza la lista si las hay
                 if (actividades.isEmpty()) {
                     rv.visibility = View.GONE
                     emptyView.visibility = View.VISIBLE
@@ -84,12 +89,13 @@ class ActivitiesListFragment : Fragment() {
                     adapter.setData(actividades)
                 }
             } catch (e: Exception) {
+                // Muestra error si ocurre un problema al cargar las actividades
                 Snackbar.make(requireView(), "Error al cargar actividades: ${e.message}", Snackbar.LENGTH_LONG).show()
             }
         }
     }
 
-    // Adaptador interno
+    // Adaptador interno para mostrar las actividades
     class ActivitiesAdapter(
         private val onEdit: (String) -> Unit,
         private val onDelete: (String) -> Unit
@@ -116,7 +122,11 @@ class ActivitiesListFragment : Fragment() {
             val a = items[pos]
             h.tvTitle.text = a.nombre
             h.tvSubtitle.text = "Tipo: ${a.tipo} | Estado: ${a.estado}"
+
+            // Acción para editar una actividad desde el ícono de edición
             h.btnEdit.setOnClickListener { onEdit(a.id) }
+
+            // Acción para eliminar una actividad desde el ícono de eliminar
             h.btnDelete.setOnClickListener { onDelete(a.id) }
         }
 

@@ -18,7 +18,9 @@ class LugarAdapter(
         val nombre: TextView = v.findViewById(R.id.itemNombre)
         val descripcion: TextView = v.findViewById(R.id.itemDescripcion)
         init {
+            // Al hacer clic en el ítem se ejecuta la acción de edición del lugar
             v.setOnClickListener { onEdit(items[bindingAdapterPosition]) }
+            // Al mantener presionado el ítem se ejecuta la acción de eliminación del lugar
             v.setOnLongClickListener { onDelete(items[bindingAdapterPosition]); true }
         }
     }

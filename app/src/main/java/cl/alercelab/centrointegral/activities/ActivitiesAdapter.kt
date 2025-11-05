@@ -47,9 +47,16 @@ class ActivitiesAdapter(
             tvTitle.text = a.nombre
             tvSubtitle.text = "Tipo: ${a.tipo} | Estado: ${a.estado}"
 
+            // Abre el detalle de la actividad cuando se toca el elemento
             itemView.setOnClickListener { onDetail(a) }
+
+            // Botón para editar la actividad seleccionada
             btnEdit.setOnClickListener { onEdit(a) }
+
+            // Botón para reprogramar la actividad
             btnReschedule.setOnClickListener { onReschedule(a) }
+
+            // Botón para eliminar la actividad
             btnDelete.setOnClickListener { onDelete(a) }
         }
     }

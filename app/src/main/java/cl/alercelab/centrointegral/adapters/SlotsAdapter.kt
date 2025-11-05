@@ -32,13 +32,15 @@ class SlotsAdapter(
         h.tvTitle.text = row.titulo ?: "(libre)"
         h.tvPlace.text = row.lugar ?: ""
 
+        // Cambia la opacidad según si el slot tiene cita o está libre
         h.itemView.alpha = if (row.citaId == null) 0.7f else 1f
+        // Define color de fondo: transparente si está libre, verde suave si tiene cita
         h.itemView.setBackgroundColor(
             if (row.citaId == null) Color.TRANSPARENT
             else Color.argb(24, 46, 125, 50)
         )
 
-        // ✅ usar 'row' (SlotRow), NO el 'it' del lambda (View)
+        // Evento click sobre cada slot: pasa el SlotRow correspondiente al callback onClick
         h.itemView.setOnClickListener {
             val adapterPos = h.bindingAdapterPosition
             if (adapterPos != RecyclerView.NO_POSITION) {

@@ -18,7 +18,9 @@ class TipoActividadAdapter(
         val nombre: TextView = v.findViewById(R.id.itemNombre)
         val descripcion: TextView = v.findViewById(R.id.itemDescripcion)
         init {
+            // Clic corto: permite editar el tipo de actividad seleccionado
             v.setOnClickListener { onEdit(items[bindingAdapterPosition]) }
+            // Clic largo: permite eliminar el tipo de actividad seleccionado
             v.setOnLongClickListener { onDelete(items[bindingAdapterPosition]); true }
         }
     }

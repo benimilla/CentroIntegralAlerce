@@ -1,4 +1,3 @@
-
 package cl.alercelab.centrointegral.activities
 
 import android.app.AlertDialog
@@ -83,11 +82,14 @@ class CitaFormFragment : Fragment() {
         }
 
         cargarActividades()
+        // Botón que guarda o actualiza una cita según corresponda
         btnGuardar.setOnClickListener { guardarCita() }
+        // Botón que abre un diálogo de confirmación antes de eliminar la cita
         btnEliminar.setOnClickListener { confirmarEliminacion() }
     }
 
     private fun configurarPickers() {
+        // Muestra un selector de fecha al tocar el campo correspondiente
         etFecha.setOnClickListener {
             val c = Calendar.getInstance()
             DatePickerDialog(
@@ -99,6 +101,7 @@ class CitaFormFragment : Fragment() {
             ).show()
         }
 
+        // Muestra un selector de hora al tocar los campos de hora
         val timePicker = { target: EditText ->
             val c = Calendar.getInstance()
             TimePickerDialog(
@@ -123,6 +126,7 @@ class CitaFormFragment : Fragment() {
         adapterEstado.setDropDownViewResource(R.layout.item_spinner_estado)
         spEstado.adapter = adapterEstado
 
+        // Si es una nueva cita, se selecciona "Pendiente" por defecto
         if (citaExistente == null) {
             val index = adapterEstado.getPosition("Pendiente")
             if (index >= 0) spEstado.setSelection(index)
@@ -144,15 +148,16 @@ class CitaFormFragment : Fragment() {
                 adapter.setDropDownViewResource(R.layout.item_spinner_actividad)
                 spActividad.adapter = adapter
 
+                // Listener para detectar cambio de actividad seleccionada
                 spActividad.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                         actividadSeleccionada = actividades[pos]
                         actualizarInfoActividad()
                     }
-
                     override fun onNothingSelected(parent: AdapterView<*>?) {}
                 }
 
+                // Si se está editando una cita, carga los datos en los campos
                 citaExistente?.let { cita ->
                     val index = actividades.indexOfFirst { it.id == cita.actividadId }
                     if (index >= 0) {
@@ -171,6 +176,7 @@ class CitaFormFragment : Fragment() {
     }
 
     private fun actualizarInfoActividad() {
+        // Actualiza la información visible de la actividad seleccionada
         actividadSeleccionada?.let {
             tvLugar.text = "Lugar: ${it.lugar}"
             tvAvisoPrevio.text = "Aviso previo: ${it.diasAvisoPrevio} día(s)"
@@ -180,6 +186,7 @@ class CitaFormFragment : Fragment() {
     }
 
     private fun cargarDatosCita(cita: Cita) {
+        // Carga los datos de una cita existente en los campos del formulario
         val fecha = formato.format(Date(cita.fechaInicioMillis)).split(" ")[0]
         val horaInicio = formato.format(Date(cita.fechaInicioMillis)).split(" ")[1]
         val horaFin = formato.format(Date(cita.fechaFinMillis)).split(" ")[1]
@@ -196,8 +203,8 @@ class CitaFormFragment : Fragment() {
         btnEliminar.visibility = View.VISIBLE
     }
 
-    /** 💾 Guarda o actualiza una cita con auditoría */
     private fun guardarCita() {
+        // Valida los datos del formulario antes de guardar o actualizar una cita
         val actividad = actividadSeleccionada ?: run {
             toast("Selecciona una actividad antes de continuar.")
             return
@@ -245,6 +252,7 @@ class CitaFormFragment : Fragment() {
         lifecycleScope.launch {
             progressBar.visibility = View.VISIBLE
             try {
+                // Verifica si existe una cita que se cruza con el horario
                 val conflicto = repos.hayConflictoCita(actividad.lugar, inicio, fin)
                 if (conflicto && citaExistente == null) {
                     toast("Conflicto: ya hay una cita en ese lugar y horario.")
@@ -254,6 +262,7 @@ class CitaFormFragment : Fragment() {
                 val accion: String
                 val citaId: String
                 if (citaExistente == null) {
+                    // Crea una nueva cita
                     val nuevaCita = Cita(
                         actividadId = actividad.id,
                         fechaInicioMillis = inicio,
@@ -268,18 +277,22 @@ class CitaFormFragment : Fragment() {
                     accion = "Creación"
                     toast("Cita creada correctamente.")
 
+                    // Muestra una notificación local al crear la cita
                     NotificationHelper.showSimpleNotification(
                         requireContext(),
-                        "Nueva cita creada 🗓",
+                        "Nueva cita creada",
                         "Se agendó la actividad '${actividad.nombre}' para el $fecha a las $horaInicio."
                     )
 
+                    // Programa recordatorios automáticos antes del evento
                     programarAlerta(actividad.id, nuevaCita.id, inicio)
 
+                    // Si la actividad es recurrente, genera repeticiones
                     if (actividad.periodicidad != null && actividad.periodicidad != "Única") {
                         generarRepeticiones(actividad, inicio, fin)
                     }
                 } else {
+                    // Actualiza una cita existente
                     val citaEditada = citaExistente!!.copy(
                         actividadId = actividad.id,
                         fechaInicioMillis = inicio,
@@ -295,15 +308,18 @@ class CitaFormFragment : Fragment() {
                     accion = "Edición"
                     toast("Cita actualizada correctamente.")
 
+                    // Notificación de cita modificada
                     NotificationHelper.showSimpleNotification(
                         requireContext(),
                         "Cita reagendada",
                         "La actividad '${actividad.nombre}' se ha reagendado para el $fecha a las $horaInicio."
                     )
 
+                    // Reprograma las alertas
                     programarAlerta(actividad.id, citaEditada.id, inicio)
                 }
 
+                // Registra el cambio en la auditoría del sistema
                 repos.registrarAuditoria(
                     usuarioId = "admin123",
                     usuarioNombre = "Administrador",
@@ -319,6 +335,7 @@ class CitaFormFragment : Fragment() {
                     )
                 )
 
+                // Vuelve al fragmento anterior informando que se guardó la cita
                 findNavController().previousBackStackEntry?.savedStateHandle?.set("citaGuardada", true)
                 findNavController().navigateUp()
             } catch (e: Exception) {
@@ -331,6 +348,7 @@ class CitaFormFragment : Fragment() {
     }
 
     private suspend fun generarRepeticiones(actividad: Actividad, inicioBase: Long, finBase: Long) {
+        // Genera citas repetidas según la periodicidad de la actividad
         val calInicio = Calendar.getInstance()
         val calFin = Calendar.getInstance()
         calInicio.timeInMillis = inicioBase
@@ -374,6 +392,7 @@ class CitaFormFragment : Fragment() {
     }
 
     private fun confirmarEliminacion() {
+        // Muestra un cuadro de diálogo antes de eliminar la cita
         AlertDialog.Builder(requireContext())
             .setTitle("Eliminar cita")
             .setMessage("¿Seguro que deseas eliminar esta cita?")
@@ -383,12 +402,13 @@ class CitaFormFragment : Fragment() {
     }
 
     private fun eliminarCita() {
+        // Elimina la cita actual y registra la acción en la auditoría
         citaExistente?.let { cita ->
             lifecycleScope.launch {
                 progressBar.visibility = View.VISIBLE
                 try {
                     repos.eliminarCita(cita.id)
-                    toast("🗑 Cita eliminada correctamente.")
+                    toast("Cita eliminada correctamente.")
 
                     NotificationHelper.showSimpleNotification(
                         requireContext(),
@@ -426,9 +446,8 @@ class CitaFormFragment : Fragment() {
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
     }
 
-    /** 🔔 Programa alertas automáticas (1 día y 30 min antes) */
     private fun programarAlerta(actividadId: String, citaId: String, fechaHora: Long) {
-        // ⏰ 30 minutos antes
+        // Programa alertas locales: una 30 minutos antes y otra 1 día antes de la cita
         val delay30Min = (fechaHora - System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(30)).coerceAtLeast(0)
         val alerta30Min = OneTimeWorkRequestBuilder<cl.alercelab.centrointegral.notifications.AlertWorker>()
             .setInputData(workDataOf("actividadId" to actividadId, "citaId" to citaId, "tipo" to "30min"))
@@ -436,7 +455,6 @@ class CitaFormFragment : Fragment() {
             .build()
         WorkManager.getInstance(requireContext()).enqueue(alerta30Min)
 
-        // 📅 1 día antes
         val delay1Dia = (fechaHora - System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)).coerceAtLeast(0)
         val alerta1Dia = OneTimeWorkRequestBuilder<cl.alercelab.centrointegral.notifications.AlertWorker>()
             .setInputData(workDataOf("actividadId" to actividadId, "citaId" to citaId, "tipo" to "1dia"))

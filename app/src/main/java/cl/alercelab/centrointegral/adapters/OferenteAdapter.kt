@@ -18,7 +18,9 @@ class OferenteAdapter(
         val nombre: TextView = v.findViewById(R.id.itemNombre)
         val descripcion: TextView = v.findViewById(R.id.itemDescripcion)
         init {
+            // Al hacer clic sobre un elemento se ejecuta la acción para editar el oferente
             v.setOnClickListener { onEdit(items[bindingAdapterPosition]) }
+            // Al mantener presionado un elemento se ejecuta la acción para eliminar el oferente
             v.setOnLongClickListener { onDelete(items[bindingAdapterPosition]); true }
         }
     }

@@ -21,6 +21,7 @@ class ActivityDetailFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?) = activity?.let { act ->
         val actividadId = arguments?.getString("actividadId").orEmpty()
 
+        // Crea el cuadro de diálogo que mostrará los detalles de la actividad
         val builder = AlertDialog.Builder(act)
             .setTitle("Detalle de actividad")
             .setMessage("Cargando...")
@@ -28,11 +29,14 @@ class ActivityDetailFragment : DialogFragment() {
 
         val dlg = builder.create()
 
+        // Carga la información de la actividad y sus citas desde Firestore
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                // Obtiene el documento de la actividad por su ID
                 val doc = db.collection("actividades").document(actividadId).get().await()
                 val actividad = doc.toObject<Actividad>()?.copy(id = doc.id)
 
+                // Obtiene las citas asociadas a la actividad
                 val citasSnap = db.collection("citas")
                     .whereEqualTo("actividadId", actividadId)
                     .get()
@@ -40,9 +44,11 @@ class ActivityDetailFragment : DialogFragment() {
                 val citas = citasSnap.documents.mapNotNull { it.toObject(Cita::class.java)?.copy(id = it.id) }
                     .sortedBy { it.fechaInicioMillis }
 
+                // Muestra la información formateada dentro del cuadro de diálogo
                 val msg = buildMessage(actividad, citas)
                 dlg.setMessage(msg)
             } catch (e: Exception) {
+                // Muestra un mensaje de error si ocurre un problema al cargar los datos
                 dlg.setMessage("Error: ${e.message}")
             }
         }
@@ -52,6 +58,8 @@ class ActivityDetailFragment : DialogFragment() {
 
     private fun buildMessage(a: Actividad?, citas: List<Cita>): String {
         if (a == null) return "Actividad no encontrada"
+
+        // Construye el texto que se mostrará en el diálogo con los detalles de la actividad y sus citas
         return buildString {
             appendLine("Nombre: ${a.nombre}")
             appendLine("Tipo: ${a.tipo}")
@@ -70,6 +78,7 @@ class ActivityDetailFragment : DialogFragment() {
                 appendLine("- (sin citas)")
             } else {
                 citas.forEach { c ->
+                    // Muestra cada cita con fecha, hora, duración y lugar
                     val duracion = ((c.fechaFinMillis - c.fechaInicioMillis) / (1000 * 60)).toInt()
                     appendLine("• ${sdf.format(Date(c.fechaInicioMillis))} - ${sdf.format(Date(c.fechaFinMillis))} (${duracion} min) · ${c.lugar}")
                 }

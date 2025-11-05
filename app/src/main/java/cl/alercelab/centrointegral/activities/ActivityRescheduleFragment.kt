@@ -55,9 +55,12 @@ class ActivityRescheduleFragment : Fragment() {
 
         actividadId = arguments?.getString("actividadId")
 
+        // Muestra los selectores de fecha y hora cuando se hace clic
         tvFecha.setOnClickListener { pickDate() }
         tvHoraInicio.setOnClickListener { pickTime(isStart = true) }
         tvHoraFin.setOnClickListener { pickTime(isStart = false) }
+
+        // Guarda los cambios al presionar el botón
         btnGuardar.setOnClickListener { onSave() }
 
         loadCitas()
@@ -78,6 +81,7 @@ class ActivityRescheduleFragment : Fragment() {
 
                 val citas = snaps.toObjects(Cita::class.java)
                 if (citas.isEmpty()) {
+                    // Si no hay citas, se muestra mensaje y se cierra el fragmento
                     Toast.makeText(requireContext(), "Esta actividad no tiene citas", Toast.LENGTH_LONG).show()
                     findNavController().popBackStack()
                     return@launch
@@ -90,6 +94,7 @@ class ActivityRescheduleFragment : Fragment() {
                     items.map { "Cita ${it.first.take(6)}..." }
                 )
 
+                // Al seleccionar una cita, se actualizan los campos del formulario
                 spCitas.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                         val sel = items[position].second
@@ -106,12 +111,14 @@ class ActivityRescheduleFragment : Fragment() {
                 }
 
             } catch (e: Exception) {
+                // Muestra un error si no se pueden cargar las citas
                 Toast.makeText(requireContext(), "Error al cargar citas: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun pickDate() {
+        // Abre un selector de fecha y guarda el valor seleccionado
         val cal = Calendar.getInstance()
         DatePickerDialog(requireContext(), { _, y, m, d ->
             cal.set(y, m, d)
@@ -121,6 +128,7 @@ class ActivityRescheduleFragment : Fragment() {
     }
 
     private fun pickTime(isStart: Boolean) {
+        // Abre un selector de hora y guarda la hora de inicio o fin según el parámetro
         val cal = Calendar.getInstance()
         TimePickerDialog(requireContext(), { _, h, m ->
             cal.set(Calendar.HOUR_OF_DAY, h)
@@ -154,19 +162,22 @@ class ActivityRescheduleFragment : Fragment() {
         }
 
         if (fin <= inicio) {
+            // Verifica que la hora final sea posterior a la inicial
             Toast.makeText(requireContext(), "La hora de fin debe ser posterior a la de inicio", Toast.LENGTH_SHORT).show()
             return
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // 🧩 Ajuste correcto a la firma real de Repos.kt.reagendarCita
+                // Llama al repositorio para actualizar los datos de la cita en la base de datos
                 Repos().reagendarCita(cId, inicio, fin, lugar)
 
+                // Muestra un mensaje de éxito y vuelve atrás
                 Toast.makeText(requireContext(), "Cita reagendada correctamente", Toast.LENGTH_SHORT).show()
                 findNavController().popBackStack()
 
             } catch (e: Exception) {
+                // Muestra un mensaje de error si falla el guardado
                 Toast.makeText(requireContext(), "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }

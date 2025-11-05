@@ -54,7 +54,6 @@ class ActivityFormFragment : Fragment() {
         if (actividadId != null) cargarActividadExistente(actividadId)
     }
 
-    /** 🔹 Vincula vistas del layout */
     private fun asignarVistas(v: View) {
         etNombre = v.findViewById(R.id.etNombre)
         spTipo = v.findViewById(R.id.spTipo)
@@ -77,13 +76,13 @@ class ActivityFormFragment : Fragment() {
         progressBar = v.findViewById(R.id.progressBar)
     }
 
-    /** 🌀 Inicializa los spinners */
     private fun inicializarSpinners() {
         val periodicidades = listOf("Única", "Semanal", "Mensual")
         val adapterPeriodicidad = ArrayAdapter(requireContext(), R.layout.spinner_item_custom, periodicidades)
         adapterPeriodicidad.setDropDownViewResource(R.layout.spinner_item_custom)
         spPeriodicidad.adapter = adapterPeriodicidad
 
+        // Cambia las opciones de frecuencia según la periodicidad seleccionada
         spPeriodicidad.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 when (periodicidades[pos]) {
@@ -100,6 +99,7 @@ class ActivityFormFragment : Fragment() {
         adapterEstado.setDropDownViewResource(R.layout.spinner_item_custom)
         spEstado.adapter = adapterEstado
 
+        // Muestra el campo de motivo de cancelación solo si el estado es "cancelada"
         spEstado.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 etMotivoCancelacion.visibility = if (estados[pos] == "cancelada") View.VISIBLE else View.GONE
@@ -116,13 +116,16 @@ class ActivityFormFragment : Fragment() {
     }
 
     private fun configurarEventos() {
+        // Navega al formulario de citas al presionar "Agregar Cita"
         btnAgregarCita.setOnClickListener {
             val bundle = Bundle().apply { putBoolean("desdeActividad", true) }
             findNavController().navigate(R.id.action_activityFormFragment_to_citaFormFragment, bundle)
         }
 
+        // Guarda la actividad al presionar el botón correspondiente
         btnGuardar.setOnClickListener { guardarActividad() }
 
+        // Escucha el resultado al volver desde el formulario de citas
         findNavController().currentBackStackEntry?.savedStateHandle
             ?.getLiveData<Cita>("nuevaCita")
             ?.observe(viewLifecycleOwner) { cita ->
@@ -134,8 +137,9 @@ class ActivityFormFragment : Fragment() {
                 val fecha = ultima?.let {
                     SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(it.fechaInicioMillis))
                 }
+                // Actualiza el resumen visual de las citas agregadas
                 tvResumenCitas.text = if (fecha != null)
-                    "📅 ${citas.size} citas (última: $fecha en ${ultima.lugar})"
+                    "${citas.size} citas (última: $fecha en ${ultima.lugar})"
                 else
                     "Citas agregadas: ${citas.size}"
                 Toast.makeText(requireContext(), "Cita agregada correctamente", Toast.LENGTH_SHORT).show()
@@ -145,6 +149,7 @@ class ActivityFormFragment : Fragment() {
     private fun cargarListasDesplegables() {
         lifecycleScope.launch {
             try {
+                // Carga las listas desde el repositorio (Firebase u otra fuente)
                 val tipos = repos.obtenerTiposActividad().map { it.nombre }
                 val oferentes = repos.obtenerOferentes().map { it.nombre }
                 val socios = repos.obtenerSociosComunitarios().map { it.nombre }
@@ -167,6 +172,7 @@ class ActivityFormFragment : Fragment() {
         lifecycleScope.launch {
             progressBar.visibility = View.VISIBLE
             try {
+                // Carga los datos de la actividad existente para editar
                 val act = repos.obtenerActividadPorId(id)
                 if (act != null) {
                     actividadExistente = act
@@ -199,7 +205,7 @@ class ActivityFormFragment : Fragment() {
                     val citasAsociadas = repos.obtenerCitasPorActividad(act.id)
                     citas.clear()
                     citas.addAll(citasAsociadas)
-                    tvResumenCitas.text = "📅 ${citas.size} citas cargadas"
+                    tvResumenCitas.text = "${citas.size} citas cargadas"
                 }
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error al cargar la actividad: ${e.message}", Toast.LENGTH_LONG).show()
@@ -210,6 +216,7 @@ class ActivityFormFragment : Fragment() {
     }
 
     private fun guardarActividad() {
+        // Validaciones previas antes de guardar la actividad
         val nombre = etNombre.text.toString().trim()
         val tipo = spTipo.selectedItem?.toString()?.trim() ?: ""
         val periodicidad = spPeriodicidad.selectedItem?.toString()?.trim() ?: ""
@@ -249,6 +256,7 @@ class ActivityFormFragment : Fragment() {
         socio: String?, beneficiarios: List<String>, diasAviso: Int, lugar: String, duracion: Int?,
         estado: String, motivo: String?
     ) {
+        // Crea o actualiza el objeto de actividad con los datos ingresados
         val actividad = Actividad(
             id = actividadExistente?.id ?: "",
             nombre = nombre,
@@ -274,6 +282,7 @@ class ActivityFormFragment : Fragment() {
                 btnGuardar.isEnabled = false
                 btnAgregarCita.isEnabled = false
 
+                // Determina si se está creando o editando una actividad
                 val accion: String
                 if (actividadExistente == null) {
                     repos.crearActividadConCitas(actividad, citas)
@@ -288,9 +297,9 @@ class ActivityFormFragment : Fragment() {
                     accion = "Edición"
                 }
 
-                // 🔹 Registrar auditoría
+                // Registra auditoría de la acción realizada
                 repos.registrarAuditoria(
-                    usuarioId = "admin123", // reemplaza por el usuario actual
+                    usuarioId = "admin123", // ID temporal, debería reemplazarse por el usuario actual
                     usuarioNombre = "Administrador",
                     modulo = "Actividades",
                     accion = accion,

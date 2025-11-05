@@ -41,6 +41,7 @@ class ActivitiesFragment : Fragment() {
 
         rv.layoutManager = LinearLayoutManager(requireContext())
 
+        // Configura el adaptador con las acciones para cada botón de la lista
         adapter = ActivitiesAdapter(
             onEdit = { act -> goToEdit(act.id) },
             onReschedule = { act -> goToReschedule(act.id) },
@@ -49,8 +50,10 @@ class ActivitiesFragment : Fragment() {
         )
         rv.adapter = adapter
 
+        // Acción para crear una nueva actividad
         btnNew.setOnClickListener { goToCreate() }
 
+        // Realiza la búsqueda cuando se presiona Enter en el campo de texto
         etSearch.setOnEditorActionListener { _, _, _ ->
             loadList()
             true
@@ -60,16 +63,17 @@ class ActivitiesFragment : Fragment() {
         return v
     }
 
-    /** 🔹 Carga todas las actividades desde Firestore */
     private fun loadList() {
         val query = etSearch.text.toString().trim()
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                // Carga todas las actividades desde Firestore
                 val snap = db.collection("actividades").get().await()
                 val list = snap.toObjects<Actividad>().mapIndexed { i, a ->
                     a.copy(id = snap.documents[i].id)
                 }.sortedBy { it.nombre.lowercase() }
 
+                // Filtra las actividades según la búsqueda del usuario
                 val filtered = if (query.isBlank()) list else list.filter {
                     it.nombre.contains(query, ignoreCase = true)
                 }
@@ -77,30 +81,31 @@ class ActivitiesFragment : Fragment() {
                 adapter.submitList(filtered)
                 tvEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
             } catch (e: Exception) {
+                // Muestra error si ocurre un problema al cargar los datos
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    /** 🔹 Crear nueva actividad */
     private fun goToCreate() {
+        // Navega al formulario para crear una nueva actividad
         findNavController().navigate(R.id.action_activities_to_activity_form)
     }
 
-    /** 🔹 Editar actividad existente */
     private fun goToEdit(actividadId: String) {
+        // Navega al formulario de edición de una actividad existente
         val b = Bundle().apply { putString("actividadId", actividadId) }
         findNavController().navigate(R.id.action_activities_to_activity_form, b)
     }
 
-    /** 🔹 Reagendar actividad */
     private fun goToReschedule(actividadId: String) {
+        // Navega a la pantalla de reprogramación de actividad
         val b = Bundle().apply { putString("actividadId", actividadId) }
         findNavController().navigate(R.id.action_activities_to_reschedule, b)
     }
 
-    /** 🔹 Confirmar eliminación */
     private fun confirmDelete(act: Actividad) {
+        // Muestra un cuadro de confirmación antes de eliminar una actividad
         AlertDialog.Builder(requireContext())
             .setTitle("Eliminar actividad")
             .setMessage("¿Deseas eliminar '${act.nombre}'? Esta acción no se puede deshacer.")
@@ -109,21 +114,22 @@ class ActivitiesFragment : Fragment() {
             .show()
     }
 
-    /** 🔹 Eliminar actividad y sus citas */
     private fun deleteActivity(actividadId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                // Elimina la actividad y sus citas asociadas
                 repos.deleteActividad(actividadId)
                 Toast.makeText(requireContext(), "Actividad eliminada correctamente", Toast.LENGTH_SHORT).show()
                 loadList()
             } catch (e: Exception) {
+                // Muestra mensaje de error si falla la eliminación
                 Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    /** 🔹 Mostrar detalle completo en diálogo */
     private fun showActivityDetailDialog(a: Actividad) {
+        // Construye un mensaje con la información detallada de la actividad
         val msg = buildString {
             appendLine("Nombre: ${a.nombre}")
             appendLine("Tipo: ${a.tipo}")
@@ -137,6 +143,7 @@ class ActivitiesFragment : Fragment() {
             appendLine("Estado: ${a.estado}")
         }
 
+        // Muestra el detalle en un cuadro de diálogo
         AlertDialog.Builder(requireContext())
             .setTitle("Detalle de actividad")
             .setMessage(msg)

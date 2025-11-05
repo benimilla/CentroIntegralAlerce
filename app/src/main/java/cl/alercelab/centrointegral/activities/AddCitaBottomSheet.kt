@@ -36,6 +36,7 @@ class AddCitaBottomSheet : BottomSheetDialogFragment() {
         btnSave = v.findViewById(R.id.btnSave)
         btnCancel = v.findViewById(R.id.btnClose)
 
+        // Si se pasa una cita existente, se cargan sus datos para editarla
         existing?.let { ex ->
             inicioCal.timeInMillis = ex.fechaInicioMillis
             finCal.timeInMillis = ex.fechaFinMillis
@@ -46,10 +47,12 @@ class AddCitaBottomSheet : BottomSheetDialogFragment() {
 
         updateLabels()
 
+        // Abre los selectores de fecha y hora solo si el usuario puede editar
         tvFecha.setOnClickListener { if (isEditable()) pickFecha() }
         tvHoraInicio.setOnClickListener { if (isEditable()) pickHora(true) }
         tvHoraFin.setOnClickListener { if (isEditable()) pickHora(false) }
 
+        // Guarda la cita validando los campos antes
         btnSave.setOnClickListener {
             if (!isEditable()) return@setOnClickListener
             val lugar = etLugar.text.toString().trim()
@@ -62,23 +65,28 @@ class AddCitaBottomSheet : BottomSheetDialogFragment() {
                 return@setOnClickListener
             }
 
+            // Crea o actualiza la cita con los datos introducidos
             val cita = Cita(
                 id = existing?.id ?: UUID.randomUUID().toString(),
                 fechaInicioMillis = inicioCal.timeInMillis,
                 fechaFinMillis = finCal.timeInMillis,
                 lugar = lugar
             )
-            onSaved?.invoke(cita)
-            dismiss()
+            onSaved?.invoke(cita) // Llama el callback para guardar en la base de datos
+            dismiss() // Cierra el bottom sheet
         }
 
+        // Botón para cerrar sin guardar
         btnCancel.setOnClickListener { dismiss() }
+
+        // Bloquea los campos según el rol del usuario
         applyRoleLock()
 
         return v
     }
 
     private fun pickFecha() {
+        // Muestra un selector de fecha y actualiza los calendarios
         val y = inicioCal.get(Calendar.YEAR)
         val m = inicioCal.get(Calendar.MONTH)
         val d = inicioCal.get(Calendar.DAY_OF_MONTH)
@@ -90,6 +98,7 @@ class AddCitaBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun pickHora(isStart: Boolean) {
+        // Muestra un selector de hora para inicio o fin
         val cal = if (isStart) inicioCal else finCal
         val hh = cal.get(Calendar.HOUR_OF_DAY)
         val mm = cal.get(Calendar.MINUTE)
@@ -101,6 +110,7 @@ class AddCitaBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun updateLabels() {
+        // Actualiza los textos de fecha y hora mostrados en pantalla
         val fecha = "%02d-%02d-%04d".format(
             inicioCal.get(Calendar.DAY_OF_MONTH),
             inicioCal.get(Calendar.MONTH) + 1,
@@ -114,6 +124,7 @@ class AddCitaBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun applyRoleLock() {
+        // Habilita o bloquea la edición según el rol del usuario
         val editable = isEditable()
         tvFecha.isEnabled = editable
         tvHoraInicio.isEnabled = editable
@@ -122,9 +133,11 @@ class AddCitaBottomSheet : BottomSheetDialogFragment() {
         btnSave.visibility = if (editable) View.VISIBLE else View.GONE
     }
 
+    // Solo los roles "admin" o "gestor" pueden editar citas
     private fun isEditable(): Boolean = userRole == "admin" || userRole == "gestor"
 
     companion object {
+        // Crea una nueva instancia del BottomSheet con una cita existente (para editar) o vacía (para nueva)
         fun new(existing: Cita?, role: String): AddCitaBottomSheet {
             val f = AddCitaBottomSheet()
             f.existing = existing

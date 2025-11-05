@@ -18,7 +18,9 @@ class ProyectoAdapter(
         val nombre: TextView = v.findViewById(R.id.itemNombre)
         val descripcion: TextView = v.findViewById(R.id.itemDescripcion)
         init {
+            // Al hacer clic sobre un elemento se ejecuta la acción para editar el proyecto
             v.setOnClickListener { onEdit(items[bindingAdapterPosition]) }
+            // Al mantener presionado un elemento se ejecuta la acción para eliminar el proyecto
             v.setOnLongClickListener { onDelete(items[bindingAdapterPosition]); true }
         }
     }
