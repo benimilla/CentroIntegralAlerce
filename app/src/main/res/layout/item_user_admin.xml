@@ -79,19 +79,19 @@
                 android:id="@+id/btnDelete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/red_700"
                 android:text="Eliminar"
                 android:textColor="@android:color/white"
-                android:backgroundTint="@color/red_700"
-                android:textSize="14sp"
-                android:layout_marginEnd="8dp" />
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/btnEdit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary_green"
                 android:text="Editar"
                 android:textColor="@android:color/white"
-                android:backgroundTint="@color/primary_green"
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>

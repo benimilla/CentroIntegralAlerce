@@ -25,25 +25,26 @@
             android:layout_height="wrap_content" />
 
         <!-- 🔹 Gestión de usuarios -->
+
         <Button
             android:id="@+id/btnGestionUsuarios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="@color/teal_700"
             android:text="Gestionar Usuarios"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/teal_700"
-            android:textColor="@android:color/white"
-            android:layout_marginBottom="8dp" />
-
-        <Button
-            android:id="@+id/btnPermitirUsuarios"
-            android:text="Permitir Usuarios Pendientes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/teal_700"
-            android:textColor="@android:color/white"
-            android:layout_marginBottom="8dp" />
+            android:textColor="@android:color/white" />
 
         <!-- 🔹 Ver auditoría -->
+        <Button
+            android:id="@+id/btnPermitirUsuarios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="@color/teal_700"
+            android:text="Permitir Usuarios Pendientes"
+            android:textColor="@android:color/white" />
+
         <Button
             android:id="@+id/btnAuditoria"
             android:text="Ver Auditoría del Sistema"
