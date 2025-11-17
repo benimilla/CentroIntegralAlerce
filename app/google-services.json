@@ -23,63 +23,6 @@
           "other_platform_oauth_client": []
         }
       }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1005007535919:android:a4c9a1c5bb5cadcd28ebda",
-        "android_client_info": {
-          "package_name": "com.example.aaaaaaa"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDHYR1aZJHriitf5ihsp-KRJ92cBD4zw7g"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1005007535919:android:fa34ee93c636761628ebda",
-        "android_client_info": {
-          "package_name": "com.example.agendaactividades"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDHYR1aZJHriitf5ihsp-KRJ92cBD4zw7g"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1005007535919:android:b0033b0ebfb6016028ebda",
-        "android_client_info": {
-          "package_name": "com.example.hola"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDHYR1aZJHriitf5ihsp-KRJ92cBD4zw7g"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
     }
   ],
   "configuration_version": "1"

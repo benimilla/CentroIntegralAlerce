@@ -16,8 +16,8 @@ android {
     applicationId = "cl.alercelab.centrointegral"
     minSdk = 24
     targetSdk = 35
-    versionCode = 4
-    versionName = "1.4"
+    versionCode = 14
+    versionName = "1.14"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
