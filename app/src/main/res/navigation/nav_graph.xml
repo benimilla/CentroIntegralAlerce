@@ -181,7 +181,7 @@
             android:id="@+id/action_adminMain_to_mantenedorProyecto"
             app:destination="@id/mantenedorProyecto" />
 
-        <!-- ✅ Acción de Auditoría -->
+        <!--  Acción de Auditoría -->
         <action
             android:id="@+id/action_adminMain_to_auditoria"
             app:destination="@id/auditoriaFragment" />
@@ -202,7 +202,7 @@
         android:label="Gestión de Usuarios"
         tools:layout="@layout/fragment_admin_users">
 
-        <!-- ✅ Nueva acción para crear usuario -->
+        <!--  Nueva acción para crear usuario -->
         <action
             android:id="@+id/action_adminUsers_to_registerFragment"
             app:destination="@id/registerFragment" />

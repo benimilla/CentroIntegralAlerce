@@ -2,7 +2,7 @@
 <resources>
 
     <!-- 🏠 Aplicación -->
-    <string name="app_name">Centro Integral Alerce</string>
+    <string name="app_name">GodCIS</string>
     <string name="app_description">Aplicación para la gestión integral de actividades y citas comunitarias.</string>
 
     <!-- 🔹 Navegación inferior -->

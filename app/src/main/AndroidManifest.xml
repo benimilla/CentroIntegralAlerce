@@ -28,7 +28,7 @@
       android:theme="@style/Theme.CentroIntegralAlerce"
       android:usesCleartextTraffic="true">
 
-    <!-- 🔸 Actividad principal -->
+    <!--  Actividad principal -->
     <activity
         android:name=".MainActivity"
         android:exported="true"
@@ -40,7 +40,7 @@
       </intent-filter>
     </activity>
 
-    <!-- 🔸 Servicio de notificaciones de Firebase -->
+    <!--  Servicio de notificaciones de Firebase -->
     <service
         android:name=".notifications.MessagingService"
         android:exported="false">
