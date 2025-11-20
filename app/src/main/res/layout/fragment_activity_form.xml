@@ -33,32 +33,59 @@
             android:background="@drawable/bg_field"
             android:padding="16dp">
 
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre de la Actividad"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="4dp" />
+
             <!-- Nombre -->
             <EditText
                 android:id="@+id/etNombre"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nombre de la actividad"
+                android:hint="Ej: Taller de Memoria"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint"
                 android:background="@drawable/bg_spinner"
                 android:padding="10dp" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tipo de Actividad"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Tipo -->
             <Spinner
                 android:id="@+id/spTipo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:popupBackground="@color/bg_card" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Periodicidad"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Periodicidad -->
             <Spinner
                 android:id="@+id/spPeriodicidad"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:popupBackground="@color/bg_card" />
 
@@ -74,8 +101,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Frecuencia"
-                    android:textColor="@color/text_primary"
+                    android:text="Frecuencia específica"
+                    android:textColor="@color/text_secondary"
                     android:textSize="14sp"
                     android:layout_marginBottom="4dp" />
 
@@ -88,102 +115,184 @@
                     android:background="@drawable/bg_spinner" />
             </LinearLayout>
 
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cupo Máximo"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
+
             <!-- Cupo -->
             <EditText
                 android:id="@+id/etCupo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Cupo máximo"
+                android:hint="Ej: 25 personas"
                 android:inputType="number"
-                android:layout_marginTop="10dp"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint"
                 android:background="@drawable/bg_spinner"
                 android:padding="10dp" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oferente"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Oferente -->
             <Spinner
                 android:id="@+id/spOferente"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:popupBackground="@color/bg_card" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Socio Comunitario"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Socio Comunitario -->
             <Spinner
                 android:id="@+id/spSocioComunitario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:popupBackground="@color/bg_card" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Beneficiarios"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Beneficiarios -->
             <EditText
                 android:id="@+id/etBeneficiarios"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Beneficiarios (separados por comas)"
+                android:hint="Ej: Adultos mayores, cuidadores"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:padding="10dp" />
 
-            <!-- 🔸 NUEVO: Días aviso previo -->
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Días de Aviso Previo"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Aviso previo -->
             <EditText
                 android:id="@+id/etDiasAvisoPrevio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Días de aviso previo"
+                android:hint="Ej: 3 días"
                 android:inputType="number"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:padding="10dp" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lugar"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Lugar -->
             <Spinner
                 android:id="@+id/spLugar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:popupBackground="@color/bg_card" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Duración Máxima"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Duración -->
             <EditText
                 android:id="@+id/etDuracion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Duración máxima (minutos)"
+                android:hint="Ej: 60 minutos"
                 android:inputType="number"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:padding="10dp" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Estado"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
 
             <!-- Estado -->
             <Spinner
                 android:id="@+id/spEstado"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:popupBackground="@color/bg_card" />
+
+            <!-- 🔸 Mini título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Motivo de Cancelación"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone" />
 
             <!-- Motivo cancelación -->
             <EditText
                 android:id="@+id/etMotivoCancelacion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Motivo de cancelación"
+                android:hint="Indique el motivo"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_spinner"
                 android:padding="10dp"
                 android:visibility="gone" />
@@ -235,6 +344,5 @@
             android:layout_gravity="center"
             android:layout_marginTop="8dp"
             android:visibility="gone" />
-
     </LinearLayout>
 </ScrollView>
